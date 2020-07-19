@@ -10,7 +10,7 @@ class Deck (object):
 
     def __init__(self):
         self.cards_all = self._build_all_cards()
-        self.cards_avaliable = self.cards_all
+        self.cards_available = self.cards_all.copy()
         self.cards_used = []
 
     @staticmethod
@@ -36,7 +36,7 @@ class Deck (object):
         :return: None
         """
 
-        random.shuffle(self.cards_avaliable)
+        random.shuffle(self.cards_available)
 
     def draw(self, num=1):
         """
@@ -46,17 +46,17 @@ class Deck (object):
         :return: the number of card objecs specified
         """
 
-        if num > len(self.cards_avaliable):
+        if num > len(self.cards_available):
             raise ValueError("Not enough cards left in the deck!")
 
         # Select the cards to return
-        cards = self.cards_avaliable[:num]
+        cards = self.cards_available[:num]
 
         # Add the cards to the used list
         self.cards_used.extend(cards)
 
         # remove the cards from the availiable list
-        self.cards_avaliable = self.cards_avaliable[num:]
+        self.cards_available = self.cards_available[num:]
 
         return cards
 
@@ -69,26 +69,19 @@ class Deck (object):
         """
 
         self.cards_used = []
-        self.cards_avaliable = self.cards_all
-
-    def get_card_from_img_path(self, img_path):
-        """
-        helper method that will return the correct card object based on the image path provided.
-        :param img_path:
-        :return:
-        """
-        for card in self.cards_all:
-            if card.img == img_path:
-                return card
+        self.cards_available = self.cards_all.copy()
 
     @staticmethod
     def order_cards(cards, descending=False):
         """
         helper method that will order a list of card objects
-        :param cards:
+        :param cards: List of card objects
         :param descending: boolean, should the ordering be descending
         :return:
         """
+
+        if not all(isinstance(card, Card) for card in cards):
+            raise ValueError("All objects within cards value must be an instance of the Cards Class")
 
         ordered_cards = []
         suits = ["Spades", "Hearts", "Clubs", "Diamonds"]
