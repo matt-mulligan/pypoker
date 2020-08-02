@@ -143,3 +143,29 @@ def test_when_find_player_best_hand_and_texas_holdem_and_flush_then_flush_return
     assert hand_type == "Flush"
     assert all(card in hand for card in expected_card_objs)
     assert all(card in expected_card_objs for card in hand)
+
+
+@mark.parametrize("player_cards, board_cards, expected_hand", [
+    (["H-12", "D-9"], ["C-10", "D-3", "S-11", "H-8", "C-12"], ["H-12", "S-11", "C-10", "D-9", "H-8"]),
+    (["H-12", "D-9"], ["C-10", "D-3", "S-7", "H-8", "C-6"], ["C-10", "D-9", "H-8", "S-7", "C-6"]),
+    (["H-12", "D-9"], ["C-4", "D-3", "S-5", "H-7", "C-6"], ["H-7", "C-6", "S-5", "C-4", "D-3"]),
+    (["H-12", "D-9"], ["C-10", "D-13", "S-11", "H-8", "C-7"], ["D-13", "H-12", "S-11", "C-10", "D-9"]),
+    (["H-6", "D-9"], ["C-10", "D-8", "S-11", "H-7", "C-5"], ["S-11", "C-10", "D-9", "D-8", "H-7"]),
+    (["H-6", "D-5"], ["C-10", "D-8", "S-11", "H-7", "C-9"], ["S-11", "C-10", "C-9", "D-8", "H-7"]),
+    (["H-12", "D-9"], ["C-4", "S-10", "H-11", "D-8"], ["H-12", "H-11", "S-10", "D-9", "D-8"]),
+    (["H-12", "D-9"], ["C-6", "S-10", "H-7", "D-8"], ["S-10", "D-9", "D-8", "H-7", "C-6"]),
+    (["H-5", "D-9"], ["C-6", "S-10", "H-7", "D-8"], ["S-10", "D-9", "D-8", "H-7", "C-6"]),
+    (["H-12", "D-9"], ["C-11", "S-10", "H-7", "D-8"], ["H-12", "C-11", "S-10", "D-9", "D-8"]),
+    (["H-12", "D-9"], ["C-11", "S-10", "D-8"], ["H-12", "C-11", "S-10", "D-9", "D-8"])
+])
+def test_when_find_player_best_hand_and_texas_holdem_and_straight_then_straight_returned(
+        hand_solver, player_cards, board_cards, expected_hand):
+    player_card_objs = [get_card(card) for card in player_cards]
+    board_card_objs = [get_card(card) for card in board_cards]
+    expected_card_objs = [get_card(card) for card in expected_hand]
+
+    hand_type, hand = hand_solver.find_player_best_hand(player_card_objs, board_card_objs)
+
+    assert hand_type == "Straight"
+    assert all(card in hand for card in expected_card_objs)
+    assert all(card in expected_card_objs for card in hand)

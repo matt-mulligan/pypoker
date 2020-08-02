@@ -21,7 +21,8 @@ class PokerHandSolver(object):
             {"name": "Straight Flush", "method": self._hand_check_texas_holdem_straight_flush},
             {"name": "Quads", "method": self._hand_check_texas_holdem_quads},
             {"name": "Full House", "method": self._hand_check_texas_holdem_full_house},
-            {"name": "Flush", "method": self._hand_check_texas_holdem_flush}
+            {"name": "Flush", "method": self._hand_check_texas_holdem_flush},
+            {"name": "Straight", "method": self._hand_check_texas_holdem_straight}
         ]
 
     ########################
@@ -181,6 +182,30 @@ class PokerHandSolver(object):
         for hand in all_hands:
             hand = list(hand)
             if self._hand_all_same_suit(hand):
+                matched_hands.append(hand)
+
+        if not matched_hands:
+            return False, None
+
+        best_hand = self._find_hand_with_highest_card(matched_hands) if len(matched_hands) > 1 else matched_hands[0]
+        return True, best_hand
+
+    def _hand_check_texas_holdem_straight(self, player_cards, board_cards):
+        """
+        This private method will check if the player can make a texas holdem hand containing a straight.
+        If the player can make multiple hands with a straight in them, then the best hand is returned.
+
+        :param player_cards:List of Card objects representing the players hand
+        :param board_cards: List of Card objects representing the communal cards
+        :return: Tuple in format of (Bool:PLAYER_HAS_THIS_HAND, List: hand of cards used)
+        """
+
+        all_hands = self._get_hand_combinations(player_cards, board_cards, 5)
+
+        matched_hands = []
+        for hand in all_hands:
+            hand = list(hand)
+            if self._hand_values_continuous(hand):
                 matched_hands.append(hand)
 
         if not matched_hands:
