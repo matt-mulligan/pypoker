@@ -22,7 +22,8 @@ class PokerHandSolver(object):
             {"name": "Quads", "method": self._hand_check_texas_holdem_quads},
             {"name": "Full House", "method": self._hand_check_texas_holdem_full_house},
             {"name": "Flush", "method": self._hand_check_texas_holdem_flush},
-            {"name": "Straight", "method": self._hand_check_texas_holdem_straight}
+            {"name": "Straight", "method": self._hand_check_texas_holdem_straight},
+            {"name": "Trips", "method": self._hand_check_texas_holdem_trips}
         ]
 
     ########################
@@ -214,6 +215,32 @@ class PokerHandSolver(object):
         best_hand = self._find_hand_with_highest_card(matched_hands) if len(matched_hands) > 1 else matched_hands[0]
         return True, best_hand
 
+    def _hand_check_texas_holdem_trips(self, player_cards, board_cards):
+        """
+        This private method will check if the player can make a texas holdem hand containing trips.
+        If the player can make multiple hands with trips, then the best hand is returned.
+
+        :param player_cards:List of Card objects representing the players hand
+        :param board_cards: List of Card objects representing the communal cards
+        :return: Tuple in format of (Bool:PLAYER_HAS_THIS_HAND, List: hand of cards used)
+        """
+
+        all_hands = self._get_hand_combinations(player_cards, board_cards, 5)
+
+        matched_hands = []
+        for hand in all_hands:
+            hand = list(hand)
+
+            hand_has_trips, trips_value = self._hand_has_value_tuple(hand, 3)
+            if hand_has_trips:
+                matched_hands.append({"cards": hand, "trips_value": trips_value})
+
+        if not matched_hands:
+            return False, None
+
+        best_hand = self._find_hand_with_highest_trips(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        return True, best_hand
+
     ##########################################
     #  PRIVATE HAND CHARACTERISTICS METHODS  #
     ##########################################
@@ -316,6 +343,18 @@ class PokerHandSolver(object):
         highest_quads_value = sorted_quads[0]["quad_value"]
         highest_quads = [hand_info["cards"] for hand_info in sorted_quads if hand_info["quad_value"] == highest_quads_value]
         return highest_quads[0] if len(highest_quads) == 1 else self._find_hand_with_highest_card(highest_quads)
+
+    def _find_hand_with_highest_trips(self, hands):
+        """
+        This private method will find the highest trips hand
+        :param hands: List of dicts containing {cards, trips_value}
+        :return:
+        """
+
+        sorted_trips = sorted(hands, key=lambda hand_info: hand_info["trips_value"], reverse=True)
+        highest_trips_value = sorted_trips[0]["trips_value"]
+        highest_trips = [hand_info["cards"] for hand_info in sorted_trips if hand_info["trips_value"] == highest_trips_value]
+        return highest_trips[0] if len(highest_trips) == 1 else self._find_hand_with_highest_card(highest_trips)
 
     @staticmethod
     def _find_hand_with_highest_full_house(hands):
