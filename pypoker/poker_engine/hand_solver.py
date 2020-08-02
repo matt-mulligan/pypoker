@@ -25,7 +25,8 @@ class PokerHandSolver(object):
             {"name": "Straight", "method": self._hand_check_texas_holdem_straight},
             {"name": "Trips", "method": self._hand_check_texas_holdem_trips},
             {"name": "Two Pair", "method": self._hand_check_texas_holdem_two_pair},
-            {"name": "Pair", "method": self._hand_check_texas_holdem_pair}
+            {"name": "Pair", "method": self._hand_check_texas_holdem_pair},
+            {"name": "High Card", "method": self._hand_check_texas_holdem_high_card}
         ]
 
     ########################
@@ -300,6 +301,26 @@ class PokerHandSolver(object):
             return False, None
 
         best_hand = self._find_hand_with_highest_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        return True, best_hand
+
+    def _hand_check_texas_holdem_high_card(self, player_cards, board_cards):
+        """
+        This private method will check if the player can make a texas holdem hand containing a hogh card.
+        If the player can make multiple hands with a high card, then the best hand is returned.
+
+        :param player_cards:List of Card objects representing the players hand
+        :param board_cards: List of Card objects representing the communal cards
+        :return: Tuple in format of (Bool:PLAYER_HAS_THIS_HAND, List: hand of cards used)
+        """
+
+        all_hands = self._get_hand_combinations(player_cards, board_cards, 5)
+
+        matched_hands = []
+        for hand in all_hands:
+            hand = list(hand)
+            matched_hands.append(hand)
+
+        best_hand = self._find_hand_with_highest_card(matched_hands)
         return True, best_hand
 
     ##########################################

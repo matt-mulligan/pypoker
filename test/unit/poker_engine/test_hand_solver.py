@@ -242,3 +242,24 @@ def test_when_find_player_best_hand_and_texas_holdem_and_pair_then_pair_returned
     assert hand_type == "Pair"
     assert all(card in hand for card in expected_card_objs)
     assert all(card in expected_card_objs for card in hand)
+
+
+@mark.parametrize("player_cards, board_cards, expected_hand", [
+    (["D-13", "C-12"], ["S-11", "C-7", "H-4", "H-3", "D-5"], ["D-13", "C-12", "S-11", "C-7", "D-5"]),
+    (["D-13", "C-2"], ["S-11", "C-7", "H-4", "H-12", "D-5"], ["D-13", "H-12", "S-11", "C-7", "D-5"]),
+    (["D-2", "C-3"], ["S-11", "C-7", "H-4", "H-12", "D-5"], ["H-12", "S-11", "C-7", "D-5", "H-4"]),
+    (["D-13", "C-12"], ["S-11", "C-7", "H-4", "H-3"], ["D-13", "C-12", "S-11", "C-7", "H-4"]),
+    (["D-2", "C-10"], ["S-11", "C-7", "H-9", "H-3"], ["S-11", "C-10", "H-9", "C-7", "H-3"]),
+    (["D-4", "C-9"], ["S-11", "C-7", "H-8"], ["S-11", "C-9", "C-7", "H-8", "D-4"])
+])
+def test_when_find_player_best_hand_and_texas_holdem_and_high_card_then_high_card_returned(
+        hand_solver, player_cards, board_cards, expected_hand):
+    player_card_objs = [get_card(card) for card in player_cards]
+    board_card_objs = [get_card(card) for card in board_cards]
+    expected_card_objs = [get_card(card) for card in expected_hand]
+
+    hand_type, hand = hand_solver.find_player_best_hand(player_card_objs, board_card_objs)
+
+    assert hand_type == "High Card"
+    assert all(card in hand for card in expected_card_objs)
+    assert all(card in expected_card_objs for card in hand)
