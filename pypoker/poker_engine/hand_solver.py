@@ -23,7 +23,9 @@ class PokerHandSolver(object):
             {"name": "Full House", "method": self._hand_check_texas_holdem_full_house},
             {"name": "Flush", "method": self._hand_check_texas_holdem_flush},
             {"name": "Straight", "method": self._hand_check_texas_holdem_straight},
-            {"name": "Trips", "method": self._hand_check_texas_holdem_trips}
+            {"name": "Trips", "method": self._hand_check_texas_holdem_trips},
+            {"name": "Two Pair", "method": self._hand_check_texas_holdem_two_pair},
+            {"name": "Pair", "method": self._hand_check_texas_holdem_pair}
         ]
 
     ########################
@@ -241,6 +243,65 @@ class PokerHandSolver(object):
         best_hand = self._find_hand_with_highest_trips(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
         return True, best_hand
 
+    def _hand_check_texas_holdem_two_pair(self, player_cards, board_cards):
+        """
+        This private method will check if the player can make a texas holdem hand containing two pairs.
+        If the player can make multiple hands with two pairs in them, then the best hand is returned.
+
+        :param player_cards:List of Card objects representing the players hand
+        :param board_cards: List of Card objects representing the communal cards
+        :return: Tuple in format of (Bool:PLAYER_HAS_THIS_HAND, List: hand of cards used)
+        """
+
+        all_hands = self._get_hand_combinations(player_cards, board_cards, 5)
+
+        matched_hands = []
+        for hand in all_hands:
+            hand = list(hand)
+
+            hand_has_pair, larger_pair_value = self._hand_has_value_tuple(hand, 2)
+            if not hand_has_pair:
+                continue
+
+            remaining_cards = self._filter_hand_by_value(hand, larger_pair_value)
+            hand_has_pair, smaller_pair_value = self._hand_has_value_tuple(remaining_cards, 2)
+
+            if hand_has_pair:
+                matched_hands.append({"cards": hand, "larger_pair_value": larger_pair_value,
+                                      "smaller_pair_value": smaller_pair_value})
+
+        if not matched_hands:
+            return False, None
+
+        best_hand = self._find_hand_with_highest_two_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        return True, best_hand
+
+    def _hand_check_texas_holdem_pair(self, player_cards, board_cards):
+        """
+        This private method will check if the player can make a texas holdem hand containing a pair.
+        If the player can make multiple hands with a pair, then the best hand is returned.
+
+        :param player_cards:List of Card objects representing the players hand
+        :param board_cards: List of Card objects representing the communal cards
+        :return: Tuple in format of (Bool:PLAYER_HAS_THIS_HAND, List: hand of cards used)
+        """
+
+        all_hands = self._get_hand_combinations(player_cards, board_cards, 5)
+
+        matched_hands = []
+        for hand in all_hands:
+            hand = list(hand)
+
+            hand_has_pair, pair_value = self._hand_has_value_tuple(hand, 2)
+            if hand_has_pair:
+                matched_hands.append({"cards": hand, "pair_value": pair_value})
+
+        if not matched_hands:
+            return False, None
+
+        best_hand = self._find_hand_with_highest_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        return True, best_hand
+
     ##########################################
     #  PRIVATE HAND CHARACTERISTICS METHODS  #
     ##########################################
@@ -366,6 +427,36 @@ class PokerHandSolver(object):
 
         sorted_hands = sorted(hands, key=lambda hand: (hand["trips_value"], hand["pair_value"]), reverse=True)
         return sorted_hands[0]["cards"]
+
+    def _find_hand_with_highest_two_pair(self, hands):
+        """
+        This private method will determine which hand has the best two pair
+        :param hands:
+        :return:
+        """
+
+        sorted_hands = sorted(hands, key=lambda hand: (hand["larger_pair_value"], hand["smaller_pair_value"]), reverse=True)
+        larger_pair = sorted_hands[0]["larger_pair_value"]
+        smaller_pair = sorted_hands[0]["smaller_pair_value"]
+
+        highest_two_pair = [
+            hand_info["cards"] for hand_info in sorted_hands if
+            hand_info["larger_pair_value"] == larger_pair and hand_info["smaller_pair_value"] == smaller_pair
+        ]
+
+        return highest_two_pair[0] if len(highest_two_pair) == 1 else self._find_hand_with_highest_card(highest_two_pair)
+
+    def _find_hand_with_highest_pair(self, hands):
+        """
+        This private method will find the highest pair hand
+        :param hands: List of dicts containing {cards, pair_value}
+        :return:
+        """
+
+        sorted_pairs = sorted(hands, key=lambda hand_info: hand_info["pair_value"], reverse=True)
+        highest_pair_value = sorted_pairs[0]["pair_value"]
+        highest_pair = [hand_info["cards"] for hand_info in sorted_pairs if hand_info["pair_value"] == highest_pair_value]
+        return highest_pair[0] if len(highest_pair) == 1 else self._find_hand_with_highest_card(highest_pair)
 
     ############################
     #  PRIVATE HELPER METHODS  #

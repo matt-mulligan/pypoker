@@ -193,3 +193,52 @@ def test_when_find_player_best_hand_and_texas_holdem_and_trips_then_trips_return
     assert hand_type == "Trips"
     assert all(card in hand for card in expected_card_objs)
     assert all(card in expected_card_objs for card in hand)
+
+
+@mark.parametrize("player_cards, board_cards, expected_hand", [
+    (["D-7", "H-12"], ["C-7", "D-2", "H-11", "S-12", "D-3"], ["H-12", "S-12", "D-7", "C-7", "H-11"]),
+    (["D-7", "H-12"], ["C-7", "D-6", "H-11", "S-6", "D-3"], ["D-7", "C-7", "D-6", "S-6", "H-12"]),
+    (["D-7", "H-12"], ["C-9", "D-2", "H-9", "S-3", "D-3"], ["C-9", "H-9", "S-3", "D-3", "H-12"]),
+    (["D-7", "H-4"], ["C-9", "D-12", "H-9", "S-3", "D-3"], ["C-9", "H-9", "S-3", "D-3", "D-12"]),
+    (["D-3", "H-12"], ["C-3", "D-2", "H-9", "S-12"], ["H-12", "S-12", "D-3", "C-3", "H-9"]),
+    (["D-3", "H-12"], ["C-3", "D-2", "H-2", "S-6"], ["D-3", "C-3", "D-2", "H-2", "H-12"]),
+    (["D-3", "H-12"], ["C-5", "D-5", "H-7", "S-7"], ["H-7", "S-7", "D-5", "C-5", "H-12"]),
+    (["D-3", "H-12"], ["C-3", "H-9", "S-12"], ["H-12", "S-12", "D-3", "C-3", "H-9"]),
+    (["D-9", "H-12"], ["C-7", "H-7", "S-12"], ["H-12", "S-12", "C-7", "H-7", "D-9"]),
+])
+def test_when_find_player_best_hand_and_texas_holdem_and_two_pair_then_two_pair_returned(
+        hand_solver, player_cards, board_cards, expected_hand):
+    player_card_objs = [get_card(card) for card in player_cards]
+    board_card_objs = [get_card(card) for card in board_cards]
+    expected_card_objs = [get_card(card) for card in expected_hand]
+
+    hand_type, hand = hand_solver.find_player_best_hand(player_card_objs, board_card_objs)
+
+    assert hand_type == "Two Pair"
+    assert all(card in hand for card in expected_card_objs)
+    assert all(card in expected_card_objs for card in hand)
+
+
+@mark.parametrize("player_cards, board_cards, expected_hand", [
+    (["D-9", "C-9"], ["S-11", "C-7", "H-4", "H-3", "D-12"], ["D-9", "C-9", "D-12", "S-11", "C-7"]),
+    (["D-4", "C-9"], ["S-11", "C-7", "H-4", "H-3", "D-12"], ["D-4", "H-4", "D-12", "S-11", "C-9"]),
+    (["D-4", "C-3"], ["S-11", "C-11", "H-9", "H-6", "D-12"], ["S-11", "C-11", "D-12", "H-9", "H-6"]),
+    (["D-10", "C-9"], ["S-11", "C-11", "H-3", "H-6", "D-12"], ["S-11", "C-11", "D-12", "D-10", "C-9"]),
+    (["D-9", "C-9"], ["S-11", "C-7", "H-4", "H-3"], ["D-9", "C-9", "S-11", "C-7", "H-4"]),
+    (["D-6", "C-9"], ["S-11", "C-7", "H-9", "H-3"], ["C-9", "H-9", "S-11", "C-7", "D-6"]),
+    (["D-4", "C-9"], ["S-11", "C-5", "H-5", "H-10"], ["C-5", "H-5", "S-11", "H-10", "C-9"]),
+    (["D-9", "C-9"], ["S-11", "C-7", "H-3"], ["D-9", "C-9", "S-11", "C-7", "H-3"]),
+    (["D-13", "C-9"], ["S-11", "D-9", "H-3"], ["D-9", "C-9", "D-13", "S-11", "H-3"]),
+    (["D-4", "C-9"], ["S-11", "C-7", "H-11"], ["S-11", "H-11", "C-9", "C-7", "D-4"]),
+])
+def test_when_find_player_best_hand_and_texas_holdem_and_pair_then_pair_returned(
+        hand_solver, player_cards, board_cards, expected_hand):
+    player_card_objs = [get_card(card) for card in player_cards]
+    board_card_objs = [get_card(card) for card in board_cards]
+    expected_card_objs = [get_card(card) for card in expected_hand]
+
+    hand_type, hand = hand_solver.find_player_best_hand(player_card_objs, board_card_objs)
+
+    assert hand_type == "Pair"
+    assert all(card in hand for card in expected_card_objs)
+    assert all(card in expected_card_objs for card in hand)
