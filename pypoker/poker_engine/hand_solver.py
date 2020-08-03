@@ -38,6 +38,7 @@ class PokerHandSolver(object):
                 "name": HAND_TYPE_QUADS,
                 "strength": 8,
                 "method": self._hand_check_texas_holdem_quads,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_quads
             },
             {
                 "name": HAND_TYPE_FULL_HOUSE,
@@ -225,12 +226,12 @@ class PokerHandSolver(object):
             hand = list(hand)
             has_quads, quad_value = self._hand_has_value_tuple(hand, 4)
             if has_quads:
-                matched_hands.append({"cards": hand, "quad_value": quad_value})
+                matched_hands.append({"hand": hand, "quad_value": quad_value})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_quad(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        best_hand = self._hand_tiebreaker_texas_holdem_quads(matched_hands)["hand"] if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_full_house(self, player_cards, board_cards):
@@ -331,12 +332,12 @@ class PokerHandSolver(object):
 
             hand_has_trips, trips_value = self._hand_has_value_tuple(hand, 3)
             if hand_has_trips:
-                matched_hands.append({"cards": hand, "trips_value": trips_value})
+                matched_hands.append({"hand": hand, "trips_value": trips_value})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_trips(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        best_hand = self._find_hand_with_highest_trips(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_two_pair(self, player_cards, board_cards):
@@ -363,13 +364,13 @@ class PokerHandSolver(object):
             hand_has_pair, smaller_pair_value = self._hand_has_value_tuple(remaining_cards, 2)
 
             if hand_has_pair:
-                matched_hands.append({"cards": hand, "larger_pair_value": larger_pair_value,
+                matched_hands.append({"hand": hand, "larger_pair_value": larger_pair_value,
                                       "smaller_pair_value": smaller_pair_value})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_two_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        best_hand = self._find_hand_with_highest_two_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_pair(self, player_cards, board_cards):
@@ -390,12 +391,12 @@ class PokerHandSolver(object):
 
             hand_has_pair, pair_value = self._hand_has_value_tuple(hand, 2)
             if hand_has_pair:
-                matched_hands.append({"cards": hand, "pair_value": pair_value})
+                matched_hands.append({"hand": hand, "pair_value": pair_value})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        best_hand = self._find_hand_with_highest_pair(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_high_card(self, player_cards, board_cards):
@@ -518,24 +519,83 @@ class PokerHandSolver(object):
         players = self._order_hands_by_highest_card(players)
 
         # Rank hands, checking for ties
-        hand_rank = 1
-        for index, player in enumerate(players):
+        tiebreaker_rank = 1
+        for index, player_dict in enumerate(players):
             if index == 0:
-                player["tiebreaker_rank"] = hand_rank
-                player["hand_rank_tie"] = False
-                hand_rank += 1
+                player_dict["tiebreaker_rank"] = tiebreaker_rank
+                player_dict["hand_rank_tie"] = False
+                tiebreaker_rank += 1
             else:
                 previous_player = players[index-1]
-                if previous_player["hand"][0].value == player["hand"][0].value:
-                    player["tiebreaker_rank"] = hand_rank-1
-                    player["hand_rank_tie"] = True
+                if previous_player["hand"][0].value == player_dict["hand"][0].value:
+                    player_dict["tiebreaker_rank"] = tiebreaker_rank-1
+                    player_dict["hand_rank_tie"] = True
                     previous_player["hand_rank_tie"] = True
                 else:
-                    player["tiebreaker_rank"] = hand_rank
-                    player["hand_rank_tie"] = False
-                    hand_rank += 1
+                    player_dict["tiebreaker_rank"] = tiebreaker_rank
+                    player_dict["hand_rank_tie"] = False
+                    tiebreaker_rank += 1
 
         return players[0] if winner_only else players
+
+    def _hand_tiebreaker_texas_holdem_quads(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem straight flush hands.
+
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of
+        all players
+        :return:
+        """
+
+        quad_values_found = []
+        for player_dict in players:
+            _, quad_value = self._hand_has_value_tuple(player_dict["hand"], 4)
+            player_dict["trump_card"] = self._filter_hand_by_value(player_dict["hand"], quad_value)
+            if quad_value not in quad_values_found:
+                quad_values_found.append(quad_value)
+
+            player_dict["quad_value"] = quad_value
+
+        tiebreaker_rank = 1
+        ranked_players = []
+        for quad_value in sorted(quad_values_found, reverse=True):
+            quad_value_players = [player_dict for player_dict in players if player_dict["quad_value"] == quad_value]
+            if len(quad_value_players) == 1:
+                player_dict = quad_value_players[0]
+                player_dict["tiebreaker_rank"] = tiebreaker_rank
+                player_dict["hand_rank_tie"] = False
+                ranked_players.append(player_dict)
+                tiebreaker_rank += 1
+            else:
+                quad_value_players = self._order_hands_by_highest_card(quad_value_players)
+                for index, player_dict in enumerate(quad_value_players):
+                    if index == 0:
+                        player_dict["tiebreaker_rank"] = tiebreaker_rank
+                        player_dict["hand_rank_tie"] = False
+                        tiebreaker_rank += 1
+                    else:
+                        previous_player = ranked_players[-1]
+                        if previous_player["trump_card"][0].value == player_dict["trump_card"][0].value:
+                            player_dict["tiebreaker_rank"] = tiebreaker_rank - 1
+                            player_dict["hand_rank_tie"] = True
+                            previous_player["hand_rank_tie"] = True
+                        else:
+                            player_dict["tiebreaker_rank"] = tiebreaker_rank
+                            player_dict["hand_rank_tie"] = False
+                            tiebreaker_rank += 1
+
+                    ranked_players.append(player_dict)
+        return ranked_players[0] if winner_only else ranked_players
+
+
+
+
+
+
 
     @staticmethod
     def _find_hand_with_highest_card(hands):
@@ -565,18 +625,6 @@ class PokerHandSolver(object):
         # two hands that tie, just take the first one
         return hands_data[0]
 
-    def _find_hand_with_highest_quad(self, quads_hands):
-        """
-        This private method will find the highest quad hand
-        :param quads_hands: List of dicts containing {cards, quad_value}
-        :return:
-        """
-
-        sorted_quads = sorted(quads_hands, key=lambda hand_info: hand_info["quad_value"], reverse=True)
-        highest_quads_value = sorted_quads[0]["quad_value"]
-        highest_quads = [hand_info["cards"] for hand_info in sorted_quads if hand_info["quad_value"] == highest_quads_value]
-        return highest_quads[0] if len(highest_quads) == 1 else self._find_hand_with_highest_card(highest_quads)
-
     def _find_hand_with_highest_trips(self, hands):
         """
         This private method will find the highest trips hand
@@ -586,7 +634,7 @@ class PokerHandSolver(object):
 
         sorted_trips = sorted(hands, key=lambda hand_info: hand_info["trips_value"], reverse=True)
         highest_trips_value = sorted_trips[0]["trips_value"]
-        highest_trips = [hand_info["cards"] for hand_info in sorted_trips if hand_info["trips_value"] == highest_trips_value]
+        highest_trips = [hand_info["hand"] for hand_info in sorted_trips if hand_info["trips_value"] == highest_trips_value]
         return highest_trips[0] if len(highest_trips) == 1 else self._find_hand_with_highest_card(highest_trips)
 
     @staticmethod
@@ -612,7 +660,7 @@ class PokerHandSolver(object):
         smaller_pair = sorted_hands[0]["smaller_pair_value"]
 
         highest_two_pair = [
-            hand_info["cards"] for hand_info in sorted_hands if
+            hand_info["hand"] for hand_info in sorted_hands if
             hand_info["larger_pair_value"] == larger_pair and hand_info["smaller_pair_value"] == smaller_pair
         ]
 
@@ -627,7 +675,7 @@ class PokerHandSolver(object):
 
         sorted_pairs = sorted(hands, key=lambda hand_info: hand_info["pair_value"], reverse=True)
         highest_pair_value = sorted_pairs[0]["pair_value"]
-        highest_pair = [hand_info["cards"] for hand_info in sorted_pairs if hand_info["pair_value"] == highest_pair_value]
+        highest_pair = [hand_info["hand"] for hand_info in sorted_pairs if hand_info["pair_value"] == highest_pair_value]
         return highest_pair[0] if len(highest_pair) == 1 else self._find_hand_with_highest_card(highest_pair)
 
     #################################

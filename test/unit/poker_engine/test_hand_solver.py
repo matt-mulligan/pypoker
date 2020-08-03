@@ -308,3 +308,46 @@ def test_when_rank_players_hands_and_straight_flushes_then_rank_correct(hand_sol
                                                               "hand_strength": 9, "tiebreaker_rank": 3}.items())
     assert all(item in players_ranked[6].items() for item in {"name": "TEN", "hand_rank": 4, "hand_rank_tie": False,
                                                               "hand_strength": 9, "tiebreaker_rank": 4}.items())
+
+
+def test_when_rank_players_hands_and_quads_then_rank_correct(hand_solver):
+    player_best_hand_side_effects = [
+        ("Quads", [get_card(card) for card in ["S-7", "D-7", "S-3", "H-7", "C-7"]]),  # Quad 7's 3 kick
+        ("Quads", [get_card(card) for card in ["S-2", "S-9", "D-9", "H-9", "C-9"]]),  # Quad 9's 2 kick
+        ("Quads", [get_card(card) for card in ["S-3", "C-3", "H-3", "D-3", "C-5"]]),  # Quad 3's 5 kick
+        ("Quads", [get_card(card) for card in ["S-7", "C-7", "H-7", "S-12", "D-7"]]),  # Quad 7's Q kick
+        ("Quads", [get_card(card) for card in ["S-8", "S-9", "C-9", "H-9", "D-9"]]),  # Quad 9's 8 kick
+        ("Quads", [get_card(card) for card in ["S-9", "C-9", "S-13", "H-9", "D-9"]]),  # Quad 9's K kicks
+        ("Quads", [get_card(card) for card in ["S-7", "S-12", "C-7", "H-7", "D-7"]]),  # Quad 7's Q kicks
+    ]
+
+    players = [  # player_cards irrelevant due to side effect usage
+        {"name": "SEVENS_2ND", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+        {"name": "NINES_3RD", "player_cards": [get_card(card) for card in ["H-4", "D-7"]]},
+        {"name": "THREES", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+        {"name": "SEVENS_1ST_TIE_A", "player_cards": [get_card(card) for card in ["S-11", "D-11"]]},
+        {"name": "NINES_2ND", "player_cards": [get_card(card) for card in ["S-13", "S-12"]]},
+        {"name": "NINES_1ST", "player_cards": [get_card(card) for card in ["S-11", "H-10"]]},
+        {"name": "SEVENS_1ST_TIE_B", "player_cards": [get_card(card) for card in ["S-11", "D-11"]]},
+    ]
+    board_cards = [get_card(card) for card in ["S-9", "S-7", "S-8", "S-6", "S-10"]]  # board cards irrelevant due to side effect usage
+
+    with patch.object(hand_solver, "find_player_best_hand", side_effect=player_best_hand_side_effects):
+        players_ranked = hand_solver.rank_player_hands(players, board_cards)
+
+    assert len(players_ranked) == 7
+
+    assert all(item in players_ranked[0].items() for item in {"name": "NINES_1ST", "hand_rank": 1, "hand_rank_tie": False,
+                                                              "hand_strength": 8, "tiebreaker_rank": 1}.items())
+    assert all(item in players_ranked[1].items() for item in {"name": "NINES_2ND", "hand_rank": 2, "hand_rank_tie": False,
+                                                              "hand_strength": 8, "tiebreaker_rank": 2}.items())
+    assert all(item in players_ranked[2].items() for item in {"name": "NINES_3RD", "hand_rank": 3, "hand_rank_tie": False,
+                                                              "hand_strength": 8, "tiebreaker_rank": 3}.items())
+    assert all(item in players_ranked[3].items() for item in {"name": "SEVENS_1ST_TIE_A", "hand_rank": 4, "hand_rank_tie": True,
+                                                              "hand_strength": 8, "tiebreaker_rank": 4}.items())
+    assert all(item in players_ranked[4].items() for item in {"name": "SEVENS_1ST_TIE_B", "hand_rank": 4, "hand_rank_tie": True,
+                                                              "hand_strength": 8, "tiebreaker_rank": 4}.items())
+    assert all(item in players_ranked[5].items() for item in {"name": "SEVENS_2ND", "hand_rank": 5, "hand_rank_tie": False,
+                                                              "hand_strength": 8, "tiebreaker_rank": 5}.items())
+    assert all(item in players_ranked[6].items() for item in {"name": "THREES", "hand_rank": 6, "hand_rank_tie": False,
+                                                              "hand_strength": 8, "tiebreaker_rank": 6}.items())
