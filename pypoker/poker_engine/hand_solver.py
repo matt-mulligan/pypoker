@@ -43,7 +43,8 @@ class PokerHandSolver(object):
             {
                 "name": HAND_TYPE_FULL_HOUSE,
                 "strength": 7,
-                "method": self._hand_check_texas_holdem_full_house
+                "method": self._hand_check_texas_holdem_full_house,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_full_house
             },
             {
                 "name": HAND_TYPE_FLUSH,
@@ -258,12 +259,12 @@ class PokerHandSolver(object):
             hand_has_pair, pair_value = self._hand_has_value_tuple(remaining_cards, 2)
 
             if hand_has_pair:
-                matched_hands.append({"cards": hand, "trips_value": trips_value, "pair_value": pair_value})
+                matched_hands.append({"hand": hand, "trips_value": trips_value, "pair_value": pair_value})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_full_house(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["cards"]
+        best_hand = self._hand_tiebreaker_texas_holdem_full_house(matched_hands)["hand"] if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_flush(self, player_cards, board_cards):
@@ -516,17 +517,17 @@ class PokerHandSolver(object):
         :return:
         """
 
-        players = self._order_hands_by_highest_card(players)
+        ranked_players = self._order_hands_by_highest_card(players)
 
         # Rank hands, checking for ties
         tiebreaker_rank = 1
-        for index, player_dict in enumerate(players):
+        for index, player_dict in enumerate(ranked_players):
             if index == 0:
                 player_dict["tiebreaker_rank"] = tiebreaker_rank
                 player_dict["hand_rank_tie"] = False
                 tiebreaker_rank += 1
             else:
-                previous_player = players[index-1]
+                previous_player = ranked_players[index-1]
                 if previous_player["hand"][0].value == player_dict["hand"][0].value:
                     player_dict["tiebreaker_rank"] = tiebreaker_rank-1
                     player_dict["hand_rank_tie"] = True
@@ -536,7 +537,7 @@ class PokerHandSolver(object):
                     player_dict["hand_rank_tie"] = False
                     tiebreaker_rank += 1
 
-        return players[0] if winner_only else players
+        return ranked_players[0] if winner_only else ranked_players
 
     def _hand_tiebreaker_texas_holdem_quads(self, players, winner_only=True):
         """
@@ -591,8 +592,48 @@ class PokerHandSolver(object):
                     ranked_players.append(player_dict)
         return ranked_players[0] if winner_only else ranked_players
 
+    def _hand_tiebreaker_texas_holdem_full_house(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem full house hands.
 
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of
+        all players
+        :return:
+        """
 
+        for player_dict in players:
+            _, trips_value = self._hand_has_value_tuple(player_dict["hand"], 3)
+            remaining_cards = self._filter_hand_by_value(player_dict["hand"], trips_value)
+            _, pair_value = self._hand_has_value_tuple(remaining_cards, 2)
+            player_dict["trips_value"] = trips_value
+            player_dict["pair_value"] = pair_value
+
+        ranked_players = sorted(players,
+                                key=lambda player_dict: (player_dict["trips_value"], player_dict["pair_value"]),
+                                reverse=True)
+
+        tiebreaker_rank = 1
+        for index, player_dict in enumerate(ranked_players):
+            if index == 0:
+                player_dict["tiebreaker_rank"] = tiebreaker_rank
+                player_dict["hand_rank_tie"] = False
+                tiebreaker_rank += 1
+            else:
+                previous_player = ranked_players[index - 1]
+                if previous_player["trips_value"] == player_dict["trips_value"] and previous_player["pair_value"] == player_dict["pair_value"]:
+                    previous_player["hand_rank_tie"] = True
+                    player_dict["tiebreaker_rank"] = tiebreaker_rank - 1
+                    player_dict["hand_rank_tie"] = True
+                else:
+                    player_dict["tiebreaker_rank"] = tiebreaker_rank
+                    player_dict["hand_rank_tie"] = False
+                    tiebreaker_rank += 1
+
+        return ranked_players[0] if winner_only else ranked_players
 
 
 
@@ -636,17 +677,6 @@ class PokerHandSolver(object):
         highest_trips_value = sorted_trips[0]["trips_value"]
         highest_trips = [hand_info["hand"] for hand_info in sorted_trips if hand_info["trips_value"] == highest_trips_value]
         return highest_trips[0] if len(highest_trips) == 1 else self._find_hand_with_highest_card(highest_trips)
-
-    @staticmethod
-    def _find_hand_with_highest_full_house(hands):
-        """
-        THis private method will check all hands passed to it
-        :param hands:
-        :return:
-        """
-
-        sorted_hands = sorted(hands, key=lambda hand: (hand["trips_value"], hand["pair_value"]), reverse=True)
-        return sorted_hands[0]["cards"]
 
     def _find_hand_with_highest_two_pair(self, hands):
         """
