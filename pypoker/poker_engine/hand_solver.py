@@ -55,7 +55,8 @@ class PokerHandSolver(object):
             {
                 "name": HAND_TYPE_STRAIGHT,
                 "strength": 5,
-                "method": self._hand_check_texas_holdem_straight
+                "method": self._hand_check_texas_holdem_straight,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_straight
             },
             {
                 "name": HAND_TYPE_TRIPS,
@@ -308,12 +309,12 @@ class PokerHandSolver(object):
         for hand in all_hands:
             hand = list(hand)
             if self._hand_values_continuous(hand):
-                matched_hands.append(hand)
+                matched_hands.append({"hand": hand})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_card(matched_hands) if len(matched_hands) > 1 else matched_hands[0]
+        best_hand = self._hand_tiebreaker_texas_holdem_straight(matched_hands)["hand"] if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_trips(self, player_cards, board_cards):
@@ -634,9 +635,24 @@ class PokerHandSolver(object):
         """
 
         ranked_players = self._order_hands_by_highest_card(players)
-
         self._mark_tied_hands_on_high_card(ranked_players)
+        return ranked_players[0] if winner_only else ranked_players
 
+    def _hand_tiebreaker_texas_holdem_straight(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem straight hands.
+
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of
+        all players
+        :return:
+        """
+
+        ranked_players = self._order_hands_by_highest_card(players)
+        self._mark_tied_hands_on_high_card(ranked_players)
         return ranked_players[0] if winner_only else ranked_players
 
     @staticmethod

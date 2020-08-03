@@ -437,3 +437,46 @@ def test_when_rank_players_hands_and_flushes_then_rank_correct(hand_solver):
                                                               "hand_strength": 6, "tiebreaker_rank": 5}.items())
     assert all(item in players_ranked[6].items() for item in {"name": "TEN_NINE", "hand_rank": 6, "hand_rank_tie": False,
                                                               "hand_strength": 6, "tiebreaker_rank": 6}.items())
+
+
+def test_when_rank_players_hands_and_straight_then_rank_correct(hand_solver):
+    player_best_hand_side_effects = [
+        ("Straight", [get_card(card) for card in ["D-9", "C-11", "S-8", "H-12", "S-10"]]),  # Queen High Straight
+        ("Straight", [get_card(card) for card in ["S-9", "D-8", "H-10", "S-6", "C-7"]]),  # 10 high Straight
+        ("Straight", [get_card(card) for card in ["C-11", "D-9", "S-12", "S-8", "S-10"]]),  # Queen High Straight
+        ("Straight", [get_card(card) for card in ["S-9", "D-8", "S-10", "S-7", "C-11"]]),  # Jack high Straight
+        ("Straight", [get_card(card) for card in ["S-12", "C-9", "S-11", "S-13", "S-10"]]),  # King High Straight
+        ("Straight", [get_card(card) for card in ["S-7", "C-9", "S-11", "D-8", "S-10"]]),  # Jack High Straight
+        ("Straight", [get_card(card) for card in ["S-10", "C-12", "S-9", "S-11", "D-8"]])  # Queen High Straight
+    ]
+
+    players = [
+        {"name": "QUEEN_TIE_A", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+        {"name": "TEN", "player_cards": [get_card(card) for card in ["H-4", "D-7"]]},
+        {"name": "QUEEN_TIE_B", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+        {"name": "JACK_TIE_A", "player_cards": [get_card(card) for card in ["S-11", "D-11"]]},
+        {"name": "KING", "player_cards": [get_card(card) for card in ["S-13", "S-12"]]},
+        {"name": "JACK_TIE_B", "player_cards": [get_card(card) for card in ["S-11", "H-10"]]},
+        {"name": "QUEEN_TIE_C", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+    ]
+    board_cards = [get_card(card) for card in ["S-9", "S-7", "S-8", "S-6", "S-10"]]
+
+    with patch.object(hand_solver, "find_player_best_hand", side_effect=player_best_hand_side_effects):
+        players_ranked = hand_solver.rank_player_hands(players, board_cards)
+
+    assert len(players_ranked) == 7
+
+    assert all(item in players_ranked[0].items() for item in {"name": "KING", "hand_rank": 1, "hand_rank_tie": False,
+                                                              "hand_strength": 5, "tiebreaker_rank": 1}.items())
+    assert all(item in players_ranked[1].items() for item in {"name": "QUEEN_TIE_A", "hand_rank": 2, "hand_rank_tie": True,
+                                                              "hand_strength": 5, "tiebreaker_rank": 2}.items())
+    assert all(item in players_ranked[2].items() for item in {"name": "QUEEN_TIE_B", "hand_rank": 2, "hand_rank_tie": True,
+                                                              "hand_strength": 5, "tiebreaker_rank": 2}.items())
+    assert all(item in players_ranked[3].items() for item in {"name": "QUEEN_TIE_C", "hand_rank": 2, "hand_rank_tie": True,
+                                                              "hand_strength": 5, "tiebreaker_rank": 2}.items())
+    assert all(item in players_ranked[4].items() for item in {"name": "JACK_TIE_A", "hand_rank": 3, "hand_rank_tie": True,
+                                                              "hand_strength": 5, "tiebreaker_rank": 3}.items())
+    assert all(item in players_ranked[5].items() for item in {"name": "JACK_TIE_B", "hand_rank": 3, "hand_rank_tie": True,
+                                                              "hand_strength": 5, "tiebreaker_rank": 3}.items())
+    assert all(item in players_ranked[6].items() for item in {"name": "TEN", "hand_rank": 4, "hand_rank_tie": False,
+                                                              "hand_strength": 5, "tiebreaker_rank": 4}.items())
