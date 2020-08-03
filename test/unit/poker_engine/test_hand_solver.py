@@ -523,3 +523,46 @@ def test_when_rank_players_hands_and_trips_then_rank_correct(hand_solver):
                                                               "hand_strength": 4, "tiebreaker_rank": 5}.items())
     assert all(item in players_ranked[6].items() for item in {"name": "THREES_FIVE", "hand_rank": 6, "hand_rank_tie": False,
                                                               "hand_strength": 4, "tiebreaker_rank": 6}.items())
+
+
+def test_when_rank_players_hands_and_two_pair_then_rank_correct(hand_solver):
+    player_best_hand_side_effects = [
+        ("Two Pair", [get_card(card) for card in ["S-7", "D-7", "S-3", "H-3", "C-8"]]),  # 7,3 pairs 8
+        ("Two Pair", [get_card(card) for card in ["C-8", "S-8", "D-14", "H-9", "C-9"]]),  # 9,8 pairs A
+        ("Two Pair", [get_card(card) for card in ["S-3", "C-9", "H-3", "D-5", "C-5"]]),  # 5,3 pairs 9
+        ("Two Pair", [get_card(card) for card in ["S-3", "C-7", "H-12", "S-12", "D-7"]]),  # Q,7 pairs 3 - TIE
+        ("Two Pair", [get_card(card) for card in ["S-8", "S-9", "C-9", "H-8", "D-5"]]),  # 9,8 pairs 5
+        ("Two Pair", [get_card(card) for card in ["S-9", "C-13", "S-13", "H-10", "D-9"]]),  # K,9 pairs 10
+        ("Two Pair", [get_card(card) for card in ["S-12", "C-7", "H-12", "S-3", "D-7"]]),  # Q,7 pairs 3 - TIE
+    ]
+
+    players = [  # player_cards irrelevant due to side effect usage
+        {"name": "SEVENS_THREES", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+        {"name": "NINES_EIGHTS_ACE", "player_cards": [get_card(card) for card in ["H-4", "D-7"]]},
+        {"name": "FIVES_THREES", "player_cards": [get_card(card) for card in ["S-11", "S-12"]]},
+        {"name": "QUEENS_SEVENS_TIE_A", "player_cards": [get_card(card) for card in ["S-11", "D-11"]]},
+        {"name": "NINES_EIGHTS_FIVE", "player_cards": [get_card(card) for card in ["S-13", "S-12"]]},
+        {"name": "KINGS_NINES", "player_cards": [get_card(card) for card in ["S-11", "H-10"]]},
+        {"name": "QUEENS_SEVENS_TIE_B", "player_cards": [get_card(card) for card in ["S-11", "D-11"]]},
+    ]
+    board_cards = [get_card(card) for card in ["S-9", "S-7", "S-8", "S-6", "S-10"]]  # board cards irrelevant due to side effect usage
+
+    with patch.object(hand_solver, "find_player_best_hand", side_effect=player_best_hand_side_effects):
+        players_ranked = hand_solver.rank_player_hands(players, board_cards)
+
+    assert len(players_ranked) == 7
+
+    assert all(item in players_ranked[0].items() for item in {"name": "KINGS_NINES", "hand_rank": 1, "hand_rank_tie": False,
+                                                              "hand_strength": 3, "tiebreaker_rank": 1}.items())
+    assert all(item in players_ranked[1].items() for item in {"name": "QUEENS_SEVENS_TIE_A", "hand_rank": 2, "hand_rank_tie": True,
+                                                              "hand_strength": 3, "tiebreaker_rank": 2}.items())
+    assert all(item in players_ranked[2].items() for item in {"name": "QUEENS_SEVENS_TIE_B", "hand_rank": 2, "hand_rank_tie": True,
+                                                              "hand_strength": 3, "tiebreaker_rank": 2}.items())
+    assert all(item in players_ranked[3].items() for item in {"name": "NINES_EIGHTS_ACE", "hand_rank": 3, "hand_rank_tie": False,
+                                                              "hand_strength": 3, "tiebreaker_rank": 3}.items())
+    assert all(item in players_ranked[4].items() for item in {"name": "NINES_EIGHTS_FIVE", "hand_rank": 4, "hand_rank_tie": False,
+                                                              "hand_strength": 3, "tiebreaker_rank": 4}.items())
+    assert all(item in players_ranked[5].items() for item in {"name": "SEVENS_THREES", "hand_rank": 5, "hand_rank_tie": False,
+                                                              "hand_strength": 3, "tiebreaker_rank": 5}.items())
+    assert all(item in players_ranked[6].items() for item in {"name": "FIVES_THREES", "hand_rank": 6, "hand_rank_tie": False,
+                                                              "hand_strength": 3, "tiebreaker_rank": 6}.items())
