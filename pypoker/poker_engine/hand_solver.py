@@ -49,7 +49,8 @@ class PokerHandSolver(object):
             {
                 "name": HAND_TYPE_FLUSH,
                 "strength": 6,
-                "method": self._hand_check_texas_holdem_flush
+                "method": self._hand_check_texas_holdem_flush,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_flush
             },
             {
                 "name": HAND_TYPE_STRAIGHT,
@@ -283,12 +284,12 @@ class PokerHandSolver(object):
         for hand in all_hands:
             hand = list(hand)
             if self._hand_all_same_suit(hand):
-                matched_hands.append(hand)
+                matched_hands.append({"hand": hand})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_card(matched_hands) if len(matched_hands) > 1 else matched_hands[0]
+        best_hand = self._hand_tiebreaker_texas_holdem_flush(matched_hands)["hand"] if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_straight(self, player_cards, board_cards):
@@ -519,23 +520,7 @@ class PokerHandSolver(object):
 
         ranked_players = self._order_hands_by_highest_card(players)
 
-        # Rank hands, checking for ties
-        tiebreaker_rank = 1
-        for index, player_dict in enumerate(ranked_players):
-            if index == 0:
-                player_dict["tiebreaker_rank"] = tiebreaker_rank
-                player_dict["hand_rank_tie"] = False
-                tiebreaker_rank += 1
-            else:
-                previous_player = ranked_players[index-1]
-                if previous_player["hand"][0].value == player_dict["hand"][0].value:
-                    player_dict["tiebreaker_rank"] = tiebreaker_rank-1
-                    player_dict["hand_rank_tie"] = True
-                    previous_player["hand_rank_tie"] = True
-                else:
-                    player_dict["tiebreaker_rank"] = tiebreaker_rank
-                    player_dict["hand_rank_tie"] = False
-                    tiebreaker_rank += 1
+        self._mark_tied_hands_on_high_card(ranked_players)
 
         return ranked_players[0] if winner_only else ranked_players
 
@@ -635,8 +620,24 @@ class PokerHandSolver(object):
 
         return ranked_players[0] if winner_only else ranked_players
 
+    def _hand_tiebreaker_texas_holdem_flush(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem flush hands.
 
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of
+        all players
+        :return:
+        """
 
+        ranked_players = self._order_hands_by_highest_card(players)
+
+        self._mark_tied_hands_on_high_card(ranked_players)
+
+        return ranked_players[0] if winner_only else ranked_players
 
     @staticmethod
     def _find_hand_with_highest_card(hands):
@@ -806,3 +807,51 @@ class PokerHandSolver(object):
                 hand_rank += 1
             ranked_players.append(player)
         return hand_rank
+
+    def _mark_tied_hands_on_high_card(self, ranked_players):
+        """
+        This private method will search through the provided ranked players and mark players tiebreaker_rank and any
+        hand ties.
+
+        :param ranked_players: List of player dictionaries containing at least the "hand" key
+        :return: None
+        """
+
+        tiebreaker_rank = 1
+        for index, player_dict in enumerate(ranked_players):
+            if index == 0:
+                player_dict["tiebreaker_rank"] = tiebreaker_rank
+                player_dict["hand_rank_tie"] = False
+                tiebreaker_rank += 1
+            else:
+                previous_player = ranked_players[index - 1]
+                if self._all_card_values_the_same(previous_player["hand"], player_dict["hand"]):
+                    player_dict["tiebreaker_rank"] = tiebreaker_rank - 1
+                    player_dict["hand_rank_tie"] = True
+                    previous_player["hand_rank_tie"] = True
+                else:
+                    player_dict["tiebreaker_rank"] = tiebreaker_rank
+                    player_dict["hand_rank_tie"] = False
+                    tiebreaker_rank += 1
+
+    @staticmethod
+    def _all_card_values_the_same(hand_a, hand_b):
+        """
+        This private method checks if the card values for each hand are the same.
+
+        :param hand_a: list of card objects
+        :param hand_b: list of card objects
+        :return: True if all card.values from hand_a match hand_b
+        """
+
+        hand_a.sort(key=lambda card: card.value, reverse=True)
+        hand_b.sort(key=lambda card: card.value, reverse=True)
+
+        return (
+            True
+            if all(
+                card_a.value == card_b.value
+                for (card_a, card_b) in zip(hand_a, hand_b)
+            )
+            else False
+        )
