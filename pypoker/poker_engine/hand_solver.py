@@ -27,7 +27,7 @@ HAND_TYPE_HIGH_CARD = "High Card"
 class PokerHandSolver(object):
 
     def __init__(self):
-        self.texas_holdem_hand_orders = [
+        self.texas_holdem_hand_definitions = [
             {
                 "name": HAND_TYPE_STRAIGHT_FLUSH,
                 "strength": 9,
@@ -89,7 +89,7 @@ class PokerHandSolver(object):
         :return: tuple(Hand Name, [hand_cards])
         """
 
-        for hand_type in self.texas_holdem_hand_orders:
+        for hand_type in self.texas_holdem_hand_definitions:
             has_hand_type, cards = hand_type["method"](player_cards, board_cards)
 
             if has_hand_type:
@@ -119,63 +119,40 @@ class PokerHandSolver(object):
             }
         """
 
-        players_with_hand_strength = {}
+        hand_strength_occurances = {}
         for player_dict in players:
-            #  Get hand type and best cards for each player
-            player_dict["hand_type"], player_dict["hand"] = \
-                self.find_player_best_hand(player_dict["player_cards"], board_cards)
+            hand_type, hand = self.find_player_best_hand(player_dict["player_cards"], board_cards)
+            hand_strength = self._find_hand_strength(hand_type)
 
-            #  Get hand strength (used for ordering) for each players
-            player_dict["hand_strength"] = next((hand_type["strength"] for hand_type in self.texas_holdem_hand_orders if
-                                                 hand_type["name"] == player_dict["hand_type"]), None)
-
-            #  Populate the players_with_hand_strength dictionary to find tiebreaker situations
-            if player_dict["hand_strength"] not in players_with_hand_strength.keys():
-                players_with_hand_strength[player_dict["hand_strength"]] = 1
+            if hand_strength not in hand_strength_occurances.keys():
+                hand_strength_occurances[hand_strength] = 1
             else:
-                players_with_hand_strength[player_dict["hand_strength"]] += 1
+                hand_strength_occurances[hand_strength] += 1
+
+            player_dict["hand_type"] = hand_type
+            player_dict["hand"] = hand
+            player_dict["hand_strength"] = hand_strength
 
         #  Create final ordered list of players
         hand_rank = 1
-        ordered_players = []
+        ranked_players = []
 
-        for hand_strength in sorted(players_with_hand_strength.keys(), reverse=True):
-            #  If only one player with that hand strength, no need for tiebreakers, just assign rank and add to list
-            if players_with_hand_strength[hand_strength] == 1:
+        for hand_strength in sorted(hand_strength_occurances.keys(), reverse=True):
+            if hand_strength_occurances[hand_strength] == 1:
                 for player in players:
                     if player["hand_strength"] == hand_strength:
                         player["hand_rank"] = hand_rank
                         player["hand_rank_tie"] = False
                         player["tiebreaker_rank"] = None
-                        ordered_players.append(player)
+                        ranked_players.append(player)
                         hand_rank += 1
             else:
-                #  Find tiebreaker players and apply the tiebreaker to them
                 tiebreak_players = [player for player in players if player["hand_strength"] == hand_strength]
-                tiebreak_method = next((hand_type["tiebreaker"] for hand_type in self.texas_holdem_hand_orders if
-                                        hand_type["name"] == tiebreak_players[0]["hand_type"]), None)
+                tiebreak_method = self._find_tiebreaker_method(tiebreak_players)
                 tiebreak_ordered = tiebreak_method(tiebreak_players, winner_only=False)
+                hand_rank = self._rank_tiebreak_players(hand_rank, ranked_players, tiebreak_ordered)
 
-                #  check returned tiebreaker players for genuine ties and assign rank accordingly
-                current_tiebreaker_rank = None
-                for player in tiebreak_ordered:
-                    if not player["hand_rank_tie"]:
-                        player["hand_rank"] = hand_rank
-                        hand_rank += 1
-                    else:
-                        if (
-                            current_tiebreaker_rank
-                            and player["tiebreaker_rank"]
-                            == current_tiebreaker_rank
-                        ):
-                            player["hand_rank"] = hand_rank - 1
-                        else:
-                            current_tiebreaker_rank = player["tiebreaker_rank"]
-                            player["hand_rank"] = hand_rank
-                            hand_rank += 1
-
-                    ordered_players.append(player)
-        return ordered_players
+        return ranked_players
 
     # def find_odds(self, player_hands, board_cards, game_format=FORMAT_TEXAS_HOLDEM):
     #     """
@@ -560,22 +537,6 @@ class PokerHandSolver(object):
 
         return players[0] if winner_only else players
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @staticmethod
     def _find_hand_with_highest_card(hands):
         """
@@ -669,9 +630,9 @@ class PokerHandSolver(object):
         highest_pair = [hand_info["cards"] for hand_info in sorted_pairs if hand_info["pair_value"] == highest_pair_value]
         return highest_pair[0] if len(highest_pair) == 1 else self._find_hand_with_highest_card(highest_pair)
 
-    ############################
-    #  PRIVATE HELPER METHODS  #
-    ############################
+    #################################
+    #  PRIVATE MISC HELPER METHODS  #
+    #################################
 
     @staticmethod
     def _get_hand_combinations(player_cards, board_cards, hand_size):
@@ -702,3 +663,68 @@ class PokerHandSolver(object):
         """
 
         return [card for card in hand if card.value != filter_value]
+
+    def _find_hand_strength(self, hand_type):
+        """
+        This private method will find the appropriate hand strength value for the hand type given
+
+        :param hand_type: String: the name of the hand type to find the strength of
+        :return: Int: hand strength
+        """
+
+        return next(
+            (
+                hand_definition["strength"]
+                for hand_definition in self.texas_holdem_hand_definitions
+                if hand_definition["name"] == hand_type
+            ),
+            None,
+        )
+
+    def _find_tiebreaker_method(self, tiebreak_players):
+        """
+        This private method will return the correct tiebreaker method to use based on the hand_type of the
+        tiebreaker_players.
+
+        :param tiebreak_players: List of player dictionaries
+        :return: Class Method to use for tiebreakers.
+        """
+
+        return next(
+            (
+                hand_definition["tiebreaker"]
+                for hand_definition in self.texas_holdem_hand_definitions
+                if hand_definition["name"] == tiebreak_players[0]["hand_type"]
+            ),
+            None,
+        )
+
+    @staticmethod
+    def _rank_tiebreak_players(hand_rank, ranked_players, tiebreak_ordered):
+        """
+        This private method will appropriately rank and add tie-broken players to the ranked_players list.
+
+        :param hand_rank: Int: current hand rank to assign
+        :param ranked_players: List of player dictionaries that have been ranked
+        :param tiebreak_ordered: List of player dictionaries that have been ordered by the appropriate tiebreak method.
+        :return: updated hank_rank value
+        """
+
+        current_tiebreaker_rank = None
+        for player in tiebreak_ordered:
+            if player["hand_rank_tie"]:
+                if (
+                        current_tiebreaker_rank
+                        and player["tiebreaker_rank"]
+                        == current_tiebreaker_rank
+                ):
+                    player["hand_rank"] = hand_rank - 1
+                else:
+                    current_tiebreaker_rank = player["tiebreaker_rank"]
+                    player["hand_rank"] = hand_rank
+                    hand_rank += 1
+            else:
+                player["hand_rank"] = hand_rank
+                hand_rank += 1
+            ranked_players.append(player)
+        return hand_rank
