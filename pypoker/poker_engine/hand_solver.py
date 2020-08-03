@@ -13,20 +13,66 @@ from itertools import combinations
 FORMAT_TEXAS_HOLDEM = "texas_holdem"
 GAME_FORMATS = [FORMAT_TEXAS_HOLDEM]
 
+HAND_TYPE_STRAIGHT_FLUSH = "Straight Flush"
+HAND_TYPE_QUADS = "Quads"
+HAND_TYPE_FULL_HOUSE = "Full House"
+HAND_TYPE_FLUSH = "Flush"
+HAND_TYPE_STRAIGHT = "Straight"
+HAND_TYPE_TRIPS = "Trips"
+HAND_TYPE_TWO_PAIR = "Two Pair"
+HAND_TYPE_PAIR = "Pair"
+HAND_TYPE_HIGH_CARD = "High Card"
+
 
 class PokerHandSolver(object):
 
     def __init__(self):
         self.texas_holdem_hand_orders = [
-            {"name": "Straight Flush", "method": self._hand_check_texas_holdem_straight_flush},
-            {"name": "Quads", "method": self._hand_check_texas_holdem_quads},
-            {"name": "Full House", "method": self._hand_check_texas_holdem_full_house},
-            {"name": "Flush", "method": self._hand_check_texas_holdem_flush},
-            {"name": "Straight", "method": self._hand_check_texas_holdem_straight},
-            {"name": "Trips", "method": self._hand_check_texas_holdem_trips},
-            {"name": "Two Pair", "method": self._hand_check_texas_holdem_two_pair},
-            {"name": "Pair", "method": self._hand_check_texas_holdem_pair},
-            {"name": "High Card", "method": self._hand_check_texas_holdem_high_card}
+            {
+                "name": HAND_TYPE_STRAIGHT_FLUSH,
+                "strength": 9,
+                "method": self._hand_check_texas_holdem_straight_flush,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_straight_flush
+            },
+            {
+                "name": HAND_TYPE_QUADS,
+                "strength": 8,
+                "method": self._hand_check_texas_holdem_quads,
+            },
+            {
+                "name": HAND_TYPE_FULL_HOUSE,
+                "strength": 7,
+                "method": self._hand_check_texas_holdem_full_house
+            },
+            {
+                "name": HAND_TYPE_FLUSH,
+                "strength": 6,
+                "method": self._hand_check_texas_holdem_flush
+            },
+            {
+                "name": HAND_TYPE_STRAIGHT,
+                "strength": 5,
+                "method": self._hand_check_texas_holdem_straight
+            },
+            {
+                "name": HAND_TYPE_TRIPS,
+                "strength": 4,
+                "method": self._hand_check_texas_holdem_trips
+            },
+            {
+                "name": HAND_TYPE_TWO_PAIR,
+                "strength": 3,
+                "method": self._hand_check_texas_holdem_two_pair
+            },
+            {
+                "name": HAND_TYPE_PAIR,
+                "strength": 2,
+                "method": self._hand_check_texas_holdem_pair
+            },
+            {
+                "name": HAND_TYPE_HIGH_CARD,
+                "strength": 1,
+                "method": self._hand_check_texas_holdem_high_card}
         ]
 
     ########################
@@ -49,17 +95,88 @@ class PokerHandSolver(object):
             if has_hand_type:
                 return hand_type["name"], cards
 
-    # def find_winner(self, player_hands, board_cards, game_format=FORMAT_TEXAS_HOLDEM):
-    #     """
-    #     This public method will determine which player has won the hand of poker based on the game format.
-    #     The hand should be played out to completion. to find each players odds use hand_solver.find_odds()
-    #
-    #     :param player_hands: Dictionary in the format of KEY="player_name", VALUE=List of Card Objects
-    #     :param board_cards: List of Card objects representing the communal cards
-    #     :param game_format: String. represents the type of poker game that is being played
-    #     :return: Tuple in format of (PLAYER_NAME, WINNING_HAND)
-    #     """
-    #
+    def rank_player_hands(self, players, board_cards, game_format=FORMAT_TEXAS_HOLDEM):
+        """
+        This public method will determine the order of the players hands.
+
+        :param players: List of player dictionaries with the following keys
+            {
+                "name": NAME_OF_PLAYER,
+                "player_cards": PLAYER_HOLE_CARDS
+            }
+        :param board_cards: List of Card objects representing the communal cards
+        :param game_format: String. represents the type of poker game that is being played
+        :return: Updated players list object with the following keys for each player dictionary
+            {
+                "name": NAME_OF_PLAYER,
+                "player_cards": PLAYER HOLE CARDS
+                "hand": CARDS OF PLAYERS BEST HAND
+                "hand_type": BEST HAND TYPE PLAYER CAN MAKE,
+                "hand_strength: THE RELATIVE STRENGTH OF THE HAND TYPE IN TEXAS HOLDEM (HIGHER IS BETTER)
+                "hand_rank": PLAYER HAND RANKING COMPARED TO OTHER PLAYERS (LOWER IS BETTER)
+                "hand_rank_tie": BOOL IF PLAYER HAND RANK IS A TIE WITH ANY OTHER PLAYERS
+                "tiebreaker_rank": RANK GIVEN BY THE TIEBREAKER METHOD
+            }
+        """
+
+        players_with_hand_strength = {}
+        for player_dict in players:
+            #  Get hand type and best cards for each player
+            player_dict["hand_type"], player_dict["hand"] = \
+                self.find_player_best_hand(player_dict["player_cards"], board_cards)
+
+            #  Get hand strength (used for ordering) for each players
+            player_dict["hand_strength"] = next((hand_type["strength"] for hand_type in self.texas_holdem_hand_orders if
+                                                 hand_type["name"] == player_dict["hand_type"]), None)
+
+            #  Populate the players_with_hand_strength dictionary to find tiebreaker situations
+            if player_dict["hand_strength"] not in players_with_hand_strength.keys():
+                players_with_hand_strength[player_dict["hand_strength"]] = 1
+            else:
+                players_with_hand_strength[player_dict["hand_strength"]] += 1
+
+        #  Create final ordered list of players
+        hand_rank = 1
+        ordered_players = []
+
+        for hand_strength in sorted(players_with_hand_strength.keys(), reverse=True):
+            #  If only one player with that hand strength, no need for tiebreakers, just assign rank and add to list
+            if players_with_hand_strength[hand_strength] == 1:
+                for player in players:
+                    if player["hand_strength"] == hand_strength:
+                        player["hand_rank"] = hand_rank
+                        player["hand_rank_tie"] = False
+                        player["tiebreaker_rank"] = None
+                        ordered_players.append(player)
+                        hand_rank += 1
+            else:
+                #  Find tiebreaker players and apply the tiebreaker to them
+                tiebreak_players = [player for player in players if player["hand_strength"] == hand_strength]
+                tiebreak_method = next((hand_type["tiebreaker"] for hand_type in self.texas_holdem_hand_orders if
+                                        hand_type["name"] == tiebreak_players[0]["hand_type"]), None)
+                tiebreak_ordered = tiebreak_method(tiebreak_players, winner_only=False)
+
+                #  check returned tiebreaker players for genuine ties and assign rank accordingly
+                current_tiebreaker_rank = None
+                for player in tiebreak_ordered:
+                    if not player["hand_rank_tie"]:
+                        player["hand_rank"] = hand_rank
+                        hand_rank += 1
+                    else:
+                        if (
+                            current_tiebreaker_rank
+                            and player["tiebreaker_rank"]
+                            == current_tiebreaker_rank
+                        ):
+                            player["hand_rank"] = hand_rank - 1
+                        else:
+                            current_tiebreaker_rank = player["tiebreaker_rank"]
+                            player["hand_rank"] = hand_rank
+                            hand_rank += 1
+
+                    ordered_players.append(player)
+        return ordered_players
+
     # def find_odds(self, player_hands, board_cards, game_format=FORMAT_TEXAS_HOLDEM):
     #     """
     #     This public method will determine each players changes of winning the hand given the current situation.
@@ -105,13 +222,14 @@ class PokerHandSolver(object):
                 continue
             if not self._hand_values_continuous(hand):
                 continue
-            matched_hands.append(hand)
+            matched_hands.append({"hand": hand})
 
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_card(matched_hands) if len(matched_hands) > 1 else matched_hands[0]
-        return True, best_hand
+        best_hand = self._hand_tiebreaker_texas_holdem_straight_flush(matched_hands) if len(matched_hands) > 1 \
+            else matched_hands[0]
+        return True, best_hand["hand"]
 
     def _hand_check_texas_holdem_quads(self, player_cards, board_cards):
         """
@@ -383,9 +501,81 @@ class PokerHandSolver(object):
 
         return True, max(meets_criteria)
 
+    ###################################
+    #  PRIVATE HAND ORDERING METHODS  #
+    ###################################
+
+    def _order_hands_by_highest_card(self, players):
+        """
+        This private method will order the given players hands based on the value of their cards.
+
+        :param players: List of dictionaries containing the player information.
+        :return:
+        """
+
+        for player_dict in players:
+            player_dict["hand"] = sorted(player_dict["hand"], key=lambda card: card.value, reverse=True)
+
+        players.sort(key=lambda player_dict: (
+        player_dict["hand"][0].value, player_dict["hand"][1].value, player_dict["hand"][2].value,
+        player_dict["hand"][3].value, player_dict["hand"][4].value), reverse=True)
+
+        return players
+
     ######################################
     #  PRIVATE HAND TIE-BREAKER METHODS  #
     ######################################
+
+    def _hand_tiebreaker_texas_holdem_straight_flush(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem straight flush hands.
+
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of all players
+        :return:
+        """
+
+        players = self._order_hands_by_highest_card(players)
+
+        # Rank hands, checking for ties
+        hand_rank = 1
+        for index, player in enumerate(players):
+            if index == 0:
+                player["tiebreaker_rank"] = hand_rank
+                player["hand_rank_tie"] = False
+                hand_rank += 1
+            else:
+                previous_player = players[index-1]
+                if previous_player["hand"][0].value == player["hand"][0].value:
+                    player["tiebreaker_rank"] = hand_rank-1
+                    player["hand_rank_tie"] = True
+                    previous_player["hand_rank_tie"] = True
+                else:
+                    player["tiebreaker_rank"] = hand_rank
+                    player["hand_rank_tie"] = False
+                    hand_rank += 1
+
+        return players[0] if winner_only else players
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @staticmethod
     def _find_hand_with_highest_card(hands):
         """
