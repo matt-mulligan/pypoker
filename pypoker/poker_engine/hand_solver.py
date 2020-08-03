@@ -79,7 +79,9 @@ class PokerHandSolver(object):
             {
                 "name": HAND_TYPE_HIGH_CARD,
                 "strength": 1,
-                "method": self._hand_check_texas_holdem_high_card}
+                "method": self._hand_check_texas_holdem_high_card,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_high_card
+            }
         ]
 
     ########################
@@ -420,91 +422,10 @@ class PokerHandSolver(object):
         matched_hands = []
         for hand in all_hands:
             hand = list(hand)
-            matched_hands.append(hand)
+            matched_hands.append({"hand": hand})
 
-        best_hand = self._find_hand_with_highest_card(matched_hands)
+        best_hand = self._hand_tiebreaker_texas_holdem_high_card(matched_hands)["hand"]
         return True, best_hand
-
-    ##########################################
-    #  PRIVATE HAND CHARACTERISTICS METHODS  #
-    ##########################################
-
-    @staticmethod
-    def _hand_all_same_suit(hand):
-        """
-        This method will check if all cards in the hand have the same suit.
-
-        :param hand: List of Card objects
-        :return: Boolean, True if all cards in hand have the same suit, False otherwise.
-        """
-
-        suit = hand[0].suit
-        return True if all(card.suit == suit for card in hand) else False
-
-    @staticmethod
-    def _hand_values_continuous(hand):
-        """
-        This private method will check if the cards provided in the hand are a straight
-        (their values are continuous without gaps)
-        This method does not assert the number of cards in the hand.
-
-        :param hand: List of Card objects representing the players hand
-        :return: Boolean. True of the ard values are continuous, False if not
-        """
-
-        hand.sort(key=lambda card: card.value, reverse=False)
-        card_value_list = [card.value for card in hand]
-        return all(a + 1 == b for a, b in zip(card_value_list, card_value_list[1:]))
-
-    @staticmethod
-    def _hand_has_value_tuple(hand, tuple_length):
-        """
-        This private method will check if the hand provided has a tuple of any value of card of the specified length.
-        this method can be used to check if the hand has a pair (tuple_length=2), trips (tuple_length=3) or
-        quads (tuple_length=4).
-
-        if hand has multiple tuples of the specified length, the maximum is returned.
-        e.g. tuple_length = 2 and hand is 7,9,10,9,7 then 9 is returned for tuple_card_value
-
-        :param hand: List of Card objects
-        :param tuple_length: Int definign if looking for pairs(2) trips(3) or quads(4)
-        :return: tuple of (BOOLEAN: hand_has_tuple, INT: tuple_card_value)
-        """
-
-        card_values = {}
-        for card in hand:
-            if card.value not in card_values.keys():
-                card_values[card.value] = 1
-            else:
-                card_values[card.value] += 1
-
-        meets_criteria = [value for value, count in card_values.items() if count == tuple_length]
-
-        if not meets_criteria:
-            return False, None
-
-        return True, max(meets_criteria)
-
-    ###################################
-    #  PRIVATE HAND ORDERING METHODS  #
-    ###################################
-
-    def _order_hands_by_highest_card(self, players):
-        """
-        This private method will order the given players hands based on the value of their cards.
-
-        :param players: List of dictionaries containing the player information.
-        :return:
-        """
-
-        for player_dict in players:
-            player_dict["hand"] = sorted(player_dict["hand"], key=lambda card: card.value, reverse=True)
-
-        players.sort(key=lambda player_dict: (
-        player_dict["hand"][0].value, player_dict["hand"][1].value, player_dict["hand"][2].value,
-        player_dict["hand"][3].value, player_dict["hand"][4].value), reverse=True)
-
-        return players
 
     ######################################
     #  PRIVATE HAND TIE-BREAKER METHODS  #
@@ -807,33 +728,104 @@ class PokerHandSolver(object):
                     ranked_players.append(player_dict)
         return ranked_players[0] if winner_only else ranked_players
 
+    def _hand_tiebreaker_texas_holdem_high_card(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem high card hands.
+
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of
+        all players
+        :return:
+        """
+
+        ranked_players = self._order_hands_by_highest_card(players)
+        self._mark_tied_hands_on_high_card(ranked_players)
+        return ranked_players[0] if winner_only else ranked_players
+
+
+    ##########################################
+    #  PRIVATE HAND CHARACTERISTICS METHODS  #
+    ##########################################
+
     @staticmethod
-    def _find_hand_with_highest_card(hands):
+    def _hand_all_same_suit(hand):
         """
-        This private method will compare the hands provided to find the one that has the highest card.
-        if the highest card is a tie, it will continue down the list.
-        if all cards are a tie then all matching hands returned.
+        This method will check if all cards in the hand have the same suit.
 
-        :return: the hand(s) with the highest card
+        :param hand: List of Card objects
+        :return: Boolean, True if all cards in hand have the same suit, False otherwise.
         """
 
-        hands_data = []
-        for hand in hands:
-            hand.sort(key=lambda card: card.value, reverse=True)
-            hands_data.append(hand)
+        suit = hand[0].suit
+        return True if all(card.suit == suit for card in hand) else False
 
-        for card_index in range(len(hands[0])):
-            hand_vals = [hand[card_index].value for hand in hands_data]
-            max_val = max(hand_vals)
+    @staticmethod
+    def _hand_values_continuous(hand):
+        """
+        This private method will check if the cards provided in the hand are a straight
+        (their values are continuous without gaps)
+        This method does not assert the number of cards in the hand.
 
-            new_hands_data = [hand for hand in hands_data if hand[card_index].value == max_val]
-            if len(new_hands_data) == 1:
-                return new_hands_data[0]
+        :param hand: List of Card objects representing the players hand
+        :return: Boolean. True of the ard values are continuous, False if not
+        """
 
-            hands_data = new_hands_data
+        hand.sort(key=lambda card: card.value, reverse=False)
+        card_value_list = [card.value for card in hand]
+        return all(a + 1 == b for a, b in zip(card_value_list, card_value_list[1:]))
 
-        # two hands that tie, just take the first one
-        return hands_data[0]
+    @staticmethod
+    def _hand_has_value_tuple(hand, tuple_length):
+        """
+        This private method will check if the hand provided has a tuple of any value of card of the specified length.
+        this method can be used to check if the hand has a pair (tuple_length=2), trips (tuple_length=3) or
+        quads (tuple_length=4).
+
+        if hand has multiple tuples of the specified length, the maximum is returned.
+        e.g. tuple_length = 2 and hand is 7,9,10,9,7 then 9 is returned for tuple_card_value
+
+        :param hand: List of Card objects
+        :param tuple_length: Int definign if looking for pairs(2) trips(3) or quads(4)
+        :return: tuple of (BOOLEAN: hand_has_tuple, INT: tuple_card_value)
+        """
+
+        card_values = {}
+        for card in hand:
+            if card.value not in card_values.keys():
+                card_values[card.value] = 1
+            else:
+                card_values[card.value] += 1
+
+        meets_criteria = [value for value, count in card_values.items() if count == tuple_length]
+
+        if not meets_criteria:
+            return False, None
+
+        return True, max(meets_criteria)
+
+    ###################################
+    #  PRIVATE HAND ORDERING METHODS  #
+    ###################################
+
+    def _order_hands_by_highest_card(self, players):
+        """
+        This private method will order the given players hands based on the value of their cards.
+
+        :param players: List of dictionaries containing the player information.
+        :return:
+        """
+
+        for player_dict in players:
+            player_dict["hand"] = sorted(player_dict["hand"], key=lambda card: card.value, reverse=True)
+
+        players.sort(key=lambda player_dict: (
+        player_dict["hand"][0].value, player_dict["hand"][1].value, player_dict["hand"][2].value,
+        player_dict["hand"][3].value, player_dict["hand"][4].value), reverse=True)
+
+        return players
 
     #################################
     #  PRIVATE MISC HELPER METHODS  #
