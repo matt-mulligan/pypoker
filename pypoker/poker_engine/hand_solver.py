@@ -61,7 +61,8 @@ class PokerHandSolver(object):
             {
                 "name": HAND_TYPE_TRIPS,
                 "strength": 4,
-                "method": self._hand_check_texas_holdem_trips
+                "method": self._hand_check_texas_holdem_trips,
+                "tiebreaker": self._hand_tiebreaker_texas_holdem_trips
             },
             {
                 "name": HAND_TYPE_TWO_PAIR,
@@ -340,7 +341,7 @@ class PokerHandSolver(object):
         if not matched_hands:
             return False, None
 
-        best_hand = self._find_hand_with_highest_trips(matched_hands) if len(matched_hands) > 1 else matched_hands[0]["hand"]
+        best_hand = self._hand_tiebreaker_texas_holdem_trips(matched_hands)["hand"] if len(matched_hands) > 1 else matched_hands[0]["hand"]
         return True, best_hand
 
     def _hand_check_texas_holdem_two_pair(self, player_cards, board_cards):
@@ -655,6 +656,58 @@ class PokerHandSolver(object):
         self._mark_tied_hands_on_high_card(ranked_players)
         return ranked_players[0] if winner_only else ranked_players
 
+    def _hand_tiebreaker_texas_holdem_trips(self, players, winner_only=True):
+        """
+        This private method will perform a tiebreaker analysis on multiple Texas Holdem straight hands.
+
+        :param players: List of dictionaries containing the player information with the minimum keys
+            {
+                "hand": PLAYERS 5 CARD HAND
+            }
+        :param winner_only: Boolean: defines if the method should return just the winning player or an ordered list of
+        all players
+        :return:
+        """
+
+        trips_values_found = []
+        for player_dict in players:
+            _, trips_value = self._hand_has_value_tuple(player_dict["hand"], 3)
+            trips_values_found.append(trips_value)
+            player_dict["trips_value"] = trips_value
+
+        trips_values_found = list(set(trips_values_found))
+
+        tiebreaker_rank = 1
+        ranked_players = []
+        for trip_value in sorted(trips_values_found, reverse=True):
+            trip_value_players = [player_dict for player_dict in players if player_dict["trips_value"] == trip_value]
+            if len(trip_value_players) == 1:
+                player_dict = trip_value_players[0]
+                player_dict["tiebreaker_rank"] = tiebreaker_rank
+                player_dict["hand_rank_tie"] = False
+                ranked_players.append(player_dict)
+                tiebreaker_rank += 1
+            else:
+                trip_value_players = self._order_hands_by_highest_card(trip_value_players)
+                for index, player_dict in enumerate(trip_value_players):
+                    if index == 0:
+                        player_dict["tiebreaker_rank"] = tiebreaker_rank
+                        player_dict["hand_rank_tie"] = False
+                        tiebreaker_rank += 1
+                    else:
+                        previous_player = ranked_players[-1]
+                        if self._all_card_values_the_same(previous_player["hand"], player_dict["hand"]):
+                            player_dict["tiebreaker_rank"] = tiebreaker_rank - 1
+                            player_dict["hand_rank_tie"] = True
+                            previous_player["hand_rank_tie"] = True
+                        else:
+                            player_dict["tiebreaker_rank"] = tiebreaker_rank
+                            player_dict["hand_rank_tie"] = False
+                            tiebreaker_rank += 1
+
+                    ranked_players.append(player_dict)
+        return ranked_players[0] if winner_only else ranked_players
+
     @staticmethod
     def _find_hand_with_highest_card(hands):
         """
@@ -682,18 +735,6 @@ class PokerHandSolver(object):
 
         # two hands that tie, just take the first one
         return hands_data[0]
-
-    def _find_hand_with_highest_trips(self, hands):
-        """
-        This private method will find the highest trips hand
-        :param hands: List of dicts containing {cards, trips_value}
-        :return:
-        """
-
-        sorted_trips = sorted(hands, key=lambda hand_info: hand_info["trips_value"], reverse=True)
-        highest_trips_value = sorted_trips[0]["trips_value"]
-        highest_trips = [hand_info["hand"] for hand_info in sorted_trips if hand_info["trips_value"] == highest_trips_value]
-        return highest_trips[0] if len(highest_trips) == 1 else self._find_hand_with_highest_card(highest_trips)
 
     def _find_hand_with_highest_two_pair(self, hands):
         """
