@@ -120,6 +120,15 @@ class Card (object):
         self.rank = self._determine_rank(card_value)
         self.name = self._determine_name(self.rank, self.suit)
 
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __gt__(self, other):
+        return self.value > other.value
+
+    def __lt__(self, other):
+        return self.value < other.value
+
     def _determine_suit(self, suit_value):
         """
         determines the suite of the card based on the given value
