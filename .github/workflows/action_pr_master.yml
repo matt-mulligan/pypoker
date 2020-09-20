@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  Master PR Checks:
+  Master_PR_Checks:
     runs-on: ubuntu-latest
 
     steps:
