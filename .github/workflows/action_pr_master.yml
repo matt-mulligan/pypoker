@@ -35,7 +35,7 @@ jobs:
           poetry show --tree
 
       # Run black checks
-      - name: Install Dependencies using poetry
+      - name: Run Black Code Checks
         run: |
           cd $GITHUB_WORKSPACE
           poetry run black --check ./src/pypoker
