@@ -6,8 +6,7 @@ produces a deck of cards object to be used by the game class
 import random
 
 
-class Deck (object):
-
+class Deck(object):
     def __init__(self):
         self.cards_all = self._build_all_cards()
         self.cards_available = self.cards_all.copy()
@@ -81,7 +80,9 @@ class Deck (object):
         """
 
         if not all(isinstance(card, Card) for card in cards):
-            raise ValueError("All objects within cards value must be an instance of the Cards Class")
+            raise ValueError(
+                "All objects within cards value must be an instance of the Cards Class"
+            )
 
         ordered_cards = []
         suits = ["Spades", "Hearts", "Clubs", "Diamonds"]
@@ -94,15 +95,26 @@ class Deck (object):
         return ordered_cards
 
 
-class Card (object):
+class Card(object):
     """
     Class representing a single playing card
     """
 
     SUIT_MAPPING = {0: "Clubs", 1: "Diamonds", 2: "Hearts", 3: "Spades"}
     VALUE_MAPPING = {
-        2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight",
-        9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King", 14: "Ace"
+        2: "Two",
+        3: "Three",
+        4: "Four",
+        5: "Five",
+        6: "Six",
+        7: "Seven",
+        8: "Eight",
+        9: "Nine",
+        10: "Ten",
+        11: "Jack",
+        12: "Queen",
+        13: "King",
+        14: "Ace",
     }
 
     def __init__(self, card_value, suit_value):
@@ -139,7 +151,9 @@ class Card (object):
         """
 
         if suit_value not in self.SUIT_MAPPING.keys():
-            raise ValueError(f"Suit value '{suit_value}'  is not in list of valid values '{self.SUIT_MAPPING}")
+            raise ValueError(
+                f"Suit value '{suit_value}'  is not in list of valid values '{self.SUIT_MAPPING}"
+            )
 
         return self.SUIT_MAPPING[suit_value]
 
@@ -153,7 +167,9 @@ class Card (object):
         """
 
         if value not in self.VALUE_MAPPING.keys():
-            raise ValueError(f"Specified card value {value} is not in value mapping dictionary '{self.VALUE_MAPPING}'.")
+            raise ValueError(
+                f"Specified card value {value} is not in value mapping dictionary '{self.VALUE_MAPPING}'."
+            )
 
         return self.VALUE_MAPPING[value]
 
