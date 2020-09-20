@@ -1,4 +1,4 @@
-from unittest.mock import patch, call, MagicMock
+from unittest.mock import patch, call
 
 from pytest import mark, raises, fixture
 
