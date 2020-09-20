@@ -2,7 +2,7 @@ from unittest.mock import patch, call
 
 from pytest import mark, raises, fixture
 
-from src.pypoker.deck import Card, Deck
+from pypoker.deck import Card, Deck
 
 
 ###################
