@@ -1,8 +1,8 @@
-from unittest.mock import patch, call, MagicMock
+from unittest.mock import patch, call
 
 from pytest import mark, raises, fixture
 
-from pypoker.deck import Card, Deck
+from src.pypoker.deck import Card, Deck
 
 
 ###################

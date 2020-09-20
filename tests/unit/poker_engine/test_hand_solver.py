@@ -1,12 +1,12 @@
 from unittest.mock import patch
 
 from pytest import mark, fixture
-from pypoker.deck import Card
+from src.pypoker.deck import Card
 
 ###################
 #  TEST FIXTURES  #
 ###################
-from pypoker.poker_engine.hand_solver import PokerHandSolver
+from src.pypoker.poker_engine import PokerHandSolver
 
 
 @fixture
