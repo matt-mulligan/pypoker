@@ -7,7 +7,7 @@ import collections
 from abc import ABCMeta, abstractmethod
 from itertools import combinations
 
-from typing import List
+from typing import List, Dict, Any
 
 from pypoker.deck import Card
 
@@ -30,6 +30,25 @@ class BaseHandSolver(metaclass=ABCMeta):
         }
         child classes implementing this abstract method can choose to expand the dictionary where
         appropriate but must at minimum have the above keys
+        """
+
+    @abstractmethod
+    def rank_hands(self, hands: Dict[str, List[Card]]):
+        """
+        Abstract method to implement to rank multiple hands aginst each other
+
+        :param hands: dictionary of hands in the format of KEY=player_name, VALUE=List of card objects representing
+        their hand
+
+        :return: dict in the following format:
+        {
+            <RANK>: {
+                "players": ["PLAYER_A", "PLAYER_B"]
+                "hand_rank": <HAND_RANK>
+                "hand_title": <HAND_TITLE>
+                "hand_description": <HAND_DESCRIPTION>
+            }
+        }
         """
 
     ####################################
