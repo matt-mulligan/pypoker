@@ -3,7 +3,7 @@ from typing import List, Dict
 from pypoker.deck import Card
 from pypoker.poker_engine.hand_solver.base import BaseHandSolver
 from pypoker.poker_engine.hand_solver.constants import HAND_TITLE, HAND_RANK, TEST_METHOD, BEST_HAND, FIND_BEST_METHOD, \
-    HAND_DESCRIPTION, DESCRIPTION_METHOD, TIEBREAK_METHOD
+    HAND_DESCRIPTION, DESCRIPTION_METHOD, RANK_METHOD
 
 
 class TexasHoldemHandSolver(BaseHandSolver):
@@ -16,40 +16,39 @@ class TexasHoldemHandSolver(BaseHandSolver):
         self._hand_ranks = [
             {
                 HAND_TITLE: "Straight Flush", HAND_RANK: 1, TEST_METHOD: self._test_straight_flush,
-                TIEBREAK_METHOD: self._tiebreak_straight_flush,
-                DESCRIPTION_METHOD: self._hand_description_straight_flush
+                RANK_METHOD: self._rank_straight_flush, DESCRIPTION_METHOD: self._hand_description_straight_flush
             },
             {
                 HAND_TITLE: "Quads", HAND_RANK: 2, TEST_METHOD: self._test_quads,
-                TIEBREAK_METHOD: self._tiebreak_quads, DESCRIPTION_METHOD: self._hand_description_quads
+                RANK_METHOD: self._rank_quads, DESCRIPTION_METHOD: self._hand_description_quads
             },
             {
                 HAND_TITLE: "Full House", HAND_RANK: 3, TEST_METHOD: self._test_full_house,
-                TIEBREAK_METHOD: self._tiebreak_full_house, DESCRIPTION_METHOD: self._hand_description_full_house
+                RANK_METHOD: self._rank_full_house, DESCRIPTION_METHOD: self._hand_description_full_house
             },
             {
                 HAND_TITLE: "Flush", HAND_RANK: 4, TEST_METHOD: self._test_flush,
-                TIEBREAK_METHOD: self._tiebreak_flush, DESCRIPTION_METHOD: self._hand_description_flush
+                RANK_METHOD: self._rank_flush, DESCRIPTION_METHOD: self._hand_description_flush
             },
             {
                 HAND_TITLE: "Straight", HAND_RANK: 5, TEST_METHOD: self._test_straight,
-                TIEBREAK_METHOD: self._tiebreak_straight, DESCRIPTION_METHOD: self._hand_description_straight
+                RANK_METHOD: self._rank_straight, DESCRIPTION_METHOD: self._hand_description_straight
             },
             {
                 HAND_TITLE: "Trips", HAND_RANK: 6, TEST_METHOD: self._test_trips,
-                TIEBREAK_METHOD: self._tiebreak_trips, DESCRIPTION_METHOD: self._hand_description_trips
+                RANK_METHOD: self._rank_trips, DESCRIPTION_METHOD: self._hand_description_trips
             },
             {
                 HAND_TITLE: "Two Pair", HAND_RANK: 7, TEST_METHOD: self._test_two_pair,
-                TIEBREAK_METHOD: self._tiebreak_two_pair, DESCRIPTION_METHOD: self._hand_description_two_pair
+                RANK_METHOD: self._rank_two_pair, DESCRIPTION_METHOD: self._hand_description_two_pair
             },
             {
                 HAND_TITLE: "Pair", HAND_RANK: 8, TEST_METHOD: self._test_pair,
-                TIEBREAK_METHOD: self._tiebreak_pair, DESCRIPTION_METHOD: self._hand_description_pair
+                RANK_METHOD: self._rank_pair, DESCRIPTION_METHOD: self._hand_description_pair
             },
             {
                 HAND_TITLE: "High Card", HAND_RANK: 9, TEST_METHOD: self._test_high_card,
-                TIEBREAK_METHOD: self._tiebreak_high_card, DESCRIPTION_METHOD: self._hand_description_high_card
+                RANK_METHOD: self._rank_high_card, DESCRIPTION_METHOD: self._hand_description_high_card
             }
         ]
 
@@ -79,7 +78,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
             matched_hands = [hand for hand in all_hands if hand_type[TEST_METHOD](hand)]
 
             if matched_hands:
-                best_hand = hand_type[TIEBREAK_METHOD](matched_hands)
+                best_hand = hand_type[RANK_METHOD](matched_hands)[1][0]
                 return {
                     BEST_HAND: best_hand,
                     HAND_TITLE: hand_type[HAND_TITLE],
@@ -199,136 +198,269 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         return True
 
-    ###########################
-    #  TIEBREAK HAND METHODS  #
-    ###########################
+    #######################
+    #  RANK HAND METHODS  #
+    #######################
 
-    def _tiebreak_straight_flush(self, hands: List[List[Card]]):
+    def _rank_straight_flush(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best straight flush hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a straight flush hand
-        :return: List[Card]: Best straight flush hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        return self.order_hands_highest_card(hands, winner_only=True)
+        ordered_hands = self.order_hands_highest_card(hands)
+        ranked_hands = {1: [ordered_hands[0]]}
 
-    def _tiebreak_quads(self, hands: List[List[Card]]):
+        for hand in ordered_hands[1:]:
+            current_rank = max(ranked_hands.keys())
+
+            if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                ranked_hands[current_rank].append(hand)
+            else:
+                current_rank += 1
+                ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_quads(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best quads hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a quads hand
-        :return: List[Card]: Best quads flush hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        hand_quads = [(hand, self.hand_highest_value_tuple(hand, 4)) for hand in hands]
+        hands_quads = [(hand, self.hand_highest_value_tuple(hand, 4)) for hand in hands]
+        quad_values = list(set([tup[1] for tup in hands_quads]))
+        quad_values.sort(reverse=True)
 
-        hand_quads.sort(key=lambda tup: tup[1], reverse=True)
-        top_quads_value = hand_quads[0][1]
-        top_quads_hands = filter(lambda tup: tup[1] == top_quads_value, hand_quads)
+        ranked_hands = dict()
 
-        return self.order_hands_highest_card([tup[0] for tup in top_quads_hands], winner_only=True)
+        for quad_value in quad_values:
+            quad_value_hands = filter(lambda hand_tuple: hand_tuple[1] == quad_value, hands_quads)
+            quad_value_hands = self.order_hands_highest_card([tup[0] for tup in quad_value_hands])
 
-    def _tiebreak_full_house(self, hands: List[List[Card]]):
+            current_rank = 1 if not ranked_hands else max(ranked_hands.keys()) + 1
+            ranked_hands[current_rank] = [quad_value_hands[0]]
+
+            for hand in quad_value_hands[1:]:
+                if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                    ranked_hands[current_rank].append(hand)
+                else:
+                    current_rank += 1
+                    ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_full_house(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best full house hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a full house hand
-        :return: List[Card]: Best full house hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        hands_trip_pair = []
+        ordered_hands = []
 
         for hand in hands:
             trips_value = self.hand_highest_value_tuple(hand, 3)
             remaining_cards = filter(lambda card: card.value != trips_value, hand)
             pair_value = self.hand_highest_value_tuple(remaining_cards, 2)
-            hands_trip_pair.append((hand, trips_value, pair_value))
+            ordered_hands.append((hand, trips_value, pair_value))
 
-        hands_trip_pair.sort(key=lambda tup: (tup[1], tup[2]), reverse=True)
-        return hands_trip_pair[0][0]
+        ordered_hands.sort(key=lambda tup: (tup[1], tup[2]), reverse=True)
 
-    def _tiebreak_flush(self, hands: List[List[Card]]):
+        current_rank = 1
+        ranked_hands = {current_rank: [ordered_hands[0][0]]}
+        current_trip = ordered_hands[0][1]
+        current_pair = ordered_hands[0][2]
+
+        for hand, trip, pair in ordered_hands[1:]:
+            if current_trip == trip and current_pair == pair:
+                ranked_hands[current_rank].append(hand)
+            else:
+                current_rank += 1
+                current_trip = trip
+                current_pair = pair
+                ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_flush(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best flush hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a flush hand
-        :return: List[Card]: Best flush hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        return self.order_hands_highest_card(hands, winner_only=True)
+        ordered_hands = self.order_hands_highest_card(hands)
+        ranked_hands = {1: [ordered_hands[0]]}
 
-    def _tiebreak_straight(self, hands: List[List[Card]]):
+        for hand in ordered_hands[1:]:
+            current_rank = max(ranked_hands.keys())
+
+            if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                ranked_hands[current_rank].append(hand)
+            else:
+                current_rank += 1
+                ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_straight(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best straight hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a straight hand
-        :return: List[Card]: Best straight hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        return self.order_hands_highest_card(hands, winner_only=True)
+        ordered_hands = self.order_hands_highest_card(hands)
+        ranked_hands = {1: [ordered_hands[0]]}
 
-    def _tiebreak_trips(self, hands: List[List[Card]]):
+        for hand in ordered_hands[1:]:
+            current_rank = max(ranked_hands.keys())
+
+            if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                ranked_hands[current_rank].append(hand)
+            else:
+                current_rank += 1
+                ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_trips(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best trips hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a trips hand
-        :return: List[Card]: Best trips hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
         hands_trips = [(hand, self.hand_highest_value_tuple(hand, 3)) for hand in hands]
-        hands_trips.sort(key=lambda tup: tup[1], reverse=True)
-        top_trips = hands_trips[0][1]
-        top_trips_hands = filter(lambda tup: tup[1] == top_trips, hands_trips)
+        trips_values = list(set([tup[1] for tup in hands_trips]))
+        trips_values.sort(reverse=True)
 
-        return self.order_hands_highest_card([tup[0] for tup in top_trips_hands], winner_only=True)
+        ranked_hands = dict()
 
-    def _tiebreak_two_pair(self, hands: List[List[Card]]):
+        for trips_value in trips_values:
+            trips_value_hands = filter(lambda hand_tuple: hand_tuple[1] == trips_value, hands_trips)
+            trips_value_hands = self.order_hands_highest_card([tup[0] for tup in trips_value_hands])
+
+            current_rank = 1 if not ranked_hands else max(ranked_hands.keys()) + 1
+            ranked_hands[current_rank] = [trips_value_hands[0]]
+
+            for hand in trips_value_hands[1:]:
+                if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                    ranked_hands[current_rank].append(hand)
+                else:
+                    current_rank += 1
+                    ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_two_pair(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best two pair hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a two pair hand
-        :return: List[Card]: Best two pair hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        hands_two_pair = []
+        hands_two_pair_kicker = []
 
         for hand in hands:
             high_pair_value = self.hand_highest_value_tuple(hand, 2)
             remaining_cards = filter(lambda card: card.value != high_pair_value, hand)
             low_pair_value = self.hand_highest_value_tuple(remaining_cards, 2)
-            hands_two_pair.append((hand, high_pair_value, low_pair_value))
+            kicker_value = list(
+                filter(lambda card: card.value != high_pair_value and card.value != low_pair_value, hand)
+            )[0].value
+            hands_two_pair_kicker.append((hand, high_pair_value, low_pair_value, kicker_value))
 
-        hands_two_pair.sort(key=lambda tup: (tup[1], tup[2]), reverse=True)
-        top_high_pair = hands_two_pair[0][1]
-        top_low_pair = hands_two_pair[0][2]
-        top_two_pair_hands = filter(lambda tup: tup[1] == top_high_pair and tup[2] == top_low_pair, hands_two_pair)
-        return self.order_hands_highest_card([tup[0] for tup in top_two_pair_hands], winner_only=True)
+        hands_two_pair_kicker.sort(key=lambda tup: (tup[1], tup[2], tup[3]), reverse=True)
 
-    def _tiebreak_pair(self, hands: List[List[Card]]):
+        current_rank = 1
+        current_high_pair = hands_two_pair_kicker[0][1]
+        current_low_pair = hands_two_pair_kicker[0][2]
+        current_kicker = hands_two_pair_kicker[0][3]
+        ranked_hands = {current_rank: [hands_two_pair_kicker[0][0]]}
+
+        for hand, high_pair, low_pair, kicker in hands_two_pair_kicker[1:]:
+            if high_pair == current_high_pair and low_pair == current_low_pair and kicker == current_kicker:
+                ranked_hands[current_rank].append(hand)
+            else:
+                current_rank += 1
+                current_high_pair = high_pair
+                current_low_pair = low_pair
+                current_kicker = kicker
+                ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_pair(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best pair hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a pair hand
-        :return: List[Card]: Best pair hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
         hands_pair = [(hand, self.hand_highest_value_tuple(hand, 2)) for hand in hands]
-        hands_pair.sort(key=lambda tup: tup[1], reverse=True)
-        top_pair = hands_pair[0][1]
-        top_pair_hands = filter(lambda tup: tup[1] == top_pair, hands_pair)
+        pair_values = list(set([tup[1] for tup in hands_pair]))
+        pair_values.sort(reverse=True)
 
-        return self.order_hands_highest_card([tup[0] for tup in top_pair_hands], winner_only=True)
+        ranked_hands = dict()
 
-    def _tiebreak_high_card(self, hands: List[List[Card]]):
+        for pair_value in pair_values:
+            pair_value_hands = filter(lambda hand_tuple: hand_tuple[1] == pair_value, hands_pair)
+            pair_value_hands = self.order_hands_highest_card([tup[0] for tup in pair_value_hands])
+
+            current_rank = 1 if not ranked_hands else max(ranked_hands.keys()) + 1
+            ranked_hands[current_rank] = [pair_value_hands[0]]
+
+            for hand in pair_value_hands[1:]:
+                if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                    ranked_hands[current_rank].append(hand)
+                else:
+                    current_rank += 1
+                    ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
+
+    def _rank_high_card(self, hands: List[List[Card]]):
         """
         Private tiebreaker method to determine the best high card hand in the list of hands
 
         :param hands: List of list of cards. each internal list of cards represents a high card hand
-        :return: List[Card]: Best high card hand
+        :return: Dictionary in the following format of KEY = Rank number (1,2,3,4...) VALUE = List of hands for that rank
+            If there are tied hands, then multiple hands will appear as the value for that rank.
         """
 
-        return self.order_hands_highest_card(hands, winner_only=True)
+        ordered_hands = self.order_hands_highest_card(hands)
+        ranked_hands = {1: [ordered_hands[0]]}
+
+        for hand in ordered_hands[1:]:
+            current_rank = max(ranked_hands.keys())
+
+            if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                ranked_hands[current_rank].append(hand)
+            else:
+                current_rank += 1
+                ranked_hands[current_rank] = [hand]
+
+        return ranked_hands
 
     ##############################
     #  HAND DESCRIPTION METHODS  #

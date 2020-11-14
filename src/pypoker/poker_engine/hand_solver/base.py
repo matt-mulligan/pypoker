@@ -142,3 +142,16 @@ class BaseHandSolver(metaclass=ABCMeta):
 
         hands.sort(key=lambda hand: tuple(card.value for card in hand), reverse=True)
         return hands[0] if winner_only else hands
+
+    @staticmethod
+    def hands_have_same_card_values(hand_a, hand_b):
+        """
+        shared hand comparison method that checks if the two hands have the same value cards
+        :param hand_a:
+        :param hand_b:
+        :return:
+        """
+
+        hand_a.sort(key=lambda card: card.value, reverse=True)
+        hand_b.sort(key=lambda card: card.value, reverse=True)
+        return all(card_a.value == card_b.value for card_a, card_b in zip(hand_a, hand_b))

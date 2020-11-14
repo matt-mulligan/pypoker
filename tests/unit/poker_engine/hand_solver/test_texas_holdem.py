@@ -83,7 +83,7 @@ def solver_instance():
     ("hole_cards_two_pair_001", "board_cards_two_pair_001", "hand_two_pair_001",
      7, "Two Pair", "Two Pair (Nines and Sevens with kicker Ten)"),  # Two Pair - all hole cards
     ("hole_cards_two_pair_002", "board_cards_two_pair_002", "hand_two_pair_002",
-     7, "Two Pair", "Two Pairr (Nines and Sevens with kicker Ten)"),  # Two Pair - one hole cards
+     7, "Two Pair", "Two Pair (Nines and Sevens with kicker Ten)"),  # Two Pair - one hole cards
     ("hole_cards_two_pair_003", "board_cards_two_pair_003", "hand_two_pair_003",
      7, "Two Pair", "Two Pair (Nines and Sevens with kicker Ten)"),  # Two Pair - no hole cards
     ("hole_cards_two_pair_004", "board_cards_two_pair_004", "hand_two_pair_004",
