@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from pytest import fixture, mark
 
@@ -10,6 +10,9 @@ from pypoker.poker_engine.hand_solver.base import BaseHandSolver
 @fixture
 def base_instance():
     class TestBaseClass(BaseHandSolver):
+        def rank_hands(self, hands: Dict[str, List[Card]]):
+            pass
+
         def find_best_hand(self, hole_cards: List[Card], board_cards: List[Card]):
             pass
 

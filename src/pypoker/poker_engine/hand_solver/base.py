@@ -27,6 +27,7 @@ class BaseHandSolver(metaclass=ABCMeta):
             "hand_title": Str the english title of the best hand type the player has (Straight, Flush, Two Pair, etc)
             "hand_rank": Int ranking of the hand type, with 1 signifying the best type of hand (e.g. straight flush
                          would have a ranking of 1 in texas holdem)
+            "hand_description": String - full description of the hand
         }
         child classes implementing this abstract method can choose to expand the dictionary where
         appropriate but must at minimum have the above keys
