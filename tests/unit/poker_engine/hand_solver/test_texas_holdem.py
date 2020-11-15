@@ -1,6 +1,6 @@
 from pytest import fixture, mark
 
-from fixtures.cards import get_hand
+from fixtures.cards import get_hand, get_hand_sets, get_rank_dictionary
 from pypoker.poker_engine.hand_solver.texas_holdem import TexasHoldemHandSolver
 
 
@@ -24,6 +24,8 @@ def solver_instance():
      1, "Straight Flush", "Straight Flush (Eight to Four of Diamonds)"),  # Straight Flush - possible two pair
     ("hole_cards_straight_flush_007", "board_cards_straight_flush_007", "hand_straight_flush_007",
      1, "Straight Flush", "Straight Flush (Jack to Seven of Clubs)"),  # Straight Flush - possible pair
+    ("hole_cards_straight_flush_008", "board_cards_straight_flush_008", "hand_straight_flush_008",
+     1, "Straight Flush", "Straight Flush (Five to Ace of Spades)"),  # Straight Flush - Ace Low Straight
 
     ("hole_cards_quads_001", "board_cards_quads_001", "hand_quads_001",
      2, "Quads", "Quads (Fours with Queen kicker)"),  # Quads - all hole cards
@@ -72,6 +74,8 @@ def solver_instance():
      5, "Straight", "Straight (Jack to Seven)"),  # Straight - possible two pair
     ("hole_cards_straight_006", "board_cards_straight_006", "hand_straight_006",
      5, "Straight", "Straight (Jack to Seven)"),  # Straight - possible pair
+    ("hole_cards_straight_007", "board_cards_straight_007", "hand_straight_007",
+     5, "Straight", "Straight (Five to Ace)"),  # Straight - Ace Low Straight
 
     ("hole_cards_trips_001", "board_cards_trips_001", "hand_trips_001",
      6, "Trips", "Trips (Kings with kickers Nine, Eight)"),  # Trips - ALl hole cards
@@ -124,3 +128,39 @@ def test_when_find_best_hand_then_correct_response_returned(hole_cards, board_ca
     assert hand_rank == actual_result["hand_rank"]
     assert hand_title == actual_result["hand_title"]
     assert hand_description == actual_result["hand_description"]
+
+
+@mark.parametrize("test_case", [
+    "straight_flush_multi", "straight_flush_multi_tie", "straight_flush_multi_tie_exact",
+    "straight_flush_multi_ace_low_straights", "straight_flush_all_ace_low_straights", "quads_multi",
+    "quads_multi_tie", "quads_multi_tie_exact", "full_house_multi", "full_house_multi_tie",
+    "full_house_multi_tie_exact", "flush_multi", "flush_multi_tie", "flush_multi_tie_exact", "straight_multi",
+    "straight_multi_tie", "straight_multi_tie_exact", "straight_multi_ace_low_straights",
+    "straight_all_ace_low_straights", "trips_multi", "trips_multi_tie", "trips_multi_tie_exact",
+    "two_pair_multi", "two_pair_multi_tie", "two_pair_multi_tie_exact", "pair_multi", "pair_multi_tie",
+    "pair_multi_tie_exact", "high_card_multi", "high_card_multi_tie", "high_card_multi_tie_exact", "one_hand_mixed",
+    "two_hands_mixed", "three_hands_mixed", "four_hands_mixed", "five_hands_mixed", "six_hands_mixed",
+    "seven_hands_mixed", "eight_hands_mixed", "nine_hands_mixed"
+])
+def test_when_rank_hands_then_correct_dictionary_returned(test_case, solver_instance):
+    hands = get_hand_sets(test_case)
+    expected_rank_dict = get_rank_dictionary(test_case)
+
+    rank_dict = solver_instance.rank_hands(hands)
+
+    assert rank_dict.keys() == expected_rank_dict.keys()
+
+    # Assert - expected and returned lists of hands must be sorted for card order, then hand order before comparison
+    for rank, list_of_hands in expected_rank_dict.items():
+        for expected_hand in list_of_hands:
+            expected_hand.sort(key=lambda card: card.name)
+
+        for actual_hand in rank_dict[rank]:
+            actual_hand.sort(key=lambda card: card.name)
+
+        list_of_hands.sort()
+        rank_dict[rank].sort()
+
+        assert len(list_of_hands) == len(rank_dict[rank])
+        assert list_of_hands == rank_dict[rank]
+

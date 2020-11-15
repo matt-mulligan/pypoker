@@ -87,19 +87,29 @@ class BaseHandSolver(metaclass=ABCMeta):
         return all(card.suit == suit for card in hand)
 
     @staticmethod
-    def hand_values_continuous(hand):
+    def hand_values_continuous(hand, allow_ace_low=True):
         """
         This private method will check if the cards provided in the hand are a straight
         (their values are continuous without gaps)
         This method does not assert the number of cards in the hand.
 
         :param hand: List of Card objects representing the players hand
+        :param allow_ace_low: Boolean indicating if for this assessment you should allow Ace cards to be a low value (1) as well
         :return: Boolean. True of the ard values are continuous, False if not
         """
 
         hand.sort(key=lambda card: card.value, reverse=False)
         card_value_list = [card.value for card in hand]
-        return all(a + 1 == b for a, b in zip(card_value_list, card_value_list[1:]))
+        normal_values_continuous = all(a + 1 == b for a, b in zip(card_value_list, card_value_list[1:]))
+
+        card_values_ace_low = [value if value != 14 else 1 for value in card_value_list]
+        card_values_ace_low.sort(reverse=False)
+        ace_low_continuous = all(a + 1 == b for a, b in zip(card_values_ace_low, card_values_ace_low[1:]))
+
+        if allow_ace_low:
+            return normal_values_continuous or ace_low_continuous
+        else:
+            return normal_values_continuous
 
     @staticmethod
     def hand_highest_value_tuple(hand, tuple_length):
@@ -124,6 +134,19 @@ class BaseHandSolver(metaclass=ABCMeta):
 
         matches = [key for key, value in occurances.items() if value >= tuple_length]
         return None if not matches else max(matches)
+
+    @staticmethod
+    def hand_is_ace_low_straight(hand: List[Card]):
+        """
+        This public method will check if the hand you have provided is an ace low straight (5, 4, 3, 2, A).
+
+        :param hand: list of card objects rperesenting a players hand
+        :return: Boolean indiciating if the hand is an ace low straight
+        """
+
+        hand.sort(key=lambda card: card.value, reverse=True)
+        card_values = [card.value for card in hand]
+        return card_values == [14, 5, 4, 3, 2]
 
     ####################################
     #  SHARED HAND COMPARISON METHODS  #

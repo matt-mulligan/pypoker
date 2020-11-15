@@ -1,8 +1,8 @@
-from typing import List, Dict
+from typing import List
 
 from pypoker.deck import Card
 from pypoker.poker_engine.hand_solver.base import BaseHandSolver
-from pypoker.poker_engine.hand_solver.constants import HAND_TITLE, HAND_RANK, TEST_METHOD, BEST_HAND, FIND_BEST_METHOD, \
+from pypoker.poker_engine.hand_solver.constants import HAND_TITLE, HAND_RANK, TEST_METHOD, BEST_HAND, \
     HAND_DESCRIPTION, DESCRIPTION_METHOD, RANK_METHOD
 
 
@@ -86,14 +86,35 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     HAND_DESCRIPTION: hand_type[DESCRIPTION_METHOD](best_hand)
                 }
 
-    def rank_hands(self, hands: Dict[str, List[Card]]):
+    def rank_hands(self, hands: List[List[Card]]):
         """
 
         :param hands:
         :return:
         """
 
-        pass
+        hands_by_hand_type_rank = {}
+
+        for hand in hands:
+            for hand_type in self._hand_ranks:
+                if hand_type[TEST_METHOD](hand):
+                    if hand_type[HAND_RANK] not in hands_by_hand_type_rank.keys():
+                        hands_by_hand_type_rank[hand_type[HAND_RANK]] = [hand]
+                    else:
+                        hands_by_hand_type_rank[hand_type[HAND_RANK]].append(hand)
+                    break
+
+        ranked_hands = dict()
+        current_rank = 0
+
+        for hand_type in self._hand_ranks:
+            if hand_type[HAND_RANK] in hands_by_hand_type_rank.keys():
+                ranked_hands_for_hand_type = hand_type[RANK_METHOD](hands_by_hand_type_rank[hand_type[HAND_RANK]])
+                for ranked_hands_set in ranked_hands_for_hand_type.values():
+                    current_rank += 1
+                    ranked_hands[current_rank] = ranked_hands_set
+
+        return ranked_hands
 
     #######################
     #  TEST HAND METHODS  #
@@ -212,6 +233,8 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         ordered_hands = self.order_hands_highest_card(hands)
+        ordered_hands = self._reorder_ace_low_straight_hands(ordered_hands)
+
         ranked_hands = {1: [ordered_hands[0]]}
 
         for hand in ordered_hands[1:]:
@@ -324,6 +347,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         ordered_hands = self.order_hands_highest_card(hands)
+        ordered_hands = self._reorder_ace_low_straight_hands(ordered_hands)
         ranked_hands = {1: [ordered_hands[0]]}
 
         for hand in ordered_hands[1:]:
@@ -466,8 +490,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
     #  HAND DESCRIPTION METHODS  #
     ##############################
 
-    @staticmethod
-    def _hand_description_straight_flush(hand: List[Card]):
+    def _hand_description_straight_flush(self, hand: List[Card]):
         """
         Private method that produces the proper hand description for a straight flush hand.
 
@@ -476,7 +499,10 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         hand.sort(key=lambda card: card.value, reverse=True)
-        return f"Straight Flush ({hand[0].rank} to {hand[4].rank} of {hand[0].suit})"
+        if self.hand_is_ace_low_straight(hand):
+            return f"Straight Flush ({hand[1].rank} to {hand[0].rank} of {hand[0].suit})"
+        else:
+            return f"Straight Flush ({hand[0].rank} to {hand[4].rank} of {hand[0].suit})"
 
     def _hand_description_quads(self, hand: List[Card]):
         """
@@ -519,8 +545,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
         return f"Flush ({hand[0].suit} with cards {hand[0].rank}, {hand[1].rank}, {hand[2].rank}, " \
                f"{hand[3].rank}, {hand[4].rank})"
 
-    @staticmethod
-    def _hand_description_straight(hand: List[Card]):
+    def _hand_description_straight(self, hand: List[Card]):
         """
         Private method that produces the proper hand description for straight hand.
 
@@ -529,7 +554,10 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         hand.sort(key=lambda card: card.value, reverse=True)
-        return f"Straight ({hand[0].rank} to {hand[4].rank})"
+        if self.hand_is_ace_low_straight(hand):
+            return f"Straight ({hand[1].rank} to {hand[0].rank})"
+        else:
+            return f"Straight ({hand[0].rank} to {hand[4].rank})"
 
     def _hand_description_trips(self, hand: List[Card]):
         """
@@ -592,3 +620,28 @@ class TexasHoldemHandSolver(BaseHandSolver):
         hand.sort(key=lambda card: card.value, reverse=True)
 
         return f"High Card ({hand[0].rank}, {hand[1].rank}, {hand[2].rank}, {hand[3].rank}, {hand[4].rank})"
+
+    #########################
+    #  MISC HELPER METHODS  #
+    #########################
+
+    def _reorder_ace_low_straight_hands(self, ordered_hands):
+        """
+        Private helper method to reorder ace low straight hands to end of ordered hands list
+        :param ordered_hands:
+        :return:
+        """
+
+        ace_low_straight_hands = [True if self.hand_is_ace_low_straight(hand) else False for hand in ordered_hands]
+        ace_low_straight_index_hand = [
+            (index, ordered_hands[index])
+            for index, is_ace_low_straight in enumerate(ace_low_straight_hands)
+            if is_ace_low_straight
+        ]
+        ace_low_straight_index_hand.sort(key=lambda tup: tup[0], reverse=True)
+
+        for index, hand in ace_low_straight_index_hand:
+            del ordered_hands[index]
+            ordered_hands.append(hand)
+
+        return ordered_hands
