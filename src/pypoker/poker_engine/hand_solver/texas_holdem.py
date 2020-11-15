@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from pypoker.deck import Card
 from pypoker.poker_engine.hand_solver.base import BaseHandSolver
@@ -13,7 +13,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
     """
 
     def __init__(self):
-        self._hand_ranks = [
+        self._hand_rankings = [
             {
                 HAND_TITLE: "Straight Flush", HAND_RANK: 1, TEST_METHOD: self._test_straight_flush,
                 RANK_METHOD: self._rank_straight_flush, DESCRIPTION_METHOD: self._hand_description_straight_flush
@@ -74,7 +74,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         all_hands = self.get_all_combinations(hole_cards, board_cards, 5)
-        for hand_type in self._hand_ranks:
+        for hand_type in self._hand_rankings:
             matched_hands = [hand for hand in all_hands if hand_type[TEST_METHOD](hand)]
 
             if matched_hands:
@@ -86,35 +86,44 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     HAND_DESCRIPTION: hand_type[DESCRIPTION_METHOD](best_hand)
                 }
 
-    def rank_hands(self, hands: List[List[Card]]):
+    def rank_hands(self, players_hands: Dict[str, List[Card]]):
+        """
+        Public method that will rank players texas hold'em hands against each other
+
+        :param player_hands: Dict in format of
+        {
+            "PLAYER_NAME": [LIST_OF_CARDS]
+        }
+
+        :return: dict in the following format:
+        {
+            <RANK>: {
+                "players": ["LIST OF PLAYER NAMES"],
+                "hand_description": "HAND_DESCRIPTION"
+            }
+        }
         """
 
-        :param hands:
-        :return:
-        """
+        player_hands_by_rank = self._group_player_hands_by_rank(players_hands)
+        ranks = sorted(list(player_hands_by_rank.keys()))
 
-        hands_by_hand_type_rank = {}
-
-        for hand in hands:
-            for hand_type in self._hand_ranks:
-                if hand_type[TEST_METHOD](hand):
-                    if hand_type[HAND_RANK] not in hands_by_hand_type_rank.keys():
-                        hands_by_hand_type_rank[hand_type[HAND_RANK]] = [hand]
-                    else:
-                        hands_by_hand_type_rank[hand_type[HAND_RANK]].append(hand)
-                    break
-
-        ranked_hands = dict()
         current_rank = 0
+        ranked_player_hands = dict()
 
-        for hand_type in self._hand_ranks:
-            if hand_type[HAND_RANK] in hands_by_hand_type_rank.keys():
-                ranked_hands_for_hand_type = hand_type[RANK_METHOD](hands_by_hand_type_rank[hand_type[HAND_RANK]])
-                for ranked_hands_set in ranked_hands_for_hand_type.values():
-                    current_rank += 1
-                    ranked_hands[current_rank] = ranked_hands_set
+        for rank in ranks:
+            hands = list(player_hands_by_rank[rank].values())
+            subranked_hands = self._hand_rankings[rank - 1][RANK_METHOD](hands)
+            subranked_players = self._link_subranked_hands_to_players(subranked_hands, players_hands)
 
-        return ranked_hands
+            for players in subranked_players.values():
+                current_rank += 1
+                hand_desc = self._hand_rankings[rank - 1][DESCRIPTION_METHOD](players_hands[players[0]])
+                ranked_player_hands[current_rank] = {
+                    "players": players,
+                    "hand_description": hand_desc
+                }
+
+        return ranked_player_hands
 
     #######################
     #  TEST HAND METHODS  #
@@ -500,9 +509,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         hand.sort(key=lambda card: card.value, reverse=True)
         if self.hand_is_ace_low_straight(hand):
-            return f"Straight Flush ({hand[1].rank} to {hand[0].rank} of {hand[0].suit})"
+            return f"Straight Flush ({hand[1].rank} to {hand[0].rank})"
         else:
-            return f"Straight Flush ({hand[0].rank} to {hand[4].rank} of {hand[0].suit})"
+            return f"Straight Flush ({hand[0].rank} to {hand[4].rank})"
 
     def _hand_description_quads(self, hand: List[Card]):
         """
@@ -542,8 +551,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         hand.sort(key=lambda card: card.value, reverse=True)
-        return f"Flush ({hand[0].suit} with cards {hand[0].rank}, {hand[1].rank}, {hand[2].rank}, " \
-               f"{hand[3].rank}, {hand[4].rank})"
+        return f"Flush ({hand[0].rank}, {hand[1].rank}, {hand[2].rank}, {hand[3].rank}, {hand[4].rank})"
 
     def _hand_description_straight(self, hand: List[Card]):
         """
@@ -645,3 +653,45 @@ class TexasHoldemHandSolver(BaseHandSolver):
             ordered_hands.append(hand)
 
         return ordered_hands
+
+    def _group_player_hands_by_rank(self, players_hands):
+        """
+        Helper method that will group player hands together by their hand ranks.
+
+        :param players_hands: Dict in format of {PLAYER_NAME: [LIST_OF_CARDS]}
+        :return: dictionary in format of {RANK: {PLAYER: [LIST_OF_CARDS]}}
+        """
+
+        player_hands_by_rank = dict()
+        for player, hand in players_hands.items():
+            for hand_type in self._hand_rankings:
+                if hand_type[TEST_METHOD](hand):
+                    if hand_type[HAND_RANK] not in player_hands_by_rank.keys():
+                        player_hands_by_rank[hand_type[HAND_RANK]] = {player: hand}
+                    else:
+                        player_hands_by_rank[hand_type[HAND_RANK]][player] = hand
+                    break
+        return player_hands_by_rank
+
+    @staticmethod
+    def _link_subranked_hands_to_players(subranked_hands, players_hands):
+        """
+        Helper method to link player names (found in players_hands dict) back to their hand within the subranked_hands
+        dict
+
+        :param subranked_hands: Dict in form of {SUBRANK: [LIST_OF_HANDS]}
+        :param players_hands: Dict in format of {PLAYER: [LIST_OF_CARDS]}
+        :return:
+        """
+        for hand in players_hands.values():
+            hand.sort(key=lambda card: card.value, reverse=True)
+
+        linked_subrank_players = dict()
+        for subrank, subrank_hands in subranked_hands.items():
+            for hand in subrank_hands:
+                hand.sort(key=lambda card: card.value, reverse=True)
+
+            matched_players = [player for player, player_hand in players_hands.items() if player_hand in subrank_hands]
+            linked_subrank_players[subrank] = matched_players
+
+        return linked_subrank_players

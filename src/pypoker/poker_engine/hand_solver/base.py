@@ -34,20 +34,20 @@ class BaseHandSolver(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def rank_hands(self, hands: Dict[str, List[Card]]):
+    def rank_hands(self, player_hands:  Dict[str, List[Card]]):
         """
-        Abstract method to implement to rank multiple hands aginst each other
+        Abstract method to implement to rank players hands against each other
 
-        :param hands: dictionary of hands in the format of KEY=player_name, VALUE=List of card objects representing
-        their hand
+        :param player_hands: Dict in format of
+        {
+            "PLAYER_NAME": [LIST_OF_CARDS]
+        }
 
         :return: dict in the following format:
         {
             <RANK>: {
-                "players": ["PLAYER_A", "PLAYER_B"]
-                "hand_rank": <HAND_RANK>
-                "hand_title": <HAND_TITLE>
-                "hand_description": <HAND_DESCRIPTION>
+                "players": ["LIST OF PLAYER NAMES"],
+                "hand_description": "HAND_DESCRIPTION"
             }
         }
         """

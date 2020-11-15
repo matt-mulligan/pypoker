@@ -1,5 +1,8 @@
 from pypoker.deck import Card
 
+PLAYERS = "players"
+HAND_DESC = "hand_description"
+
 
 def get_card(descriptor: str):
     """
@@ -171,6 +174,36 @@ def get_hand(hand_name):
         "hand_high_card_001": ["S6", "D4", "H8", "H9", "CJ"],
         "hand_high_card_002": ["S6", "D4", "H8", "H9", "CJ"],
         "hand_high_card_003": ["S6", "D4", "H8", "H9", "CJ"],
+
+
+
+        "straight_flush_multi_A": ["HA", "HJ", "HQ", "H10", "HK"],
+        "straight_flush_multi_B": ["DK", "D10", "DJ", "D9", "DQ"],
+        "straight_flush_multi_C": ["C9", "C10", "C6", "C8", "C7"],
+        "straight_flush_multi_D": ["S4", "S6", "S8", "S5", "S7"],
+        "straight_flush_multi_E": ["SA", "S3", "S4", "S2", "S5"],
+        "straight_flush_multi_tie_A": ["DK", "D10", "DJ", "D9", "DQ"],
+        "straight_flush_multi_tie_B": ["SQ", "S10", "S9", "SK", "SJ"],
+        "straight_flush_multi_tie_C": ["CJ", "C9", "C7", "C10", "C8"],
+        "straight_flush_multi_tie_D": ["H9", "HJ", "H7", "H8", "H10"],
+        "straight_flush_multi_tie_E": ["D7", "D10", "DJ", "D9", "D8"],
+        "straight_flush_multi_tie_exact_A": ["H9", "HJ", "HQ", "H8", "H10"],
+        "straight_flush_multi_tie_exact_B": ["CJ", "C9", "C7", "C10", "C8"],
+        "straight_flush_multi_ace_low_straights_A": ["HA", "H3", "H4", "H2", "H5"],
+        "straight_flush_multi_ace_low_straights_B": ["CA", "C3", "C4", "C2", "C5"],
+        "straight_flush_multi_ace_low_straights_C": ["SA", "S3", "S4", "S2", "S5"],
+        "straight_flush_multi_ace_low_straights_D": ["DK", "D10", "DJ", "D9", "DQ"],
+        "quads_multi_A": ["DK", "SA", "SK", "CK", "HK"],
+        "quads_multi_B": ["D7", "S7", "H7", "DK", "C7"],
+        "quads_multi_C": ["H9", "C7", "H7", "S7", "D7"],
+        "quads_multi_D": ["H7", "S7", "C2", "D7", "C7"],
+        "quads_multi_E": ["S5", "H5", "D7", "C5", "D5"],
+        "quads_multi_tie_A": ["D7", "S7", "H7", "S9", "C7"],
+        "quads_multi_tie_B": ["D7", "S7", "H7", "H9", "C7"],
+        "quads_multi_tie_C": ["D7", "S7", "H7", "D4", "C7"],
+        "quads_multi_tie_D": ["D7", "S7", "H7", "C4", "C7"],
+        "quads_multi_tie_exact_A": ["D7", "S7", "H7", "D4", "C7"]
+
     }[hand_name]
 
     return [get_card(descriptors) for descriptors in cards]
@@ -208,65 +241,15 @@ def get_hand_sets(hand_name):
             ['DK', 'S8', 'D7', 'S3', 'S2']
         ],
 
-        "straight_flush_multi": [
-            ["DK", "D10", "DJ", "D9", "DQ"], ["S4", "S6", "S8", "S5", "S7"], ["C9", "C10", "C6", "C8", "C7"],
-            ["HA", "HJ", "HQ", "H10", "HK"], ["SA", "S3", "S4", "S2", "S5"]
-        ],
-        "straight_flush_multi_A": [["HA", "HJ", "HQ", "H10", "HK"]],
-        "straight_flush_multi_B": [["DK", "D10", "DJ", "D9", "DQ"]],
-        "straight_flush_multi_C": [["C9", "C10", "C6", "C8", "C7"]],
-        "straight_flush_multi_D": [["S4", "S6", "S8", "S5", "S7"]],
-        "straight_flush_multi_E": [["SA", "S3", "S4", "S2", "S5"]],
 
-        "straight_flush_multi_tie": [
-            ["DK", "D10", "DJ", "D9", "DQ"], ["CJ", "C9", "C7", "C10", "C8"], ["H9", "HJ", "H7", "H8", "H10"],
-            ["SQ", "S10", "S9", "SK", "SJ"], ["D7", "D10", "DJ", "D9", "D8"]
-        ],
-        "straight_flush_multi_tie_A": [["DK", "D10", "DJ", "D9", "DQ"], ["SQ", "S10", "S9", "SK", "SJ"]],
-        "straight_flush_multi_tie_B": [
-            ["CJ", "C9", "C7", "C10", "C8"], ["H9", "HJ", "H7", "H8", "H10"], ["D7", "D10", "DJ", "D9", "D8"]
-        ],
 
-        "straight_flush_multi_tie_exact": [
-            ["CJ", "C9", "C7", "C10", "C8"], ["C9", "C8", "C10", "CJ", "C7"], ["H9", "HJ", "HQ", "H8", "H10"]
-        ],
-        "straight_flush_multi_tie_exact_A": [["H9", "HJ", "HQ", "H8", "H10"]],
-        "straight_flush_multi_tie_exact_B": [["CJ", "C9", "C7", "C10", "C8"], ["C9", "C8", "C10", "CJ", "C7"]],
 
-        "straight_flush_multi_ace_low_straights": [
-            ["DK", "D10", "DJ", "D9", "DQ"], ["SA", "S3", "S4", "S2", "S5"], ["CA", "C3", "C4", "C2", "C5"],
-            ["HA", "H3", "H4", "H2", "H5"]
-        ],
-        "straight_flush_multi_ace_low_straights_A": [["DK", "D10", "DJ", "D9", "DQ"]],
-        "straight_flush_multi_ace_low_straights_B": [
-            ["HA", "H3", "H4", "H2", "H5"], ["CA", "C3", "C4", "C2", "C5"], ["SA", "S3", "S4", "S2", "S5"]
-        ],
 
-        "straight_flush_all_ace_low_straights": [
-            ["SA", "S3", "S4", "S2", "S5"], ["CA", "C3", "C4", "C2", "C5"], ["HA", "H3", "H4", "H2", "H5"]
-        ],
-        "straight_flush_all_ace_low_straights_A": [
-            ["HA", "H3", "H4", "H2", "H5"], ["CA", "C3", "C4", "C2", "C5"], ["SA", "S3", "S4", "S2", "S5"]
-        ],
 
-        "quads_multi": [
-            ["H7", "S7", "C2", "D7", "C7"], ["S5", "H5", "D7", "C5", "D5"], ["H9", "C7", "H7", "S7", "D7"],
-            ["DK", "SA", "SK", "CK", "HK"], ["D7", "S7", "H7", "DK", "C7"]
-        ],
-        "quads_multi_A": [["DK", "SA", "SK", "CK", "HK"]],
-        "quads_multi_B": [["D7", "S7", "H7", "DK", "C7"]],
-        "quads_multi_C": [["H9", "C7", "H7", "S7", "D7"]],
-        "quads_multi_D": [["H7", "S7", "C2", "D7", "C7"]],
-        "quads_multi_E": [["S5", "H5", "D7", "C5", "D5"]],
 
-        "quads_multi_tie": [
-            ["D7", "S7", "H7", "D4", "C7"], ["D7", "S7", "H7", "C4", "C7"], ["D7", "S7", "H7", "S9", "C7"],
-            ["D7", "S7", "H7", "H9", "C7"]
-        ],
-        "quads_multi_tie_A": [["D7", "S7", "H7", "S9", "C7"], ["D7", "S7", "H7", "H9", "C7"]],
-        "quads_multi_tie_B": [["D7", "S7", "H7", "D4", "C7"], ["D7", "S7", "H7", "C4", "C7"]],
 
-        "quads_multi_tie_exact": [["D7", "S7", "H7", "D4", "C7"], ["D7", "D4", "C7", "S7", "H7"]],
+
+
 
         "full_house_multi": [
             ["S2", "C3", "H3", "D2", "H2"], ["DK", "S9", "C9", "HK", "SK"], ["DK", "C7", "SK", "S7", "CK"],
@@ -506,27 +489,41 @@ def get_hand_sets(hand_name):
 def get_rank_dictionary(rank_dict_name):
     return {
         "straight_flush_multi": {
-            1: get_hand_sets("straight_flush_multi_A"), 2: get_hand_sets("straight_flush_multi_B"),
-            3: get_hand_sets("straight_flush_multi_C"), 4: get_hand_sets("straight_flush_multi_D"),
-            5: get_hand_sets("straight_flush_multi_E")
+            1: {PLAYERS: ["player_a"], HAND_DESC: 'Straight Flush (Ace to Ten)'},
+            2: {PLAYERS: ["player_b"], HAND_DESC: 'Straight Flush (King to Nine)'},
+            3: {PLAYERS: ["player_c"], HAND_DESC: 'Straight Flush (Ten to Six)'},
+            4: {PLAYERS: ["player_d"], HAND_DESC: 'Straight Flush (Eight to Four)'},
+            5: {PLAYERS: ["player_e"], HAND_DESC: 'Straight Flush (Five to Ace)'}
         },
         "straight_flush_multi_tie": {
-            1: get_hand_sets("straight_flush_multi_tie_A"), 2: get_hand_sets("straight_flush_multi_tie_B")
+            1: {PLAYERS: ["player_a", "player_b"], HAND_DESC: "Straight Flush (King to Nine)"},
+            2: {PLAYERS: ["player_c", "player_d", "player_e"], HAND_DESC: "Straight Flush (Jack to Seven)"}
         },
         "straight_flush_multi_tie_exact": {
-            1: get_hand_sets("straight_flush_multi_tie_exact_A"), 2: get_hand_sets("straight_flush_multi_tie_exact_B")
+            1: {PLAYERS: ["player_a"], HAND_DESC: "Straight Flush (Queen to Eight)"},
+            2: {PLAYERS: ["player_b", "player_c"], HAND_DESC: "Straight Flush (Jack to Seven)"}
         },
         "straight_flush_multi_ace_low_straights": {
-            1: get_hand_sets("straight_flush_multi_ace_low_straights_A"),
-            2: get_hand_sets("straight_flush_multi_ace_low_straights_B"),
+            1: {PLAYERS: ["player_d"], HAND_DESC: "Straight Flush (King to Nine)"},
+            2: {PLAYERS: ["player_a", "player_b", "player_c"], HAND_DESC: "Straight Flush (Five to Ace)"}
         },
-        "straight_flush_all_ace_low_straights": {1: get_hand_sets("straight_flush_all_ace_low_straights_A")},
+        "straight_flush_all_ace_low_straights": {
+            1: {PLAYERS: ["player_a", "player_b", "player_c"], HAND_DESC: "Straight Flush (Five to Ace)"}
+        },
         "quads_multi": {
-            1: get_hand_sets("quads_multi_A"), 2: get_hand_sets("quads_multi_B"), 3: get_hand_sets("quads_multi_C"),
-            4: get_hand_sets("quads_multi_D"), 5: get_hand_sets("quads_multi_E")
+            1: {PLAYERS: ["player_a"], HAND_DESC: 'Quads (Kings with Ace kicker)'},
+            2: {PLAYERS: ["player_b"], HAND_DESC: 'Quads (Sevens with King kicker)'},
+            3: {PLAYERS: ["player_c"], HAND_DESC: 'Quads (Sevens with Nine kicker)'},
+            4: {PLAYERS: ["player_d"], HAND_DESC: 'Quads (Sevens with Two kicker)'},
+            5: {PLAYERS: ["player_e"], HAND_DESC: 'Quads (Fives with Seven kicker)'}
         },
-        "quads_multi_tie": {1: get_hand_sets("quads_multi_tie_A"), 2: get_hand_sets("quads_multi_tie_B")},
-        "quads_multi_tie_exact": {1: get_hand_sets("quads_multi_tie_exact")},
+        "quads_multi_tie": {
+            1: {PLAYERS: ["player_a", "player_b"], HAND_DESC: "Quads (Sevens with Nine kicker)"},
+            2: {PLAYERS: ["player_c", "player_d"], HAND_DESC: "Quads (Sevens with Four kicker)"}
+        },
+        "quads_multi_tie_exact": {
+            1: {PLAYERS: ["player_a", "player_b"], HAND_DESC: "Quads (Sevens with Four kicker)"}
+        },
         "full_house_multi": {
             1: get_hand_sets("full_house_multi_A"), 2: get_hand_sets("full_house_multi_B"),
             3: get_hand_sets("full_house_multi_C"), 4: get_hand_sets("full_house_multi_D"),
@@ -620,3 +617,53 @@ def get_rank_dictionary(rank_dict_name):
             9: get_hand_sets("nine_hands_mixed_I")
         }
     }[rank_dict_name]
+
+
+def get_player_hands_dict(scenario):
+    """
+    test helper method to generate a player ahnd dictionary
+
+    :param scenario: scenario name
+    :return:
+    """
+
+    return {
+        "straight_flush_multi": {
+            "player_a": get_hand("straight_flush_multi_A"), "player_b": get_hand("straight_flush_multi_B"),
+            "player_c": get_hand("straight_flush_multi_C"), "player_d": get_hand("straight_flush_multi_D"),
+            "player_e": get_hand("straight_flush_multi_E")
+        },
+        "straight_flush_multi_tie": {
+            "player_a": get_hand("straight_flush_multi_tie_A"),  "player_b": get_hand("straight_flush_multi_tie_B"),
+            "player_c": get_hand("straight_flush_multi_tie_C"),  "player_d": get_hand("straight_flush_multi_tie_D"),
+            "player_e": get_hand("straight_flush_multi_tie_E")
+        },
+        "straight_flush_multi_tie_exact": {
+            "player_a": get_hand("straight_flush_multi_tie_exact_A"),
+            "player_b": get_hand("straight_flush_multi_tie_exact_B"),
+            "player_c": get_hand("straight_flush_multi_tie_exact_B")
+        },
+        "straight_flush_multi_ace_low_straights": {
+            "player_a": get_hand("straight_flush_multi_ace_low_straights_A"),
+            "player_b": get_hand("straight_flush_multi_ace_low_straights_B"),
+            "player_c": get_hand("straight_flush_multi_ace_low_straights_C"),
+            "player_d": get_hand("straight_flush_multi_ace_low_straights_D"),
+        },
+        "straight_flush_all_ace_low_straights": {
+            "player_a": get_hand("straight_flush_multi_ace_low_straights_A"),
+            "player_b": get_hand("straight_flush_multi_ace_low_straights_B"),
+            "player_c": get_hand("straight_flush_multi_ace_low_straights_C"),
+        },
+        "quads_multi": {
+            "player_a": get_hand("quads_multi_A"), "player_b": get_hand("quads_multi_B"),
+            "player_c": get_hand("quads_multi_C"), "player_d": get_hand("quads_multi_D"),
+            "player_e": get_hand("quads_multi_E")
+        },
+        "quads_multi_tie": {
+            "player_a": get_hand("quads_multi_tie_A"), "player_b": get_hand("quads_multi_tie_B"),
+            "player_c": get_hand("quads_multi_tie_C"), "player_d": get_hand("quads_multi_tie_D")
+        },
+        "quads_multi_tie_exact": {
+            "player_a": get_hand("quads_multi_tie_exact_A"), "player_b": get_hand("quads_multi_tie_exact_A")
+        }
+    }[scenario]

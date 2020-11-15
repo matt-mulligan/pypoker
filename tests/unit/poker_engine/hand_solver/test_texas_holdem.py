@@ -1,6 +1,6 @@
 from pytest import fixture, mark
 
-from fixtures.cards import get_hand, get_hand_sets, get_rank_dictionary
+from fixtures.cards import get_hand, get_hand_sets, get_rank_dictionary, get_player_hands_dict
 from pypoker.poker_engine.hand_solver.texas_holdem import TexasHoldemHandSolver
 
 
@@ -143,24 +143,14 @@ def test_when_find_best_hand_then_correct_response_returned(hole_cards, board_ca
     "seven_hands_mixed", "eight_hands_mixed", "nine_hands_mixed"
 ])
 def test_when_rank_hands_then_correct_dictionary_returned(test_case, solver_instance):
-    hands = get_hand_sets(test_case)
+    hands = get_player_hands_dict(test_case)
     expected_rank_dict = get_rank_dictionary(test_case)
 
     rank_dict = solver_instance.rank_hands(hands)
 
     assert rank_dict.keys() == expected_rank_dict.keys()
 
-    # Assert - expected and returned lists of hands must be sorted for card order, then hand order before comparison
-    for rank, list_of_hands in expected_rank_dict.items():
-        for expected_hand in list_of_hands:
-            expected_hand.sort(key=lambda card: card.name)
-
-        for actual_hand in rank_dict[rank]:
-            actual_hand.sort(key=lambda card: card.name)
-
-        list_of_hands.sort()
-        rank_dict[rank].sort()
-
-        assert len(list_of_hands) == len(rank_dict[rank])
-        assert list_of_hands == rank_dict[rank]
+    for rank, rank_info in rank_dict.items():
+        assert rank_info["players"] == expected_rank_dict[rank]["players"]
+        assert rank_info["hand_description"] == expected_rank_dict[rank]["hand_description"]
 
