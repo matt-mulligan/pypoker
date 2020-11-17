@@ -11,21 +11,21 @@ def solver_instance():
 
 @mark.parametrize("hole_cards, board_cards, best_hand, hand_rank, hand_title, hand_description", [
     ("hole_cards_straight_flush_001", "board_cards_straight_flush_001", "hand_straight_flush_001",
-     1, "Straight Flush", "Straight Flush (Ace to Ten of Diamonds)"),  # straight flush - all hole cards
+     1, "Straight Flush", "Straight Flush (Ace to Ten)"),  # straight flush - all hole cards
     ("hole_cards_straight_flush_002", "board_cards_straight_flush_002", "hand_straight_flush_002",
-     1, "Straight Flush", "Straight Flush (Ten to Six of Hearts)"),  # straight flush - 1 hole cards
+     1, "Straight Flush", "Straight Flush (Ten to Six)"),  # straight flush - 1 hole cards
     ("hole_cards_straight_flush_003", "board_cards_straight_flush_003", "hand_straight_flush_003",
-     1, "Straight Flush", "Straight Flush (Seven to Three of Clubs)"),  # straight flush - no hole cards
+     1, "Straight Flush", "Straight Flush (Seven to Three)"),  # straight flush - no hole cards
     ("hole_cards_straight_flush_004", "board_cards_straight_flush_004", "hand_straight_flush_004",
-     1, "Straight Flush", "Straight Flush (King to Nine of Diamonds)"),  # straight flush - multiple
+     1, "Straight Flush", "Straight Flush (King to Nine)"),  # straight flush - multiple
     ("hole_cards_straight_flush_005", "board_cards_straight_flush_005", "hand_straight_flush_005",
-     1, "Straight Flush", "Straight Flush (Ace to Ten of Hearts)"),  # Straight Flush - possible trips
+     1, "Straight Flush", "Straight Flush (Ace to Ten)"),  # Straight Flush - possible trips
     ("hole_cards_straight_flush_006", "board_cards_straight_flush_006", "hand_straight_flush_006",
-     1, "Straight Flush", "Straight Flush (Eight to Four of Diamonds)"),  # Straight Flush - possible two pair
+     1, "Straight Flush", "Straight Flush (Eight to Four)"),  # Straight Flush - possible two pair
     ("hole_cards_straight_flush_007", "board_cards_straight_flush_007", "hand_straight_flush_007",
-     1, "Straight Flush", "Straight Flush (Jack to Seven of Clubs)"),  # Straight Flush - possible pair
+     1, "Straight Flush", "Straight Flush (Jack to Seven)"),  # Straight Flush - possible pair
     ("hole_cards_straight_flush_008", "board_cards_straight_flush_008", "hand_straight_flush_008",
-     1, "Straight Flush", "Straight Flush (Five to Ace of Spades)"),  # Straight Flush - Ace Low Straight
+     1, "Straight Flush", "Straight Flush (Five to Ace)"),  # Straight Flush - Ace Low Straight
 
     ("hole_cards_quads_001", "board_cards_quads_001", "hand_quads_001",
      2, "Quads", "Quads (Fours with Queen kicker)"),  # Quads - all hole cards
@@ -48,19 +48,19 @@ def solver_instance():
      3, "Full House", "Full House (Tens full of Nines)"),  # Full House - Competing Pairs
 
     ("hole_cards_flush_001", "board_cards_flush_001", "hand_flush_001",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - all hole cards
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - all hole cards
     ("hole_cards_flush_002", "board_cards_flush_002", "hand_flush_002",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - 1 hole cards
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - 1 hole cards
     ("hole_cards_flush_003", "board_cards_flush_003", "hand_flush_003",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - no hole cards
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - no hole cards
     ("hole_cards_flush_004", "board_cards_flush_004", "hand_flush_004",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - possible trips
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - possible trips
     ("hole_cards_flush_005", "board_cards_flush_005", "hand_flush_005",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - possible two pair
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - possible two pair
     ("hole_cards_flush_006", "board_cards_flush_006", "hand_flush_006",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - possible pair
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - possible pair
     ("hole_cards_flush_007", "board_cards_flush_007", "hand_flush_007",
-     4, "Flush", "Flush (Hearts with cards King, Nine, Eight, Seven, Four)"),  # Flush - possible straight
+     4, "Flush", "Flush (King, Nine, Eight, Seven, Four)"),  # Flush - possible straight
 
     ("hole_cards_straight_001", "board_cards_straight_001", "hand_straight_001",
      5, "Straight", "Straight (Jack to Seven)"),  # Straight - all hole cards
