@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from pypoker.deck import Card
+from pypoker.deck import Card, Deck
 from pypoker.poker_engine.hand_solver.base import BaseHandSolver
 from pypoker.poker_engine.hand_solver.constants import HAND_TITLE, HAND_RANK, TEST_METHOD, BEST_HAND, \
     HAND_DESCRIPTION, DESCRIPTION_METHOD, RANK_METHOD
@@ -90,7 +90,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
         Public method that will rank players texas hold'em hands against each other
 
-        :param player_hands: Dict in format of
+        :param players_hands: Dict in format of
         {
             "PLAYER_NAME": [LIST_OF_CARDS]
         }
@@ -124,6 +124,20 @@ class TexasHoldemHandSolver(BaseHandSolver):
                 }
 
         return ranked_player_hands
+
+    def find_odds(self, player_cards: Dict[str, List[Card]], board_cards: List[Card]):
+        """
+        Abstract method to implement to find the odds of all players winning from the current situation.
+
+        :param player_cards: Dictionary, of player names and their hole cards
+        :param board_cards: List of cards representing the current board cards
+        :return: Dictionary of player names and their likelyhood of winning from this situation.
+        """
+
+        unused_cards = self._determine_unused_cards(player_cards, board_cards)
+        possible_boards = self.get_all_combinations(board_cards, unused_cards, 5, always_use_hole_cards=True)
+        wins = self._find_all_winners(player_cards, possible_boards)
+        return self._calculate_win_percentage(wins, len(possible_boards))
 
     #######################
     #  TEST HAND METHODS  #
@@ -695,3 +709,64 @@ class TexasHoldemHandSolver(BaseHandSolver):
             linked_subrank_players[subrank] = matched_players
 
         return linked_subrank_players
+
+    @staticmethod
+    def _determine_unused_cards(player_cards, board_cards):
+        """
+        private helper method that finds all of the possible remaining cards based on the hole and boaard cards
+        that are known.
+
+        :param player_cards: Dictionary, of player names and their hole cards
+        :param board_cards: List of cards representing the current board cards
+        :return:
+        """
+
+        used_cards = board_cards.copy()
+        for cards in player_cards.values():
+            used_cards.extend(cards)
+
+        return [card for card in Deck().cards_all if card not in used_cards]
+
+    def _find_all_winners(self, player_cards, possible_boards):
+        """
+        Private helper method to assess the winner of each set of board cards.
+
+        :param player_cards: Dictionary, of player names and their hole cards
+        :param possible_boards: list of all possible board card combinations to test against
+        :return:
+        """
+
+        wins = dict()
+        for board in possible_boards:
+            best_hands = {
+                player: self.find_best_hand(hole_cards, board)[BEST_HAND]
+                for player, hole_cards in player_cards.items()
+            }
+
+            ranked_hands = self.rank_hands(best_hands)
+            winners = sorted(ranked_hands[1]["players"])
+            winners_key = "---".join(winners)
+
+            if winners_key in wins.keys():
+                wins[winners_key] += 1
+            else:
+                wins[winners_key] = 1
+        return wins
+
+    @staticmethod
+    def _calculate_win_percentage(wins, games_played):
+        """
+        private method to calculate each players win percentage.
+
+        :param games_played: number of games played to build the wins dictionary
+        :param wins: dictionary containing player names and their win total.
+        Ties are represented as players names seperated by '---'
+        :return: dictionary of player names and their win percentage
+        """
+
+        player_odds = dict()
+        for winner, win_count in wins:
+            name = f"Tie ({winner.split('---')})" if "---" in winner else winner
+            win_percentage = win_count / games_played
+            player_odds[name] = win_percentage
+        return player_odds

@@ -52,11 +52,22 @@ class BaseHandSolver(metaclass=ABCMeta):
         }
         """
 
+    @abstractmethod
+    def find_odds(self, player_cards: Dict[str, List[Card]], board_cards: List[Card]):
+        """
+        Abstract method to implement to find the odds of all players winning from the current situation.
+
+        :param player_cards: Dictionary, of player names and their hole cards
+        :param board_cards: List of cards representing the current board cards
+        :return: Dictionary of player names and their likelyhood of winning from this situation.
+        """
+
     ####################################
     #  SHARED HAND GENERATION METHODS  #
     ####################################
     @staticmethod
-    def get_all_combinations(hole_cards: List[Card], board_cards: List[Card], hand_size: int):
+    def get_all_combinations(hole_cards: List[Card], board_cards: List[Card], hand_size: int,
+                             always_use_hole_cards=False):
         """
         This private method will get all possible hand combinations for a
 
@@ -69,7 +80,12 @@ class BaseHandSolver(metaclass=ABCMeta):
 
         all_cards = hole_cards.copy()
         all_cards.extend(board_cards)
-        return [list(cards) for cards in list(combinations(all_cards, hand_size))]
+        all_combinations = [list(cards) for cards in list(combinations(all_cards, hand_size))]
+
+        if always_use_hole_cards:
+            return [combo for combo in all_combinations if all([True for card in hole_cards if card in combo])]
+        else:
+            return all_combinations
 
     ##########################################
     #  SHARED HAND CHARACTERISATION METHODS  #

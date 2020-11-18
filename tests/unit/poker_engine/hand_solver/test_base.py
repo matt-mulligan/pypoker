@@ -16,6 +16,9 @@ def base_instance():
         def find_best_hand(self, hole_cards: List[Card], board_cards: List[Card]):
             pass
 
+        def find_odds(self, player_cards: Dict[str, List[Card]], board_cards: List[Card]):
+            pass
+
     return TestBaseClass()
 
 

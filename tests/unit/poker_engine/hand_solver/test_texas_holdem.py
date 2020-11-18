@@ -1,6 +1,6 @@
 from pytest import fixture, mark
 
-from fixtures.cards import get_hand, get_hand_sets, get_rank_dictionary, get_player_hands_dict
+from fixtures.cards import get_hand, get_rank_dictionary, get_player_hands_dict
 from pypoker.poker_engine.hand_solver.texas_holdem import TexasHoldemHandSolver
 
 
@@ -153,4 +153,3 @@ def test_when_rank_hands_then_correct_dictionary_returned(test_case, solver_inst
     for rank, rank_info in rank_dict.items():
         assert rank_info["players"] == expected_rank_dict[rank]["players"]
         assert rank_info["hand_description"] == expected_rank_dict[rank]["hand_description"]
-
