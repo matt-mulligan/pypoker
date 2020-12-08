@@ -123,6 +123,9 @@ def get_hand(hand_name):
         "hand_0002": ["ST", "H5", "S4", "SK", "S2"],
         "hand_0003": ["ST", "S7", "H8", "DJ", "S9"],
         "hand_0004": ["ST", "S7", "H8", "DQ", "S9"],
+        "hand_0005": ["S4", "C2", "CA", "D5", "D3"],
+        "hand_0006": ["S4", "C2", "C6", "D5", "D3"],
+        "hand_0007": ["SJ", "CQ", "CA", "DK", "DT"],
         "hand_straight_flush_001": ["DA", "DK", "DQ", "DJ", "DT"],
         "hand_straight_flush_002": ["HT", "H9", "H8", "H7", "H6"],
         "hand_straight_flush_003": ["C7", "C6", "C5", "C4", "C3"],
@@ -135,6 +138,7 @@ def get_hand(hand_name):
         "hand_quads_002": ["HQ", "DQ", "SQ", "CQ", "HJ"],
         "hand_quads_003": ["HQ", "DQ", "SQ", "CQ", "HJ"],
         "hand_quads_004": ["HQ", "DQ", "SQ", "CQ", "HJ"],
+        "hand_quads_short_001": ["HQ", "DQ", "SQ", "CQ"],
         "hand_full_house_001": ["HK", "SK", "D9", "C9", "S9"],
         "hand_full_house_002": ["HJ", "DJ", "D4", "S4", "C4"],
         "hand_full_house_003": ["DQ", "CQ", "SQ", "HJ", "CJ"],
@@ -157,16 +161,26 @@ def get_hand(hand_name):
         "hand_trips_001": ["S9", "H8", "DK", "CK", "SK"],
         "hand_trips_002": ["S9", "H8", "DK", "CK", "SK"],
         "hand_trips_003": ["S9", "H8", "DK", "CK", "SK"],
+        "hand_trips_short_001": ["S9", "DK", "CK", "SK"],
+        "hand_trips_short_002": ["DK", "CK", "SK"],
         "hand_two_pair_001": ["ST", "H7", "D9", "C9", "S7"],
         "hand_two_pair_002": ["ST", "H7", "D9", "C9", "S7"],
         "hand_two_pair_003": ["ST", "H7", "D9", "C9", "S7"],
         "hand_two_pair_004": ["H7", "D9", "C9", "S7", "C6"],
+        "hand_two_pair_short_001": ["H7", "D9", "C9", "S7"],
         "hand_pair_001": ["ST", "H7", "D8", "D7", "CA"],
         "hand_pair_002": ["ST", "H7", "D8", "D7", "CA"],
         "hand_pair_003": ["ST", "H7", "D8", "D7", "CA"],
+        "hand_pair_short_001": ["ST", "H7", "D7", "CA"],
+        "hand_pair_short_002": ["H7", "D7", "CA"],
+        "hand_pair_short_003": ["H7", "D7"],
         "hand_high_card_001": ["S6", "D4", "H8", "H9", "CJ"],
         "hand_high_card_002": ["S6", "D4", "H8", "H9", "CJ"],
         "hand_high_card_003": ["S6", "D4", "H8", "H9", "CJ"],
+        "hand_high_card_short_001": ["S6", "H8", "H9", "CJ"],
+        "hand_high_card_short_002": ["H8", "H9", "CJ"],
+        "hand_high_card_short_003": ["H9", "CJ"],
+        "hand_high_card_short_004": ["CJ"],
         "straight_flush_multi_A": ["HA", "HJ", "HQ", "HT", "HK"],
         "straight_flush_multi_B": ["DK", "DT", "DJ", "D9", "DQ"],
         "straight_flush_multi_C": ["C9", "CT", "C6", "C8", "C7"],
@@ -355,13 +369,49 @@ def get_hand_sets(hand_name):
             ['DK', 'CQ', 'HT', 'S8', 'S3'], ['DK', 'CQ', 'HT', 'D7', 'S3'], ['DK', 'CQ', 'HT', 'D7', 'S2'],
             ['DK', 'S8', 'D7', 'S3', 'S2']
         ],
+        "hand_set_straight_flush_001": [
+            ["C6", "CT", "C9", "C8", "C7"], ["DK", "DT", "D9", "DQ", "DJ"], ["DK", "DT", "DA", "DQ", "DJ"],
+            ["SK", "ST", "S9", "SQ", "SJ"], ["C6", "CT", "C9", "C8", "C7"]
+        ],
+        "hand_set_quads_001": [
+            ["C7", "D7", "S7", "H7", "HK"], ["C7", "D7", "S7", "H7", "C6"], ["D6", "C6", "S6", "H6", "DJ"],
+            ["D6", "C6", "S6", "H6", "CJ"], ["C9", "D9", "S9", "H9", "C7"]
+        ],
+        "hand_set_full_house_001": [
+            ["C7", "D7", "S7", "H6", "C6"], ["C7", "D7", "S7", "H8", "C8"], ["D7", "C7", "S7", "C6", "D6"],
+            ["DK", "CK", "SK", "HA", "CA"]
+        ],
+        "hand_set_flush_001": [
+            ["CA", "CT", "C7", "C6", "C2"], ["DA", "DK", "D7", "D6", "D2"], ["HA", "HK", "HT", "H6", "H2"],
+            ["DA", "DK", "DT", "D9", "D2"], ["SA", "SK", "ST", "S9", "S2"], ["DA", "DK", "DT", "D9", "D7"]
+        ],
+        "hand_set_straight_001": [
+            ["C6", "D7", "DT", "S8", "H9"], ["SJ", "C7", "CT", "S8", "H9"],
+            ["CQ", "DJ", "DT", "S8", "H9"], ["CJ", "D7", "DT", "S8", "H9"]
+        ],
+        "hand_set_trips_001": [
+            ["C7", "D7", "S7", "H5", "C6"], ["C7", "D7", "S7", "H8", "C6"], ["D7", "C7", "S7", "C6", "D5"],
+            ["DK", "CK", "SK", "HA", "C2"]
+        ],
+        "hand_set_two_pair_001": [
+            ["C7", "D7", "S4", "H6", "C6"], ["C7", "D7", "C4", "H6", "C6"], ["D7", "C7", "S9", "C6", "D6"],
+            ["DK", "CK", "ST", "HA", "CA"]
+        ],
+        "hand_set_pair_001": [
+            ["C7", "D7", "S4", "H6", "C8"], ["C7", "D7", "C4", "H7", "C8"], ["D7", "C7", "S4", "C7", "DK"],
+            ["DK", "CK", "ST", "HA", "C9"], ["D7", "C7", "C4", "H7", "CK"]
+        ],
+        "hand_set_high_card_001": [
+            ["C2", "DQ", "DT", "S8", "H5"], ["CA", "DQ", "DT", "S8", "H5"], ["CA", "DQ", "DT", "S8", "HK"],
+            ["SA", "SQ", "HT", "C8", "CK"], ["SA", "SQ", "HT", "C9", "CK"],
+        ]
     }[hand_name]
 
     return [[get_card(descriptors) for descriptors in cards] for cards in hand_sets]
 
 
-def get_rank_dictionary(rank_dict_name):
-    return {
+def get_rank_dictionary(rank_dict_name, build_cards=False):
+    dict_val = {
         "straight_flush_multi": {
             1: {PLAYERS: ["player_a"], HAND_DESC: 'Straight Flush (Ace to Ten)'},
             2: {PLAYERS: ["player_b"], HAND_DESC: 'Straight Flush (King to Nine)'},
@@ -561,8 +611,58 @@ def get_rank_dictionary(rank_dict_name):
             7: {PLAYERS: ["player_g"], HAND_DESC: "Two Pair (Nines and Twos with kicker Jack)"},
             8: {PLAYERS: ["player_h"], HAND_DESC: "Pair (Tens with kickers Jack, Seven, Three)"},
             9: {PLAYERS: ["player_i"], HAND_DESC: "High Card (King, Queen, Nine, Six, Four)"},
+        },
+        "rank_dict_straight_flush_001": {
+            1: [["DK", "DT", "DA", "DQ", "DJ"]],
+            2: [["DK", "DT", "D9", "DQ", "DJ"], ["SK", "ST", "S9", "SQ", "SJ"]],
+            3: [["C6", "CT", "C9", "C8", "C7"], ["C6", "CT", "C9", "C8", "C7"]]
+        },
+        "rank_dict_quads_001": {
+            1: [["C9", "D9", "S9", "H9", "C7"]],
+            2: [["C7", "D7", "S7", "H7", "HK"]],
+            3: [["C7", "D7", "S7", "H7", "C6"]],
+            4: [["D6", "C6", "S6", "H6", "DJ"], ["D6", "C6", "S6", "H6", "CJ"]]
+        },
+        "rank_dict_full_house_001": {
+            1: [["DK", "CK", "SK", "HA", "CA"]], 2: [["C7", "D7", "S7", "H8", "C8"]],
+            3: [["C7", "D7", "S7", "H6", "C6"], ["D7", "C7", "S7", "C6", "D6"]]
+        },
+        "rank_dict_flush_001": {
+            1: [["DA", "DK", "DT", "D9", "D7"]],
+            2: [["DA", "DK", "DT", "D9", "D2"], ["SA", "SK", "ST", "S9", "S2"]],
+            3: [["HA", "HK", "HT", "H6", "H2"]], 4: [["DA", "DK", "D7", "D6", "D2"]],
+            5: [["CA", "CT", "C7", "C6", "C2"]]
+        },
+        "rank_dict_straight_001": {
+            1: [["CQ", "DJ", "DT", "S8", "H9"]], 2: [["SJ", "C7", "CT", "S8", "H9"], ["CJ", "D7", "DT", "S8", "H9"]],
+            3: [["C6", "D7", "DT", "S8", "H9"]]
+        },
+        "rank_dict_trips_001": {
+            1: [["DK", "CK", "SK", "HA", "C2"]], 2: [["C7", "D7", "S7", "H8", "C6"]],
+            3: [["C7", "D7", "S7", "H5", "C6"], ["D7", "C7", "S7", "C6", "D5"]]
+        },
+        "rank_dict_two_pair_001": {
+            1: [["DK", "CK", "ST", "HA", "CA"]], 2: [["D7", "C7", "S9", "C6", "D6"]],
+            3: [["C7", "D7", "S4", "H6", "C6"], ["C7", "D7", "C4", "H6", "C6"]]
+        },
+        "rank_dict_pair_001": {
+            1: [["DK", "CK", "ST", "HA", "C9"]], 2: [["D7", "C7", "S4", "C7", "DK"], ["D7", "C7", "C4", "H7", "CK"]],
+            3: [["C7", "D7", "C4", "H7", "C8"]], 4: [["C7", "D7", "S4", "H6", "C8"]]
+        },
+        "rank_dict_high_card_001": {
+            1: [["SA", "SQ", "HT", "C9", "CK"]], 2: [["CA", "DQ", "DT", "S8", "HK"], ["SA", "SQ", "HT", "C8", "CK"]],
+            3: [["CA", "DQ", "DT", "S8", "H5"]], 4: [["C2", "DQ", "DT", "S8", "H5"]]
         }
     }[rank_dict_name]
+
+    if build_cards:
+        for rank, rank_hands in dict_val.items():
+            rank_hands = [[get_card(descriptors) for descriptors in hand] for hand in rank_hands]
+            rank_hands = [sorted(hand, reverse=True) for hand in rank_hands]
+            rank_hands.sort(reverse=True)
+            dict_val[rank] = rank_hands
+
+    return dict_val
 
 
 def get_player_hands_dict(scenario):

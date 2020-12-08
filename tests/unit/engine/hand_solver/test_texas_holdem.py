@@ -1,7 +1,7 @@
 from pytest import fixture, mark
 
 from fixtures.cards import get_hand, get_rank_dictionary, get_player_hands_dict
-from pypoker.poker_engine.hand_solver.texas_holdem import TexasHoldemHandSolver
+from pypoker.engine.hand_solver.texas_holdem import TexasHoldemHandSolver
 
 
 @fixture
