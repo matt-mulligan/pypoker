@@ -10,8 +10,19 @@ from typing import Union, List
 
 CARD_ID_SUITS = {"C": "Clubs", "D": "Diamonds", "H": "Hearts", "S": "Spades"}
 CARD_ID_RANKS = {
-    "2": "Two", "3": "Three", "4": "Four", "5": "Five", "6": "Six", "7": "Seven", "8": "Eight", "9": "Nine",
-    "T": "Ten", "J": "Jack", "Q": "Queen", "K": "King", "A": "Ace",
+    "2": "Two",
+    "3": "Three",
+    "4": "Four",
+    "5": "Five",
+    "6": "Six",
+    "7": "Seven",
+    "8": "Eight",
+    "9": "Nine",
+    "T": "Ten",
+    "J": "Jack",
+    "Q": "Queen",
+    "K": "King",
+    "A": "Ace",
 }
 
 
@@ -50,12 +61,16 @@ class Card(object):
             raise ValueError("Card ID provided must be exactly 2 characters long.")
 
         if card_id[0] not in CARD_ID_SUITS.keys():
-            raise ValueError(f"Card ID first character '{card_id[0]}' is not within valid list of "
-                             f"suit identifiers '{CARD_ID_SUITS.keys()}'")
+            raise ValueError(
+                f"Card ID first character '{card_id[0]}' is not within valid list of "
+                f"suit identifiers '{CARD_ID_SUITS.keys()}'"
+            )
 
         if card_id[1] not in CARD_ID_RANKS.keys():
-            raise ValueError(f"Card ID second character '{card_id[1]}' is not within valid list of "
-                             f"rank identifiers '{CARD_ID_RANKS.keys()}'")
+            raise ValueError(
+                f"Card ID second character '{card_id[1]}' is not within valid list of "
+                f"rank identifiers '{CARD_ID_RANKS.keys()}'"
+            )
 
         return card_id
 
@@ -138,7 +153,21 @@ class Deck(object):
         cards = []
 
         for suit in ["H", "D", "C", "S"]:
-            for value in ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]:
+            for value in [
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "T",
+                "J",
+                "Q",
+                "K",
+                "A",
+            ]:
                 card_id = f"{suit}{value}"
                 cards.append(Card(card_id))
 

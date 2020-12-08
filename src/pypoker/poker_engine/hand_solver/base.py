@@ -13,7 +13,6 @@ from pypoker.deck import Card
 
 
 class BaseHandSolver(metaclass=ABCMeta):
-
     @abstractmethod
     def find_best_hand(self, hole_cards: List[Card], board_cards: List[Card]):
         """
@@ -34,7 +33,7 @@ class BaseHandSolver(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def rank_hands(self, player_hands:  Dict[str, List[Card]]):
+    def rank_hands(self, player_hands: Dict[str, List[Card]]):
         """
         Abstract method to implement to rank players hands against each other
 
@@ -66,8 +65,12 @@ class BaseHandSolver(metaclass=ABCMeta):
     #  SHARED HAND GENERATION METHODS  #
     ####################################
     @staticmethod
-    def get_all_combinations(hole_cards: List[Card], board_cards: List[Card], hand_size: int,
-                             always_use_hole_cards=False):
+    def get_all_combinations(
+        hole_cards: List[Card],
+        board_cards: List[Card],
+        hand_size: int,
+        always_use_hole_cards=False,
+    ):
         """
         This private method will get all possible hand combinations for a
 
@@ -80,10 +83,16 @@ class BaseHandSolver(metaclass=ABCMeta):
 
         all_cards = hole_cards.copy()
         all_cards.extend(board_cards)
-        all_combinations = [list(cards) for cards in list(combinations(all_cards, hand_size))]
+        all_combinations = [
+            list(cards) for cards in list(combinations(all_cards, hand_size))
+        ]
 
         if always_use_hole_cards:
-            return [combo for combo in all_combinations if all([True for card in hole_cards if card in combo])]
+            return [
+                combo
+                for combo in all_combinations
+                if all([True for card in hole_cards if card in combo])
+            ]
         else:
             return all_combinations
 
@@ -116,11 +125,15 @@ class BaseHandSolver(metaclass=ABCMeta):
 
         hand.sort(key=lambda card: card.value, reverse=False)
         card_value_list = [card.value for card in hand]
-        normal_values_continuous = all(a + 1 == b for a, b in zip(card_value_list, card_value_list[1:]))
+        normal_values_continuous = all(
+            a + 1 == b for a, b in zip(card_value_list, card_value_list[1:])
+        )
 
         card_values_ace_low = [value if value != 14 else 1 for value in card_value_list]
         card_values_ace_low.sort(reverse=False)
-        ace_low_continuous = all(a + 1 == b for a, b in zip(card_values_ace_low, card_values_ace_low[1:]))
+        ace_low_continuous = all(
+            a + 1 == b for a, b in zip(card_values_ace_low, card_values_ace_low[1:])
+        )
 
         if allow_ace_low:
             return normal_values_continuous or ace_low_continuous
@@ -193,7 +206,9 @@ class BaseHandSolver(metaclass=ABCMeta):
 
         hand_a.sort(key=lambda card: card.value, reverse=True)
         hand_b.sort(key=lambda card: card.value, reverse=True)
-        return all(card_a.value == card_b.value for card_a, card_b in zip(hand_a, hand_b))
+        return all(
+            card_a.value == card_b.value for card_a, card_b in zip(hand_a, hand_b)
+        )
 
     #####################################
     #  SHARED OUTS CALCULATION METHODS  #
@@ -225,12 +240,28 @@ class BaseHandSolver(metaclass=ABCMeta):
 
             if index < len(suits):
                 suit = {
-                    "Hearts": "H", "Diamonds": "D", "Clubs": "C", "Spades": "S", "ANY": "*"
+                    "Hearts": "H",
+                    "Diamonds": "D",
+                    "Clubs": "C",
+                    "Spades": "S",
+                    "ANY": "*",
                 }[suits[index]]
 
                 value = {
-                    2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8",
-                    9: "9", 10: "T", 11: "J", 12: "Q", 13: "K", 14: "A", "ANY": "*"
+                    2: "2",
+                    3: "3",
+                    4: "4",
+                    5: "5",
+                    6: "6",
+                    7: "7",
+                    8: "8",
+                    9: "9",
+                    10: "T",
+                    11: "J",
+                    12: "Q",
+                    13: "K",
+                    14: "A",
+                    "ANY": "*",
                 }[values[index]]
 
             out_string_parts.append(f"{suit}{value}")
@@ -274,9 +305,21 @@ class BaseHandSolver(metaclass=ABCMeta):
             if suit == "*" and value == "*":
                 card_candidates.append([card.identity for card in drawable_cards])
             elif suit == "*":
-                card_candidates.append([card.identity for card in drawable_cards if card.identity[1] == value])
+                card_candidates.append(
+                    [
+                        card.identity
+                        for card in drawable_cards
+                        if card.identity[1] == value
+                    ]
+                )
             elif value == "*":
-                card_candidates.append([card.identity for card in drawable_cards if card.identity[0] == suit])
+                card_candidates.append(
+                    [
+                        card.identity
+                        for card in drawable_cards
+                        if card.identity[0] == suit
+                    ]
+                )
             else:
                 card_candidates.append([card_str])
 

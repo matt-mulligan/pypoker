@@ -4,9 +4,25 @@ from typing import List, Dict
 
 from pypoker.deck import Card, Deck
 from pypoker.poker_engine.hand_solver.base import BaseHandSolver
-from pypoker.poker_engine.hand_solver.constants import HAND_TITLE, HAND_RANK, TEST_METHOD, BEST_HAND, \
-    HAND_DESCRIPTION, DESCRIPTION_METHOD, RANK_METHOD, OUTS_METHOD, OUTS_TB_METHOD, SUIT_HEARTS, SUIT_SPADES, \
-    SUIT_DIAMONDS, SUIT_CLUBS, TIEBREAKER, CARD_VALUES, OUT_STRING, PLAYING_BOARD
+from pypoker.poker_engine.hand_solver.constants import (
+    HAND_TITLE,
+    HAND_RANK,
+    TEST_METHOD,
+    BEST_HAND,
+    HAND_DESCRIPTION,
+    DESCRIPTION_METHOD,
+    RANK_METHOD,
+    OUTS_METHOD,
+    OUTS_TB_METHOD,
+    SUIT_HEARTS,
+    SUIT_SPADES,
+    SUIT_DIAMONDS,
+    SUIT_CLUBS,
+    TIEBREAKER,
+    CARD_VALUES,
+    OUT_STRING,
+    PLAYING_BOARD,
+)
 
 
 class TexasHoldemHandSolver(BaseHandSolver):
@@ -34,50 +50,86 @@ class TexasHoldemHandSolver(BaseHandSolver):
     def __init__(self):
         self._hand_rankings = [
             {
-                HAND_TITLE: "Straight Flush", HAND_RANK: 1, TEST_METHOD: self._test_straight_flush,
-                RANK_METHOD: self._rank_straight_flush, DESCRIPTION_METHOD: self._hand_description_straight_flush,
-                OUTS_METHOD: self._outs_straight_flush, OUTS_TB_METHOD: self._outs_tb_straight_flush
+                HAND_TITLE: "Straight Flush",
+                HAND_RANK: 1,
+                TEST_METHOD: self._test_straight_flush,
+                RANK_METHOD: self._rank_straight_flush,
+                DESCRIPTION_METHOD: self._hand_description_straight_flush,
+                OUTS_METHOD: self._outs_straight_flush,
+                OUTS_TB_METHOD: self._outs_tb_straight_flush,
             },
             {
-                HAND_TITLE: "Quads", HAND_RANK: 2, TEST_METHOD: self._test_quads,
-                RANK_METHOD: self._rank_quads, DESCRIPTION_METHOD: self._hand_description_quads,
-                OUTS_METHOD: self._outs_quads, OUTS_TB_METHOD: self._outs_tb_quads
+                HAND_TITLE: "Quads",
+                HAND_RANK: 2,
+                TEST_METHOD: self._test_quads,
+                RANK_METHOD: self._rank_quads,
+                DESCRIPTION_METHOD: self._hand_description_quads,
+                OUTS_METHOD: self._outs_quads,
+                OUTS_TB_METHOD: self._outs_tb_quads,
             },
             {
-                HAND_TITLE: "Full House", HAND_RANK: 3, TEST_METHOD: self._test_full_house,
-                RANK_METHOD: self._rank_full_house, DESCRIPTION_METHOD: self._hand_description_full_house,
-                OUTS_METHOD: self._outs_full_house, OUTS_TB_METHOD: self._outs_tb_full_house
+                HAND_TITLE: "Full House",
+                HAND_RANK: 3,
+                TEST_METHOD: self._test_full_house,
+                RANK_METHOD: self._rank_full_house,
+                DESCRIPTION_METHOD: self._hand_description_full_house,
+                OUTS_METHOD: self._outs_full_house,
+                OUTS_TB_METHOD: self._outs_tb_full_house,
             },
             {
-                HAND_TITLE: "Flush", HAND_RANK: 4, TEST_METHOD: self._test_flush,
-                RANK_METHOD: self._rank_flush, DESCRIPTION_METHOD: self._hand_description_flush,
-                OUTS_METHOD: self._outs_flush, OUTS_TB_METHOD: self._outs_tb_flush
+                HAND_TITLE: "Flush",
+                HAND_RANK: 4,
+                TEST_METHOD: self._test_flush,
+                RANK_METHOD: self._rank_flush,
+                DESCRIPTION_METHOD: self._hand_description_flush,
+                OUTS_METHOD: self._outs_flush,
+                OUTS_TB_METHOD: self._outs_tb_flush,
             },
             {
-                HAND_TITLE: "Straight", HAND_RANK: 5, TEST_METHOD: self._test_straight,
-                RANK_METHOD: self._rank_straight, DESCRIPTION_METHOD: self._hand_description_straight,
-                OUTS_METHOD: self._outs_straight, OUTS_TB_METHOD: self._outs_tb_straight
+                HAND_TITLE: "Straight",
+                HAND_RANK: 5,
+                TEST_METHOD: self._test_straight,
+                RANK_METHOD: self._rank_straight,
+                DESCRIPTION_METHOD: self._hand_description_straight,
+                OUTS_METHOD: self._outs_straight,
+                OUTS_TB_METHOD: self._outs_tb_straight,
             },
             {
-                HAND_TITLE: "Trips", HAND_RANK: 6, TEST_METHOD: self._test_trips,
-                RANK_METHOD: self._rank_trips, DESCRIPTION_METHOD: self._hand_description_trips,
-                OUTS_METHOD: self._outs_trips, OUTS_TB_METHOD: self._outs_tb_trips
+                HAND_TITLE: "Trips",
+                HAND_RANK: 6,
+                TEST_METHOD: self._test_trips,
+                RANK_METHOD: self._rank_trips,
+                DESCRIPTION_METHOD: self._hand_description_trips,
+                OUTS_METHOD: self._outs_trips,
+                OUTS_TB_METHOD: self._outs_tb_trips,
             },
             {
-                HAND_TITLE: "Two Pair", HAND_RANK: 7, TEST_METHOD: self._test_two_pair,
-                RANK_METHOD: self._rank_two_pair, DESCRIPTION_METHOD: self._hand_description_two_pair,
-                OUTS_METHOD: self._outs_two_pair, OUTS_TB_METHOD: self._outs_tb_two_pair
+                HAND_TITLE: "Two Pair",
+                HAND_RANK: 7,
+                TEST_METHOD: self._test_two_pair,
+                RANK_METHOD: self._rank_two_pair,
+                DESCRIPTION_METHOD: self._hand_description_two_pair,
+                OUTS_METHOD: self._outs_two_pair,
+                OUTS_TB_METHOD: self._outs_tb_two_pair,
             },
             {
-                HAND_TITLE: "Pair", HAND_RANK: 8, TEST_METHOD: self._test_pair,
-                RANK_METHOD: self._rank_pair, DESCRIPTION_METHOD: self._hand_description_pair,
-                OUTS_METHOD: self._outs_pair, OUTS_TB_METHOD: self._outs_tb_pair
+                HAND_TITLE: "Pair",
+                HAND_RANK: 8,
+                TEST_METHOD: self._test_pair,
+                RANK_METHOD: self._rank_pair,
+                DESCRIPTION_METHOD: self._hand_description_pair,
+                OUTS_METHOD: self._outs_pair,
+                OUTS_TB_METHOD: self._outs_tb_pair,
             },
             {
-                HAND_TITLE: "High Card", HAND_RANK: 9, TEST_METHOD: self._test_high_card,
-                RANK_METHOD: self._rank_high_card, DESCRIPTION_METHOD: self._hand_description_high_card,
-                OUTS_METHOD: self._outs_high_card, OUTS_TB_METHOD: self._outs_tb_high_card
-            }
+                HAND_TITLE: "High Card",
+                HAND_RANK: 9,
+                TEST_METHOD: self._test_high_card,
+                RANK_METHOD: self._rank_high_card,
+                DESCRIPTION_METHOD: self._hand_description_high_card,
+                OUTS_METHOD: self._outs_high_card,
+                OUTS_TB_METHOD: self._outs_tb_high_card,
+            },
         ]
 
     ########################
@@ -101,7 +153,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
         appropriate but must at minimum have the above keys
         """
 
-        hand_size = 5 if len(hole_cards) + len(board_cards) >= 5 else len(hole_cards) + len(board_cards)
+        hand_size = (
+            5
+            if len(hole_cards) + len(board_cards) >= 5
+            else len(hole_cards) + len(board_cards)
+        )
         all_hands = self.get_all_combinations(hole_cards, board_cards, hand_size)
         for hand_type in self._hand_rankings:
             matched_hands = [hand for hand in all_hands if hand_type[TEST_METHOD](hand)]
@@ -112,7 +168,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     BEST_HAND: best_hand,
                     HAND_TITLE: hand_type[HAND_TITLE],
                     HAND_RANK: hand_type[HAND_RANK],
-                    HAND_DESCRIPTION: hand_type[DESCRIPTION_METHOD](best_hand)
+                    HAND_DESCRIPTION: hand_type[DESCRIPTION_METHOD](best_hand),
                 }
 
     def rank_hands(self, players_hands: Dict[str, List[Card]]):
@@ -142,19 +198,25 @@ class TexasHoldemHandSolver(BaseHandSolver):
         for rank in ranks:
             hands = list(player_hands_by_rank[rank].values())
             subranked_hands = self._hand_rankings[rank - 1][RANK_METHOD](hands)
-            subranked_players = self._link_subranked_hands_to_players(subranked_hands, players_hands)
+            subranked_players = self._link_subranked_hands_to_players(
+                subranked_hands, players_hands
+            )
 
             for players in subranked_players.values():
                 current_rank += 1
-                hand_desc = self._hand_rankings[rank - 1][DESCRIPTION_METHOD](players_hands[players[0]])
+                hand_desc = self._hand_rankings[rank - 1][DESCRIPTION_METHOD](
+                    players_hands[players[0]]
+                )
                 ranked_player_hands[current_rank] = {
                     "players": players,
-                    "hand_description": hand_desc
+                    "hand_description": hand_desc,
                 }
 
         return ranked_player_hands
 
-    def find_odds(self, player_hole_cards: Dict[str, List[Card]], board_cards: List[Card]):
+    def find_odds(
+        self, player_hole_cards: Dict[str, List[Card]], board_cards: List[Card]
+    ):
         """
         Abstract method to implement to find the odds of all players winning from the current situation.
 
@@ -164,15 +226,25 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         drawable_cards = self._determine_unused_cards(player_hole_cards, board_cards)
-        player_current_hand = {player: self.find_best_hand(hole_cards, board_cards)
-                               for player, hole_cards in player_hole_cards.items()}
-        current_best_hand_rank = max([best_hand[HAND_RANK] for best_hand in player_current_hand.values()])
+        player_current_hand = {
+            player: self.find_best_hand(hole_cards, board_cards)
+            for player, hole_cards in player_hole_cards.items()
+        }
+        current_best_hand_rank = max(
+            [best_hand[HAND_RANK] for best_hand in player_current_hand.values()]
+        )
 
         ranked_player_outs = {}
         for hand_info in self._hand_rankings:
             for player, current_hand in player_current_hand.items():
-                if current_hand[HAND_RANK] >= hand_info[HAND_RANK] <= current_best_hand_rank:
-                    player_outs = hand_info[OUTS_METHOD](player_hole_cards[player], board_cards, drawable_cards)
+                if (
+                    current_hand[HAND_RANK]
+                    >= hand_info[HAND_RANK]
+                    <= current_best_hand_rank
+                ):
+                    player_outs = hand_info[OUTS_METHOD](
+                        player_hole_cards[player], board_cards, drawable_cards
+                    )
                     if hand_info[HAND_RANK] not in ranked_player_outs.keys():
                         ranked_player_outs[hand_info[HAND_RANK]] = {player: player_outs}
                     else:
@@ -184,25 +256,40 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         for rank, player_out_scenarios in ranked_player_outs.items():
             print(f"Assigning wins for rank {rank} outs")
-            players_with_outs = [player for player, out_scenarios in player_out_scenarios.items() if out_scenarios]
+            players_with_outs = [
+                player
+                for player, out_scenarios in player_out_scenarios.items()
+                if out_scenarios
+            ]
             if not players_with_outs:
                 print("No players with outs for this rank")
                 continue
             elif len(players_with_outs) == 1:
                 player_name = players_with_outs[0]
-                print(f"Only player {player_name} has outs for this rank.  Assigning wins")
-                potential_outs = [scenario[OUT_STRING] for scenario in player_out_scenarios[player_name]]
-                claimed_outs = self.claim_out_strings(utilised_outs, potential_outs, drawable_cards)
+                print(
+                    f"Only player {player_name} has outs for this rank.  Assigning wins"
+                )
+                potential_outs = [
+                    scenario[OUT_STRING]
+                    for scenario in player_out_scenarios[player_name]
+                ]
+                claimed_outs = self.claim_out_strings(
+                    utilised_outs, potential_outs, drawable_cards
+                )
                 wins[player_name] += len(claimed_outs)
                 utilised_outs.extend(claimed_outs)
             else:
-                print(f"Multiple players found to have outs at this rank: {players_with_outs}.  Tiebreaking outs.")
+                print(
+                    f"Multiple players found to have outs at this rank: {players_with_outs}.  Tiebreaking outs."
+                )
                 combined_outs = {player: [] for player in players_with_outs}
                 for player, out_scenarios in player_out_scenarios.items():
                     if not out_scenarios:
                         continue
                     for scenario in out_scenarios:
-                        scenario["OUTS"] = self.claim_out_strings(utilised_outs, [scenario[OUT_STRING]], drawable_cards)
+                        scenario["OUTS"] = self.claim_out_strings(
+                            utilised_outs, [scenario[OUT_STRING]], drawable_cards
+                        )
                         combined_outs[player].extend(scenario["OUTS"])
 
                 for player, out_scenarios in player_out_scenarios.items():
@@ -211,7 +298,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     combined_outs[player].sort()
                     my_outs = list(combo for combo, _ in groupby(combined_outs[player]))
                     my_outs = [out for out in my_outs if out not in utilised_outs]
-                    their_outs = [outs for player_name, outs in combined_outs.items() if player_name != player]
+                    their_outs = [
+                        outs
+                        for player_name, outs in combined_outs.items()
+                        if player_name != player
+                    ]
                     their_outs = [item for sublist in their_outs for item in sublist]
                     their_outs.sort()
                     their_outs = list(combo for combo, _ in groupby(their_outs))
@@ -224,16 +315,26 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     utilised_outs.extend(unique_outs)
 
                     for out_ids in conflicted_outs:
-                        valid_players = [player_name for player_name, outs in combined_outs.items() if out_ids in outs]
+                        valid_players = [
+                            player_name
+                            for player_name, outs in combined_outs.items()
+                            if out_ids in outs
+                        ]
 
                         tiebreakers = {}
                         hole_cards = {}
                         for player in valid_players:
-                            tiebreakers[player] = [scenario[TIEBREAKER] for scenario in player_out_scenarios[player] if out_ids in scenario["OUTS"]][0]
+                            tiebreakers[player] = [
+                                scenario[TIEBREAKER]
+                                for scenario in player_out_scenarios[player]
+                                if out_ids in scenario["OUTS"]
+                            ][0]
                             hole_cards[player] = player_hole_cards[player]
 
                         drawn_cards = [Card(card_id) for card_id in out_ids]
-                        winner = self._hand_rankings[rank - 1][OUTS_TB_METHOD](tiebreakers, hole_cards, board_cards, drawn_cards)
+                        winner = self._hand_rankings[rank - 1][OUTS_TB_METHOD](
+                            tiebreakers, hole_cards, board_cards, drawn_cards
+                        )
                         if winner not in wins.keys():
                             wins[winner] = 1
                         else:
@@ -247,7 +348,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
             draw_combo_num *= cards_available
         draw_combo_num /= cards_to_draw
 
-        odds = {player: win_count / draw_combo_num for player, win_count in wins.items()}
+        odds = {
+            player: win_count / draw_combo_num for player, win_count in wins.items()
+        }
         return odds
 
     #######################
@@ -262,7 +365,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
         :return: Boolean indicating if the hand is a straight flush
         """
 
-        return len(hand) == 5 and self.hand_all_same_suit(hand) and self.hand_values_continuous(hand)
+        return (
+            len(hand) == 5
+            and self.hand_all_same_suit(hand)
+            and self.hand_values_continuous(hand)
+        )
 
     def _test_quads(self, hand: List[Card]):
         """
@@ -398,14 +505,20 @@ class TexasHoldemHandSolver(BaseHandSolver):
         ranked_hands = dict()
 
         for quad_value in quad_values:
-            quad_value_hands = filter(lambda hand_tuple: hand_tuple[1] == quad_value, hands_quads)
-            quad_value_hands = self.order_hands_highest_card([tup[0] for tup in quad_value_hands])
+            quad_value_hands = filter(
+                lambda hand_tuple: hand_tuple[1] == quad_value, hands_quads
+            )
+            quad_value_hands = self.order_hands_highest_card(
+                [tup[0] for tup in quad_value_hands]
+            )
 
             current_rank = 1 if not ranked_hands else max(ranked_hands.keys()) + 1
             ranked_hands[current_rank] = [quad_value_hands[0]]
 
             for hand in quad_value_hands[1:]:
-                if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                if self.hands_have_same_card_values(
+                    hand, ranked_hands[current_rank][0]
+                ):
                     ranked_hands[current_rank].append(hand)
                 else:
                     current_rank += 1
@@ -511,14 +624,20 @@ class TexasHoldemHandSolver(BaseHandSolver):
         ranked_hands = dict()
 
         for trips_value in trips_values:
-            trips_value_hands = filter(lambda hand_tuple: hand_tuple[1] == trips_value, hands_trips)
-            trips_value_hands = self.order_hands_highest_card([tup[0] for tup in trips_value_hands])
+            trips_value_hands = filter(
+                lambda hand_tuple: hand_tuple[1] == trips_value, hands_trips
+            )
+            trips_value_hands = self.order_hands_highest_card(
+                [tup[0] for tup in trips_value_hands]
+            )
 
             current_rank = 1 if not ranked_hands else max(ranked_hands.keys()) + 1
             ranked_hands[current_rank] = [trips_value_hands[0]]
 
             for hand in trips_value_hands[1:]:
-                if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                if self.hands_have_same_card_values(
+                    hand, ranked_hands[current_rank][0]
+                ):
                     ranked_hands[current_rank].append(hand)
                 else:
                     current_rank += 1
@@ -542,11 +661,19 @@ class TexasHoldemHandSolver(BaseHandSolver):
             remaining_cards = filter(lambda card: card.value != high_pair_value, hand)
             low_pair_value = self.hand_highest_value_tuple(remaining_cards, 2)
             kicker_value = list(
-                filter(lambda card: card.value != high_pair_value and card.value != low_pair_value, hand)
+                filter(
+                    lambda card: card.value != high_pair_value
+                    and card.value != low_pair_value,
+                    hand,
+                )
             )[0].value
-            hands_two_pair_kicker.append((hand, high_pair_value, low_pair_value, kicker_value))
+            hands_two_pair_kicker.append(
+                (hand, high_pair_value, low_pair_value, kicker_value)
+            )
 
-        hands_two_pair_kicker.sort(key=lambda tup: (tup[1], tup[2], tup[3]), reverse=True)
+        hands_two_pair_kicker.sort(
+            key=lambda tup: (tup[1], tup[2], tup[3]), reverse=True
+        )
 
         current_rank = 1
         current_high_pair = hands_two_pair_kicker[0][1]
@@ -555,7 +682,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
         ranked_hands = {current_rank: [hands_two_pair_kicker[0][0]]}
 
         for hand, high_pair, low_pair, kicker in hands_two_pair_kicker[1:]:
-            if high_pair == current_high_pair and low_pair == current_low_pair and kicker == current_kicker:
+            if (
+                high_pair == current_high_pair
+                and low_pair == current_low_pair
+                and kicker == current_kicker
+            ):
                 ranked_hands[current_rank].append(hand)
             else:
                 current_rank += 1
@@ -582,14 +713,20 @@ class TexasHoldemHandSolver(BaseHandSolver):
         ranked_hands = dict()
 
         for pair_value in pair_values:
-            pair_value_hands = filter(lambda hand_tuple: hand_tuple[1] == pair_value, hands_pair)
-            pair_value_hands = self.order_hands_highest_card([tup[0] for tup in pair_value_hands])
+            pair_value_hands = filter(
+                lambda hand_tuple: hand_tuple[1] == pair_value, hands_pair
+            )
+            pair_value_hands = self.order_hands_highest_card(
+                [tup[0] for tup in pair_value_hands]
+            )
 
             current_rank = 1 if not ranked_hands else max(ranked_hands.keys()) + 1
             ranked_hands[current_rank] = [pair_value_hands[0]]
 
             for hand in pair_value_hands[1:]:
-                if self.hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
+                if self.hands_have_same_card_values(
+                    hand, ranked_hands[current_rank][0]
+                ):
                     ranked_hands[current_rank].append(hand)
                 else:
                     current_rank += 1
@@ -638,40 +775,69 @@ class TexasHoldemHandSolver(BaseHandSolver):
         suit_drawn = {
             SUIT_HEARTS: sum([1 for card in drawn_cards if card.suit == SUIT_HEARTS]),
             SUIT_CLUBS: sum([1 for card in drawn_cards if card.suit == SUIT_CLUBS]),
-            SUIT_DIAMONDS: sum([1 for card in drawn_cards if card.suit == SUIT_DIAMONDS]),
-            SUIT_SPADES: sum([1 for card in drawn_cards if card.suit == SUIT_SPADES])
+            SUIT_DIAMONDS: sum(
+                [1 for card in drawn_cards if card.suit == SUIT_DIAMONDS]
+            ),
+            SUIT_SPADES: sum([1 for card in drawn_cards if card.suit == SUIT_SPADES]),
         }
         suit_remaining = {
-            SUIT_HEARTS: sum([1 for card in available_cards if card.suit == SUIT_HEARTS]),
+            SUIT_HEARTS: sum(
+                [1 for card in available_cards if card.suit == SUIT_HEARTS]
+            ),
             SUIT_CLUBS: sum([1 for card in available_cards if card.suit == SUIT_CLUBS]),
-            SUIT_DIAMONDS: sum([1 for card in available_cards if card.suit == SUIT_DIAMONDS]),
-            SUIT_SPADES: sum([1 for card in available_cards if card.suit == SUIT_SPADES]),
+            SUIT_DIAMONDS: sum(
+                [1 for card in available_cards if card.suit == SUIT_DIAMONDS]
+            ),
+            SUIT_SPADES: sum(
+                [1 for card in available_cards if card.suit == SUIT_SPADES]
+            ),
         }
 
-        suit_eligable = [suit for suit, count in suit_drawn.items()
-                         if count + draws >= 5 and suit_remaining[suit] >= (5 - count)]
+        suit_eligable = [
+            suit
+            for suit, count in suit_drawn.items()
+            if count + draws >= 5 and suit_remaining[suit] >= (5 - count)
+        ]
 
         for suit in suit_eligable:
             drawn_suit_cards = [card for card in drawn_cards if card.suit == suit]
-            available_suit_cards = [card for card in available_cards if card.suit == suit]
+            available_suit_cards = [
+                card for card in available_cards if card.suit == suit
+            ]
 
-            drawn_suit_cards = sorted(drawn_suit_cards, key=lambda card: card.value, reverse=True)
-            available_suit_cards = sorted(available_suit_cards, key=lambda card: card.value, reverse=True)
+            drawn_suit_cards = sorted(
+                drawn_suit_cards, key=lambda card: card.value, reverse=True
+            )
+            available_suit_cards = sorted(
+                available_suit_cards, key=lambda card: card.value, reverse=True
+            )
 
             for draws_used in range(1, draws + 1):
-                for hypothetical_draw_cards in self.get_all_combinations(available_suit_cards, [], draws_used):
+                for hypothetical_draw_cards in self.get_all_combinations(
+                    available_suit_cards, [], draws_used
+                ):
                     usable_cards = drawn_suit_cards + hypothetical_draw_cards
                     usable_card_vals = [card.value for card in usable_cards]
                     usable_card_vals.sort()
 
-                    gaps = [[s, e] for s, e in zip(usable_card_vals, usable_card_vals[1:]) if s + 1 < e]
-                    edges = iter(usable_card_vals[:1] + sum(gaps, []) + usable_card_vals[-1:])
+                    gaps = [
+                        [s, e]
+                        for s, e in zip(usable_card_vals, usable_card_vals[1:])
+                        if s + 1 < e
+                    ]
+                    edges = iter(
+                        usable_card_vals[:1] + sum(gaps, []) + usable_card_vals[-1:]
+                    )
                     runs = list(zip(edges, edges))
 
                     qualifying_straights = [
-                        run for run in runs
-                        if run[1] - run[0] >= 4 and
-                        all((run[1] - 4) <= card.value <= run[1] for card in hypothetical_draw_cards)
+                        run
+                        for run in runs
+                        if run[1] - run[0] >= 4
+                        and all(
+                            (run[1] - 4) <= card.value <= run[1]
+                            for card in hypothetical_draw_cards
+                        )
                     ]
 
                     for straight_vals in qualifying_straights:
@@ -680,9 +846,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
                         for card in hypothetical_draw_cards:
                             suits.append(card.suit)
                             values.append(card.value)
-                        draw_scenarios.append({
-                            OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: straight_vals[1]
-                        })
+                        draw_scenarios.append(
+                            {
+                                OUT_STRING: self.build_out_string(suits, values, draws),
+                                TIEBREAKER: straight_vals[1],
+                            }
+                        )
 
         return draw_scenarios
 
@@ -701,9 +870,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
         drawn_value_counter = Counter([card.value for card in drawn_cards])
         available_values_counter = Counter([card.value for card in available_cards])
         value_eligable = [
-            value for value, count in drawn_value_counter.items()
-            if count + draws >= 4
-            and available_values_counter[value] + value >= 4
+            value
+            for value, count in drawn_value_counter.items()
+            if count + draws >= 4 and available_values_counter[value] + value >= 4
         ]
 
         for value in value_eligable:
@@ -711,9 +880,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
             suits = ["ANY" for _ in range(cards_needed)]
             values = [value for _ in range(cards_needed)]
 
-            draw_scenarios.append({
-                OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: value
-            })
+            draw_scenarios.append(
+                {
+                    OUT_STRING: self.build_out_string(suits, values, draws),
+                    TIEBREAKER: value,
+                }
+            )
 
         return draw_scenarios
 
@@ -733,13 +905,15 @@ class TexasHoldemHandSolver(BaseHandSolver):
         available_values_counter = Counter([card.value for card in available_cards])
 
         trips_eligable = [
-            (value, drawn_value_counter[value]) for value in CARD_VALUES
+            (value, drawn_value_counter[value])
+            for value in CARD_VALUES
             if drawn_value_counter[value] + draws >= 3
             and available_values_counter[value] + drawn_value_counter[value] >= 3
         ]
 
         pair_eligable = [
-            (value, drawn_value_counter[value]) for value in CARD_VALUES
+            (value, drawn_value_counter[value])
+            for value in CARD_VALUES
             if drawn_value_counter[value] + draws >= 2
             and available_values_counter[value] + drawn_value_counter[value] >= 2
         ]
@@ -759,9 +933,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
             values = [trip_info[0] for _ in range(trip_draws_required)]
             values.extend([pair_info[0] for _ in range(pair_draws_required)])
 
-            draw_scenarios.append({
-                    OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: (trip_info[0], pair_info[0])
-                })
+            draw_scenarios.append(
+                {
+                    OUT_STRING: self.build_out_string(suits, values, draws),
+                    TIEBREAKER: (trip_info[0], pair_info[0]),
+                }
+            )
         return draw_scenarios
 
     def _outs_flush(self, hole_cards, board_cards, available_cards):
@@ -778,27 +955,41 @@ class TexasHoldemHandSolver(BaseHandSolver):
         suit_drawn = {
             SUIT_HEARTS: sum([1 for card in drawn_cards if card.suit == SUIT_HEARTS]),
             SUIT_CLUBS: sum([1 for card in drawn_cards if card.suit == SUIT_CLUBS]),
-            SUIT_DIAMONDS: sum([1 for card in drawn_cards if card.suit == SUIT_DIAMONDS]),
-            SUIT_SPADES: sum([1 for card in drawn_cards if card.suit == SUIT_SPADES])
+            SUIT_DIAMONDS: sum(
+                [1 for card in drawn_cards if card.suit == SUIT_DIAMONDS]
+            ),
+            SUIT_SPADES: sum([1 for card in drawn_cards if card.suit == SUIT_SPADES]),
         }
         suit_remaining = {
-            SUIT_HEARTS: sum([1 for card in available_cards if card.suit == SUIT_HEARTS]),
+            SUIT_HEARTS: sum(
+                [1 for card in available_cards if card.suit == SUIT_HEARTS]
+            ),
             SUIT_CLUBS: sum([1 for card in available_cards if card.suit == SUIT_CLUBS]),
-            SUIT_DIAMONDS: sum([1 for card in available_cards if card.suit == SUIT_DIAMONDS]),
-            SUIT_SPADES: sum([1 for card in available_cards if card.suit == SUIT_SPADES]),
+            SUIT_DIAMONDS: sum(
+                [1 for card in available_cards if card.suit == SUIT_DIAMONDS]
+            ),
+            SUIT_SPADES: sum(
+                [1 for card in available_cards if card.suit == SUIT_SPADES]
+            ),
         }
 
-        suit_eligable = [suit for suit, count in suit_drawn.items()
-                         if count + draws >= 5 and suit_remaining[suit] >= (5 - count)]
+        suit_eligable = [
+            suit
+            for suit, count in suit_drawn.items()
+            if count + draws >= 5 and suit_remaining[suit] >= (5 - count)
+        ]
 
         for suit in suit_eligable:
             draws_required = max([5 - suit_drawn[suit], 0])
             suits = [suit for _ in range(draws_required)]
             values = ["ANY" for _ in range(draws_required)]
 
-            draw_scenarios.append({
-                OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: suit
-            })
+            draw_scenarios.append(
+                {
+                    OUT_STRING: self.build_out_string(suits, values, draws),
+                    TIEBREAKER: suit,
+                }
+            )
 
         return draw_scenarios
 
@@ -814,20 +1005,31 @@ class TexasHoldemHandSolver(BaseHandSolver):
         draws = 5 - len(board_cards)
         drawn_cards = hole_cards + board_cards
 
-        drawn_values = sorted(list(set([card.value for card in drawn_cards])), reverse=True)
-        available_values = sorted(list(set([card.value for card in available_cards])), reverse=True)
-        not_drawn_values = [value for value in available_values if value not in drawn_values]
+        drawn_values = sorted(
+            list(set([card.value for card in drawn_cards])), reverse=True
+        )
+        available_values = sorted(
+            list(set([card.value for card in available_cards])), reverse=True
+        )
+        not_drawn_values = [
+            value for value in available_values if value not in drawn_values
+        ]
 
         for draws_used in range(1, draws + 1):
             for possible_draw in combinations(not_drawn_values, draws_used):
                 combined_values = sorted(drawn_values + list(possible_draw))
 
-                gaps = [[s, e] for s, e in zip(combined_values, combined_values[1:]) if s + 1 < e]
+                gaps = [
+                    [s, e]
+                    for s, e in zip(combined_values, combined_values[1:])
+                    if s + 1 < e
+                ]
                 edges = iter(combined_values[:1] + sum(gaps, []) + combined_values[-1:])
                 runs = list(zip(edges, edges))
 
                 qualifying_straights = [
-                    run for run in runs
+                    run
+                    for run in runs
                     if run[1] - run[0] >= 4
                     and all((run[1] - 4) <= value <= run[1] for value in possible_draw)
                 ]
@@ -835,9 +1037,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
                 for straight_vals in qualifying_straights:
                     suits = ["ANY" for _ in possible_draw]
                     values = [value for value in possible_draw]
-                    draw_scenarios.append({
-                        OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: straight_vals[1]
-                    })
+                    draw_scenarios.append(
+                        {
+                            OUT_STRING: self.build_out_string(suits, values, draws),
+                            TIEBREAKER: straight_vals[1],
+                        }
+                    )
         return draw_scenarios
 
     def _outs_trips(self, hole_cards, board_cards, available_cards):
@@ -856,7 +1061,8 @@ class TexasHoldemHandSolver(BaseHandSolver):
         available_values_counter = Counter([card.value for card in available_cards])
 
         trips_eligable = [
-            (value, drawn_value_counter[value]) for value in CARD_VALUES
+            (value, drawn_value_counter[value])
+            for value in CARD_VALUES
             if drawn_value_counter[value] + draws >= 3
             and available_values_counter[value] + drawn_value_counter[value] >= 3
         ]
@@ -866,9 +1072,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
             suits = ["ANY" for _ in range(draws_required)]
             values = [value for _ in range(draws_required)]
 
-            draw_scenarios.append({
-                OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: value
-            })
+            draw_scenarios.append(
+                {
+                    OUT_STRING: self.build_out_string(suits, values, draws),
+                    TIEBREAKER: value,
+                }
+            )
 
         return draw_scenarios
 
@@ -888,7 +1097,8 @@ class TexasHoldemHandSolver(BaseHandSolver):
         available_values_counter = Counter([card.value for card in available_cards])
 
         pair_eligable = [
-            (value, drawn_value_counter[value]) for value in CARD_VALUES
+            (value, drawn_value_counter[value])
+            for value in CARD_VALUES
             if drawn_value_counter[value] + draws >= 2
             and available_values_counter[value] + drawn_value_counter[value] >= 2
         ]
@@ -903,9 +1113,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
                 suits = ["ANY" for _ in range(high_pair_draws_req + low_pair_draws_req)]
                 values = [high_pair[0] for _ in range(high_pair_draws_req)]
                 values.extend([low_pair[0] for _ in range(low_pair_draws_req)])
-                draw_scenarios.append({
-                    OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: (high_pair[0], low_pair[0])
-                })
+                draw_scenarios.append(
+                    {
+                        OUT_STRING: self.build_out_string(suits, values, draws),
+                        TIEBREAKER: (high_pair[0], low_pair[0]),
+                    }
+                )
 
         return draw_scenarios
 
@@ -925,7 +1138,8 @@ class TexasHoldemHandSolver(BaseHandSolver):
         available_values_counter = Counter([card.value for card in available_cards])
 
         pair_eligable = [
-            (value, drawn_value_counter[value]) for value in CARD_VALUES
+            (value, drawn_value_counter[value])
+            for value in CARD_VALUES
             if drawn_value_counter[value] + draws >= 2
             and available_values_counter[value] + drawn_value_counter[value] >= 2
         ]
@@ -934,7 +1148,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
             draws_req = max([2 - pair[1], 0])
             suits = ["ANY" for _ in range(draws_req)]
             values = [pair[0] for _ in range(draws_req)]
-            draw_scenarios.append({OUT_STRING: self.build_out_string(suits, values, draws), TIEBREAKER: pair[0]})
+            draw_scenarios.append(
+                {
+                    OUT_STRING: self.build_out_string(suits, values, draws),
+                    TIEBREAKER: pair[0],
+                }
+            )
 
         return draw_scenarios
 
@@ -953,8 +1172,12 @@ class TexasHoldemHandSolver(BaseHandSolver):
     #############################
 
     @staticmethod
-    def _outs_tb_straight_flush(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                                drawn_cards: List[Card]) -> str:
+    def _outs_tb_straight_flush(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger straight flush hand. given the drawn cards.
 
@@ -968,12 +1191,20 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
-        winners = [player for player, tiebreaker in tiebreakers.items() if tiebreaker == max_tiebreaker]
+        winners = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker == max_tiebreaker
+        ]
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_quads(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                       drawn_cards: List[Card]) -> str:
+    def _outs_tb_quads(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger quads hand. given the drawn cards.
 
@@ -987,7 +1218,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
-        possible_winners = [player for player, tiebreaker in tiebreakers.items() if tiebreaker == max_tiebreaker]
+        possible_winners = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker == max_tiebreaker
+        ]
 
         if len(possible_winners) == 1:
             return possible_winners[0]
@@ -997,17 +1232,25 @@ class TexasHoldemHandSolver(BaseHandSolver):
             player_values = [card.value for card in hole_cards[player]]
             player_values.extend([card.value for card in board_cards])
             player_values.extend([card.value for card in drawn_cards])
-            player_values = [value for value in player_values if value != max_tiebreaker]
+            player_values = [
+                value for value in player_values if value != max_tiebreaker
+            ]
 
             player_kickers[player] = max(player_values)
 
         max_kicker = max([kicker for kicker in player_kickers.values()])
-        winners = [player for player, kicker in player_kickers.items() if kicker == max_kicker]
+        winners = [
+            player for player, kicker in player_kickers.items() if kicker == max_kicker
+        ]
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_full_house(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                       drawn_cards: List[Card]) -> str:
+    def _outs_tb_full_house(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger full house hand. given the drawn cards.
 
@@ -1021,22 +1264,41 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_trips = max([tiebreaker[0] for tiebreaker in tiebreakers.values()])
-        max_trips_players = [player for player, tiebreaker in tiebreakers.items() if tiebreaker[0] == max_trips]
+        max_trips_players = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker[0] == max_trips
+        ]
 
         if len(max_trips_players) == 1:
             return max_trips_players[0]
 
-        max_pair = max([tiebreaker[1] for player, tiebreaker in tiebreakers.items() if player in max_trips_players])
+        max_pair = max(
+            [
+                tiebreaker[1]
+                for player, tiebreaker in tiebreakers.items()
+                if player in max_trips_players
+            ]
+        )
         max_pair_players = [
-            player for player, tiebreaker in tiebreakers.items()
+            player
+            for player, tiebreaker in tiebreakers.items()
             if tiebreaker[1] == max_pair and player in max_trips_players
         ]
 
-        return max_pair_players[0] if len(max_pair_players) == 1 else f"TIE({','.join(max_pair_players)})"
+        return (
+            max_pair_players[0]
+            if len(max_pair_players) == 1
+            else f"TIE({','.join(max_pair_players)})"
+        )
 
     @staticmethod
-    def _outs_tb_flush(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                       drawn_cards: List[Card]) -> str:
+    def _outs_tb_flush(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger flush hand. given the drawn cards.
 
@@ -1051,27 +1313,44 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         player_flush_values = {}
         for player, cards in hole_cards.items():
-            flush_values = [card.value for card in cards if card.suit == tiebreakers[player]]
-            flush_values.extend([card.value for card in board_cards if card.suit == tiebreakers[player]])
-            flush_values.extend([card.value for card in drawn_cards if card.suit == tiebreakers[player]])
+            flush_values = [
+                card.value for card in cards if card.suit == tiebreakers[player]
+            ]
+            flush_values.extend(
+                [card.value for card in board_cards if card.suit == tiebreakers[player]]
+            )
+            flush_values.extend(
+                [card.value for card in drawn_cards if card.suit == tiebreakers[player]]
+            )
 
             player_flush_values[player] = sorted(flush_values, reverse=True)
 
         winners = [player for player in hole_cards.keys()]
 
         for index in range(5):
-            max_index_value = max([
-                values[index] for player, values in player_flush_values.items()
-                if player in winners
-            ])
+            max_index_value = max(
+                [
+                    values[index]
+                    for player, values in player_flush_values.items()
+                    if player in winners
+                ]
+            )
 
-            winners = [player for player in winners if player_flush_values[player][index] == max_index_value]
+            winners = [
+                player
+                for player in winners
+                if player_flush_values[player][index] == max_index_value
+            ]
 
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_straight(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                          drawn_cards: List[Card]) -> str:
+    def _outs_tb_straight(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger straight hand. given the drawn cards.
 
@@ -1085,12 +1364,20 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
-        winners = [player for player, tiebreaker in tiebreakers.items() if tiebreaker == max_tiebreaker]
+        winners = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker == max_tiebreaker
+        ]
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_trips(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                       drawn_cards: List[Card]) -> str:
+    def _outs_tb_trips(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger trips hand. given the drawn cards.
 
@@ -1104,7 +1391,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
-        possible_winners = [player for player, tiebreaker in tiebreakers.items() if tiebreaker == max_tiebreaker]
+        possible_winners = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker == max_tiebreaker
+        ]
 
         if len(possible_winners) == 1:
             return possible_winners[0]
@@ -1114,24 +1405,37 @@ class TexasHoldemHandSolver(BaseHandSolver):
             player_values = [card.value for card in hole_cards[player]]
             player_values.extend([card.value for card in board_cards])
             player_values.extend([card.value for card in drawn_cards])
-            player_values = [value for value in player_values if value != max_tiebreaker]
+            player_values = [
+                value for value in player_values if value != max_tiebreaker
+            ]
 
             player_kickers[player] = sorted(player_values, reverse=True)
 
         winners = [player for player in possible_winners]
         for index in range(2):
-            max_index_value = max([
-                values[index] for player, values in player_kickers.items()
-                if player in winners
-            ])
+            max_index_value = max(
+                [
+                    values[index]
+                    for player, values in player_kickers.items()
+                    if player in winners
+                ]
+            )
 
-            winners = [player for player in winners if player_kickers[player][index] == max_index_value]
+            winners = [
+                player
+                for player in winners
+                if player_kickers[player][index] == max_index_value
+            ]
 
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_two_pair(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                            drawn_cards: List[Card]) -> str:
+    def _outs_tb_two_pair(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger two pair hand. given the drawn cards.
 
@@ -1145,17 +1449,25 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_high_pair = max([tiebreaker[0] for tiebreaker in tiebreakers.values()])
-        max_high_pair_players = [player for player, tiebreaker in tiebreakers.items() if tiebreaker[0] == max_high_pair]
+        max_high_pair_players = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker[0] == max_high_pair
+        ]
 
         if len(max_high_pair_players) == 1:
             return max_high_pair_players[0]
 
-        max_low_pair = max([
-            tiebreaker[1] for player, tiebreaker in tiebreakers.items()
-            if player in max_high_pair_players
-        ])
+        max_low_pair = max(
+            [
+                tiebreaker[1]
+                for player, tiebreaker in tiebreakers.items()
+                if player in max_high_pair_players
+            ]
+        )
         max_low_pair_players = [
-            player for player, tiebreaker in tiebreakers.items()
+            player
+            for player, tiebreaker in tiebreakers.items()
             if tiebreaker[1] == max_low_pair and player in max_high_pair_players
         ]
 
@@ -1167,17 +1479,27 @@ class TexasHoldemHandSolver(BaseHandSolver):
             player_values = [card.value for card in hole_cards[player]]
             player_values.extend([card.value for card in board_cards])
             player_values.extend([card.value for card in drawn_cards])
-            player_values = [value for value in player_values if value not in [max_high_pair, max_low_pair]]
+            player_values = [
+                value
+                for value in player_values
+                if value not in [max_high_pair, max_low_pair]
+            ]
 
             player_kickers[player] = max(player_values)
 
         max_kicker = max([kicker for kicker in player_kickers.values()])
-        winners = [player for player, kicker in player_kickers.items() if kicker == max_kicker]
+        winners = [
+            player for player, kicker in player_kickers.items() if kicker == max_kicker
+        ]
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_pair(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                       drawn_cards: List[Card]) -> str:
+    def _outs_tb_pair(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger pair hand. given the drawn cards.
 
@@ -1191,7 +1513,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
-        possible_winners = [player for player, tiebreaker in tiebreakers.items() if tiebreaker == max_tiebreaker]
+        possible_winners = [
+            player
+            for player, tiebreaker in tiebreakers.items()
+            if tiebreaker == max_tiebreaker
+        ]
 
         if len(possible_winners) == 1:
             return possible_winners[0]
@@ -1201,24 +1527,37 @@ class TexasHoldemHandSolver(BaseHandSolver):
             player_values = [card.value for card in hole_cards[player]]
             player_values.extend([card.value for card in board_cards])
             player_values.extend([card.value for card in drawn_cards])
-            player_values = [value for value in player_values if value != max_tiebreaker]
+            player_values = [
+                value for value in player_values if value != max_tiebreaker
+            ]
 
             player_kickers[player] = sorted(player_values, reverse=True)
 
         winners = [player for player in possible_winners]
         for index in range(3):
-            max_index_value = max([
-                values[index] for player, values in player_kickers.items()
-                if player in winners
-            ])
+            max_index_value = max(
+                [
+                    values[index]
+                    for player, values in player_kickers.items()
+                    if player in winners
+                ]
+            )
 
-            winners = [player for player in winners if player_kickers[player][index] == max_index_value]
+            winners = [
+                player
+                for player in winners
+                if player_kickers[player][index] == max_index_value
+            ]
 
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
     @staticmethod
-    def _outs_tb_high_card(tiebreakers: Dict, hole_cards: Dict[str, List[Card]], board_cards: List[Card],
-                           drawn_cards: List[Card]) -> str:
+    def _outs_tb_high_card(
+        tiebreakers: Dict,
+        hole_cards: Dict[str, List[Card]],
+        board_cards: List[Card],
+        drawn_cards: List[Card],
+    ) -> str:
         """
         Private method to determine which player would have the stronger high card hand. given the drawn cards.
 
@@ -1241,12 +1580,19 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         winners = [player for player in tiebreakers.keys()]
         for index in range(5):
-            max_index_value = max([
-                values[index] for player, values in player_kickers.items()
-                if player in winners
-            ])
+            max_index_value = max(
+                [
+                    values[index]
+                    for player, values in player_kickers.items()
+                    if player in winners
+                ]
+            )
 
-            winners = [player for player in winners if player_kickers[player][index] == max_index_value]
+            winners = [
+                player
+                for player in winners
+                if player_kickers[player][index] == max_index_value
+            ]
 
         return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
@@ -1334,7 +1680,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
         trips_rank = list(filter(lambda card: card.value == trips_value, hand))[0].rank
         kickers = list(filter(lambda card: card.value != trips_value, hand))
         kickers.sort(key=lambda card: card.value, reverse=True)
-        return f"Trips ({trips_rank}s with kickers {kickers[0].rank}, {kickers[1].rank})"
+        return (
+            f"Trips ({trips_rank}s with kickers {kickers[0].rank}, {kickers[1].rank})"
+        )
 
     def _hand_description_two_pair(self, hand: List[Card]):
         """
@@ -1345,13 +1693,21 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         higher_pair_value = self.hand_highest_value_tuple(hand, 2)
-        higher_pair_rank = list(filter(lambda card: card.value == higher_pair_value, hand))[0].rank
+        higher_pair_rank = list(
+            filter(lambda card: card.value == higher_pair_value, hand)
+        )[0].rank
 
-        remaining_cards = list(filter(lambda card: card.value != higher_pair_value, hand))
+        remaining_cards = list(
+            filter(lambda card: card.value != higher_pair_value, hand)
+        )
         lower_pair_value = self.hand_highest_value_tuple(remaining_cards, 2)
-        lower_pair_rank = list(filter(lambda card: card.value == lower_pair_value, remaining_cards))[0].rank
+        lower_pair_rank = list(
+            filter(lambda card: card.value == lower_pair_value, remaining_cards)
+        )[0].rank
 
-        kicker_rank = list(filter(lambda card: card.value != lower_pair_value, remaining_cards))[0].rank
+        kicker_rank = list(
+            filter(lambda card: card.value != lower_pair_value, remaining_cards)
+        )[0].rank
 
         return f"Two Pair ({higher_pair_rank}s and {lower_pair_rank}s with kicker {kicker_rank})"
 
@@ -1400,7 +1756,10 @@ class TexasHoldemHandSolver(BaseHandSolver):
         :return:
         """
 
-        ace_low_straight_hands = [True if self.hand_is_ace_low_straight(hand) else False for hand in ordered_hands]
+        ace_low_straight_hands = [
+            True if self.hand_is_ace_low_straight(hand) else False
+            for hand in ordered_hands
+        ]
         ace_low_straight_index_hand = [
             (index, ordered_hands[index])
             for index, is_ace_low_straight in enumerate(ace_low_straight_hands)
@@ -1451,7 +1810,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
             for hand in subrank_hands:
                 hand.sort(key=lambda card: card.value, reverse=True)
 
-            matched_players = [player for player, player_hand in players_hands.items() if player_hand in subrank_hands]
+            matched_players = [
+                player
+                for player, player_hand in players_hands.items()
+                if player_hand in subrank_hands
+            ]
             linked_subrank_players[subrank] = matched_players
 
         return linked_subrank_players
