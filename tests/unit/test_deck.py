@@ -27,94 +27,105 @@ def deck_card_names():
 
 @fixture
 def cards_five():
-    return [Card(3, "D"), Card("A", "D"), Card("Q", "C"), Card(7, "H"), Card(9, "S")]
+    return [Card("D3"), Card("DA"), Card("CQ"), Card("H7"), Card("S9")]
 
 ###########################
 #  CARD CLASS UNIT TESTS  #
 ###########################
 
 
-@mark.parametrize("card_val, suit_val, card_name", [
-    (2, "C", "Two of Clubs"),
-    (3, "C", "Three of Clubs"),
-    (4, "C", "Four of Clubs"),
-    (5, "C", "Five of Clubs"),
-    (6, "C", "Six of Clubs"),
-    (7, "C", "Seven of Clubs"),
-    (8, "C", "Eight of Clubs"),
-    (9, "C", "Nine of Clubs"),
-    (10, "C", "Ten of Clubs"),
-    ("J", "C", "Jack of Clubs"),
-    ("Q", "C", "Queen of Clubs"),
-    ("K", "C", "King of Clubs"),
-    ("A", "C", "Ace of Clubs"),
-    (2, "D", "Two of Diamonds"),
-    (3, "D", "Three of Diamonds"),
-    (4, "D", "Four of Diamonds"),
-    (5, "D", "Five of Diamonds"),
-    (6, "D", "Six of Diamonds"),
-    (7, "D", "Seven of Diamonds"),
-    (8, "D", "Eight of Diamonds"),
-    (9, "D", "Nine of Diamonds"),
-    (10, "D", "Ten of Diamonds"),
-    ("J", "D", "Jack of Diamonds"),
-    ("Q", "D", "Queen of Diamonds"),
-    ("K", "D", "King of Diamonds"),
-    ("A", "D", "Ace of Diamonds"),
-    (2, "H", "Two of Hearts"),
-    (3, "H", "Three of Hearts"),
-    (4, "H", "Four of Hearts"),
-    (5, "H", "Five of Hearts"),
-    (6, "H", "Six of Hearts"),
-    (7, "H", "Seven of Hearts"),
-    (8, "H", "Eight of Hearts"),
-    (9, "H", "Nine of Hearts"),
-    (10, "H", "Ten of Hearts"),
-    ("J", "H", "Jack of Hearts"),
-    ("Q", "H", "Queen of Hearts"),
-    ("K", "H", "King of Hearts"),
-    ("A", "H", "Ace of Hearts"),
-    (2, "S", "Two of Spades"),
-    (3, "S", "Three of Spades"),
-    (4, "S", "Four of Spades"),
-    (5, "S", "Five of Spades"),
-    (6, "S", "Six of Spades"),
-    (7, "S", "Seven of Spades"),
-    (8, "S", "Eight of Spades"),
-    (9, "S", "Nine of Spades"),
-    (10, "S", "Ten of Spades"),
-    ("J", "S", "Jack of Spades"),
-    ("Q", "S", "Queen of Spades"),
-    ("K", "S", "King of Spades"),
-    ("A", "S", "Ace of Spades")
+@mark.parametrize("card_val, card_rank, card_suit, card_name, card_id", [
+    (2, "Two", "Clubs", "Two of Clubs", "C2"),
+    (3, "Three", "Clubs", "Three of Clubs", "C3"),
+    (4, "Four", "Clubs", "Four of Clubs", "C4"),
+    (5, "Five", "Clubs", "Five of Clubs", "C5"),
+    (6, "Six", "Clubs", "Six of Clubs", "C6"),
+    (7, "Seven", "Clubs", "Seven of Clubs", "C7"),
+    (8, "Eight", "Clubs", "Eight of Clubs", "C8"),
+    (9, "Nine", "Clubs", "Nine of Clubs", "C9"),
+    (10, "Ten", "Clubs", "Ten of Clubs", "CT"),
+    (11, "Jack", "Clubs", "Jack of Clubs", "CJ"),
+    (12, "Queen", "Clubs", "Queen of Clubs", "CQ"),
+    (13, "King", "Clubs", "King of Clubs", "CK"),
+    (14, "Ace", "Clubs", "Ace of Clubs", "CA"),
+    (2, "Two", "Diamonds", "Two of Diamonds", "D2"),
+    (3, "Three", "Diamonds", "Three of Diamonds", "D3"),
+    (4, "Four", "Diamonds", "Four of Diamonds", "D4"),
+    (5, "Five", "Diamonds", "Five of Diamonds", "D5"),
+    (6, "Six", "Diamonds", "Six of Diamonds", "D6"),
+    (7, "Seven", "Diamonds", "Seven of Diamonds", "D7"),
+    (8, "Eight", "Diamonds", "Eight of Diamonds", "D8"),
+    (9, "Nine", "Diamonds", "Nine of Diamonds", "D9"),
+    (10, "Ten", "Diamonds", "Ten of Diamonds", "DT"),
+    (11, "Jack", "Diamonds", "Jack of Diamonds", "DJ"),
+    (12, "Queen", "Diamonds", "Queen of Diamonds", "DQ"),
+    (13, "King", "Diamonds", "King of Diamonds", "DK"),
+    (14, "Ace", "Diamonds", "Ace of Diamonds", "DA"),
+    (2, "Two", "Hearts", "Two of Hearts", "H2"),
+    (3, "Three", "Hearts", "Three of Hearts", "H3"),
+    (4, "Four", "Hearts", "Four of Hearts", "H4"),
+    (5, "Five", "Hearts", "Five of Hearts", "H5"),
+    (6, "Six", "Hearts", "Six of Hearts", "H6"),
+    (7, "Seven", "Hearts", "Seven of Hearts", "H7"),
+    (8, "Eight", "Hearts", "Eight of Hearts", "H8"),
+    (9, "Nine", "Hearts", "Nine of Hearts", "H9"),
+    (10, "Ten", "Hearts", "Ten of Hearts", "HT"),
+    (11, "Jack", "Hearts", "Jack of Hearts", "HJ"),
+    (12, "Queen", "Hearts", "Queen of Hearts", "HQ"),
+    (13, "King", "Hearts", "King of Hearts", "HK"),
+    (14, "Ace", "Hearts", "Ace of Hearts", "HA"),
+    (2, "Two", "Spades", "Two of Spades", "S2"),
+    (3, "Three", "Spades", "Three of Spades", "S3"),
+    (4, "Four", "Spades", "Four of Spades", "S4"),
+    (5, "Five", "Spades", "Five of Spades", "S5"),
+    (6, "Six", "Spades", "Six of Spades", "S6"),
+    (7, "Seven", "Spades", "Seven of Spades", "S7"),
+    (8, "Eight", "Spades", "Eight of Spades", "S8"),
+    (9, "Nine", "Spades", "Nine of Spades", "S9"),
+    (10, "Ten", "Spades", "Ten of Spades", "ST"),
+    (11, "Jack", "Spades", "Jack of Spades", "SJ"),
+    (12, "Queen", "Spades", "Queen of Spades", "SQ"),
+    (13, "King", "Spades", "King of Spades", "SK"),
+    (14, "Ace", "Spades", "Ace of Spades", "SA")
 ])
-def test_when_card_init_then_correct_values_set(card_val, suit_val, card_name):
-    card = Card(card_val, suit_val)
+def test_when_card_init_then_correct_values_set(card_val, card_rank, card_suit, card_name, card_id):
+    card = Card(card_id)
     assert card.name == card_name
+    assert card.identity == card_id
+    assert card.suit == card_suit
+    assert card.rank == card_rank
+    assert card.value == card_val
+
+
+@mark.parametrize("card_id", ["C", "D12"])
+def test_when_card_init_and_card_id_not_2_chars_then_raise_error(card_id):
+    with raises(ValueError, match="Card ID provided must be exactly 2 characters long"):
+        Card(card_id)
 
 
 @mark.parametrize("card_val", [
-    1, 16, "ace", "Nine"
+    1, "N",
 ])
 def test_when_card_init_and_card_rank_bad_then_raise_error(card_val):
-    with raises(ValueError, match=f"Specified card rank {card_val} is not in value mapping dictionary"):
-        Card(card_val, "C")
+    with raises(ValueError, match=f"Card ID second character '{card_val}' "
+                                  f"is not within valid list of rank identifiers"):
+        Card(f"H{card_val}")
 
 
 @mark.parametrize("suit_val", [
-    -1, 6, "3", "SPADES", "Clubs", "hearts"
+    3, "s", "c", "h", "d"
 ])
 def test_when_card_init_and_suit_value_bad_then_raise_error(suit_val):
-    with raises(ValueError, match=f"Suit value '{suit_val}' is not in list of valid values"):
-        Card(5, suit_val)
+    with raises(ValueError, match=f"Card ID first character '{suit_val}' is not within valid list of suit identifiers"):
+        Card(f"{suit_val}6")
 
 
 @mark.parametrize("card_a, card_b, expected", [
-    (Card(7, "D"), Card(10, "D"), False),
-    (Card("Q", "H"), Card(3, "H"), True),
-    (Card(3, "S"), Card("K", "C"), False),
-    (Card(10, "C"), Card(4, "H"), True),
-    (Card(7, "H"), Card(7, "S"), False)
+    (Card("D7"), Card("DT"), False),
+    (Card("HQ"), Card("H3"), True),
+    (Card("S3"), Card("CK"), False),
+    (Card("CT"), Card("H4"), True),
+    (Card("H7"), Card("S7"), False)
 ])
 def test_when_card_greater_than_then_correct_result_returned(card_a, card_b, expected):
     actual = card_a > card_b
@@ -122,11 +133,11 @@ def test_when_card_greater_than_then_correct_result_returned(card_a, card_b, exp
 
 
 @mark.parametrize("card_a, card_b, expected", [
-    (Card(7, "D"), Card(10, "D"), True),
-    (Card("Q", "H"), Card(3, "H"), False),
-    (Card(3, "S"), Card("K", "C"), True),
-    (Card(10, "C"), Card(4, "H"), False),
-    (Card(7, "H"), Card(7, "S"), False)
+    (Card("D7"), Card("DT"), True),
+    (Card("HQ"), Card("H3"), False),
+    (Card("S3"), Card("CK"), True),
+    (Card("CT"), Card("H4"), False),
+    (Card("H7"), Card("S7"), False)
 ])
 def test_when_card_less_than_then_correct_result_returned(card_a, card_b, expected):
     actual = card_a < card_b
@@ -269,22 +280,22 @@ def test_when_deck_reset_then_cards_available_reset(cards_five, deck_card_names)
 
 @mark.parametrize("cards, expected_card_names, descending", [
     (
-        [Card(7, "D"), Card(4, "D"), Card("A", "D"), Card("Q", "D")],
+        [Card("D7"), Card("D4"), Card("DA"), Card("DQ")],
         ["Four of Diamonds", "Seven of Diamonds", "Queen of Diamonds", "Ace of Diamonds"],
         False
     ),
     (
-        [Card(7, "D"), Card(4, "D"), Card("A", "C"), Card("Q", "C")],
+        [Card("D7"), Card("D4"), Card("CA"), Card("CQ")],
         ["Queen of Clubs", "Ace of Clubs", "Four of Diamonds", "Seven of Diamonds"],
         False
     ),
     (
-        [Card(7, "D"), Card(4, "D"), Card("A", "D"), Card("Q", "D")],
+        [Card("D7"), Card("D4"), Card("DA"), Card("DQ")],
         ["Ace of Diamonds", "Queen of Diamonds", "Seven of Diamonds", "Four of Diamonds"],
         True
     ),
     (
-        [Card(7, "D"), Card(4, "D"), Card("A", "C"), Card("Q", "C")],
+        [Card("D7"), Card("D4"), Card("CA"), Card("CQ")],
         ["Ace of Clubs", "Queen of Clubs", "Seven of Diamonds", "Four of Diamonds"],
         True
     ),
@@ -299,6 +310,6 @@ def test_when_deck_order_cards_then_correct_reordering_occurs(cards, expected_ca
 
 def test_when_deck_order_cards_and_non_card_passed_then_raise_error():
     deck = Deck()
-    cards = [Card(5, "C"), "Six of Spades", Card(9, "S")]
+    cards = [Card("C5"), "Six of Spades", Card("S9")]
     with raises(ValueError, match="All objects within cards value must be an instance of the Cards Class"):
         deck.order_cards(cards)
