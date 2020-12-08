@@ -43,7 +43,7 @@ jobs:
       # run unit tests
       - name: Run Unit Tests
         run: |
-          cd $GITHUB_WORKSPACE / tests
+          cd $GITHUB_WORKSPACE/tests
           poetry run pytest ./unit -v --junitxml=junit/pypoker-unit-test-results.xml
 
       # Upload Test Artifacts
