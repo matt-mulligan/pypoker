@@ -20,19 +20,3 @@ def base_instance():
             pass
 
     return TestBaseClass()
-
-
-@mark.parametrize("hole_cards, board_cards, hand_size, expected_combos", [
-    ("hole_cards_001", "board_cards_001", 5, "combos_001"),
-    ("hole_cards_001", "board_cards_002", 5, "combos_002"),
-    ("hole_cards_001", "board_cards_003", 5, "combos_003")
-])
-def test_when_get_all_combinations_then_correct_combinations_returned(hole_cards, board_cards, hand_size,
-                                                                      expected_combos, base_instance):
-    hole_cards = get_hand(hole_cards)
-    board_cards = get_hand(board_cards)
-    expected_combos = get_hand_sets(expected_combos)
-
-    combos = base_instance.get_all_combinations(hole_cards, board_cards, hand_size)
-
-    assert combos == expected_combos

@@ -15,3 +15,4 @@ with their private implementation methods
 from pypoker.engine.hand_solver.functions.type import hand_test
 from pypoker.engine.hand_solver.functions.rank import rank_hand_type
 from pypoker.engine.hand_solver.functions.describe import describe_hand
+from pypoker.engine.hand_solver.functions.outs import find_outs_scenarios

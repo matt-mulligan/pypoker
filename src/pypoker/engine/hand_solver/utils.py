@@ -6,6 +6,7 @@ functions are a good candiate for this package if they are used by both the the 
 class implementations.
 """
 import collections
+from itertools import combinations
 from typing import List
 
 from pypoker.deck import Card
@@ -117,3 +118,23 @@ def hands_have_same_card_values(hand_a, hand_b):
     return all(
         card_a.value == card_b.value for card_a, card_b in zip(hand_a, hand_b)
     )
+
+
+def get_all_combinations(hole_cards: List[Card], board_cards: List[Card], hand_size: int):
+    """
+    This private method will get all possible hand combinations for a
+
+    :param hole_cards: List of Card objects representing the players hole
+    :param board_cards: List of Card objects representing the communal cards
+    :param hand_size: Int representing what size hands to produce.
+
+    :return: list of card objects
+    """
+
+    all_cards = hole_cards.copy()
+    all_cards.extend(board_cards)
+    all_combinations = [
+        list(cards) for cards in list(combinations(all_cards, hand_size))
+    ]
+
+    return all_combinations
