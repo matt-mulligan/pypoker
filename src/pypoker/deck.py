@@ -8,22 +8,29 @@ from dataclasses import dataclass, InitVar, field
 from typing import Union, List
 
 
+CARD_ID_SUITS = {"C": "Clubs", "D": "Diamonds", "H": "Hearts", "S": "Spades"}
+CARD_ID_RANKS = {
+    "2": "Two", "3": "Three", "4": "Four", "5": "Five", "6": "Six", "7": "Seven", "8": "Eight", "9": "Nine",
+    "T": "Ten", "J": "Jack", "Q": "Queen", "K": "King", "A": "Ace",
+}
+
+
 @dataclass()
 class Card(object):
     """
     Class representing a single playing card
     """
 
-    rank_value: InitVar[Union[str, int]]
-    suit_value: InitVar[str]
+    card_id: InitVar[str]
     rank: str = field(init=False, compare=False, repr=False)
     suit: str = field(init=False, compare=False, repr=False)
     value: int = field(init=False, compare=False, repr=False)
     name: str = field(init=False)
 
-    def __post_init__(self, rank_value, suit_value):
-        self.rank = self._determine_rank(rank_value)
-        self.suit = self._determine_suit(suit_value)
+    def __post_init__(self, card_id):
+        self.identity = self._check_card_id(card_id)
+        self.rank = self._determine_rank(self.identity)
+        self.suit = self._determine_suit(self.identity)
         self.value = self._determine_value(self.rank)
         self.name = self._determine_name(self.rank, self.suit)
 
@@ -34,55 +41,47 @@ class Card(object):
         return self.value < other.value
 
     @staticmethod
-    def _determine_suit(suit_value: str) -> str:
+    def _check_card_id(card_id: str) -> str:
         """
-        determines the suite of the card based on the given value
-
-        :param suit_value: value of the cards suit
-        :return:
+        Private method used to check the ID passed for the card creation is valid and then assign it to the card object
         """
 
-        suit_mapping = {"C": "Clubs", "D": "Diamonds", "H": "Hearts", "S": "Spades"}
+        if len(card_id) != 2:
+            raise ValueError("Card ID provided must be exactly 2 characters long.")
 
-        if suit_value not in suit_mapping.keys():
-            raise ValueError(
-                f"Suit value '{suit_value}' is not in list of valid values '{suit_mapping.keys()}"
-            )
+        if card_id[0] not in CARD_ID_SUITS.keys():
+            raise ValueError(f"Card ID first character '{card_id[0]}' is not within valid list of "
+                             f"suit identifiers '{CARD_ID_SUITS.keys()}'")
 
-        return suit_mapping[suit_value]
+        if card_id[1] not in CARD_ID_RANKS.keys():
+            raise ValueError(f"Card ID second character '{card_id[1]}' is not within valid list of "
+                             f"rank identifiers '{CARD_ID_RANKS.keys()}'")
+
+        return card_id
 
     @staticmethod
-    def _determine_rank(rank_value: Union[str, int]) -> str:
+    def _determine_suit(card_id: str) -> str:
         """
-        returns the english rank of the card based on the value.
+        determines the suite of the card based on the card id value
 
-        :param rank_value: integer/str representing the value of the card between 2 and A
-        (where 2 represents a 2 and A represents an ace)
+        :param card_id: 2 character string representation of the card. First character representing Suit,
+        Second character representing the rank
+        :return: Suit value of the card
+        """
+
+        return CARD_ID_SUITS[card_id[0]]
+
+    @staticmethod
+    def _determine_rank(card_id: str) -> str:
+        """
+        returns the english rank of the card based on the card id value
+
+        :param card_id: 2 character string representation of the card. First character representing Suit,
+        Second character representing the rank
         :return: English rank of the card
         """
 
-        rank_mapping = {
-            "2": "Two",
-            "3": "Three",
-            "4": "Four",
-            "5": "Five",
-            "6": "Six",
-            "7": "Seven",
-            "8": "Eight",
-            "9": "Nine",
-            "10": "Ten",
-            "J": "Jack",
-            "Q": "Queen",
-            "K": "King",
-            "A": "Ace",
-        }
-
-        if str(rank_value) not in rank_mapping.keys():
-            raise ValueError(
-                f"Specified card rank {rank_value} is not in value mapping dictionary '{rank_mapping}'."
-            )
-
-        return rank_mapping[str(rank_value)]
+        return CARD_ID_RANKS[card_id[1]]
 
     @staticmethod
     def _determine_value(rank: str) -> int:
@@ -139,8 +138,9 @@ class Deck(object):
         cards = []
 
         for suit in ["H", "D", "C", "S"]:
-            for value in [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]:
-                cards.append(Card(value, suit))
+            for value in ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]:
+                card_id = f"{suit}{value}"
+                cards.append(Card(card_id))
 
         return cards
 
