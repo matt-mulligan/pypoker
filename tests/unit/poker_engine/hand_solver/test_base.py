@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from pytest import fixture, mark
 
-from tests.fixtures.cards import get_hand, get_hand_sets
+from fixtures.cards import get_hand, get_hand_sets
 from pypoker.deck import Card
 from pypoker.poker_engine.hand_solver.base import BaseHandSolver
 
