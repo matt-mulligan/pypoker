@@ -327,7 +327,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
     #############################
     #  OUTS TIEBREAKER METHODS  #
-    #############################
+    ######################1#######
 
     @staticmethod
     def _outs_tb_straight_flush(

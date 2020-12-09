@@ -1,6 +1,41 @@
-from pytest import mark
+from itertools import product
 
+from pytest import mark, fixture
+
+from pypoker.deck import Card
 from pypoker.engine.hand_solver.functions.outs import build_out_string, claim_out_strings
+
+
+##############
+#  Fixtures  #
+##############
+@fixture
+def utilised_outs_none():
+    return []
+
+
+@fixture
+def drawable_cards_all():
+    drawable_cards = []
+    for suit in ["S", "C", "D", "H"]:
+        for value in ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]:
+            drawable_cards.append(Card(f"{suit}{value}"))
+    return drawable_cards
+
+
+@fixture
+def expected_claim_all_spades_singles():
+    return sorted(["S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "ST", "SJ", "SQ", "SK", "SA"])
+
+
+@fixture
+def expected_claim_all_spades_single_wildcard(drawable_cards_all):
+    spades = ["S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "ST", "SJ", "SQ", "SK", "SA"]
+    all_cards = [card.identity for card in drawable_cards_all]
+    combos = product(spades, all_cards)
+    combos = [sorted(list(combo)) for combo in combos if len(set(combo)) == len(combo)]
+    combos = ["-".join(combo) for combo in combos]
+    return sorted(list(set(combos)))
 
 
 @mark.parametrize("suits, values, draws, expected", [
@@ -28,8 +63,12 @@ def test_when_build_out_string_then_correct_string_returned(suits, values, draws
 
 
 @mark.parametrize("utilised_outs, out_strings, drawable_cards, expected", [
-    ([], ["S*"], "drawable_cards_001", [])
+    ("utilised_outs_none", ["S*"], "drawable_cards_all", "expected_claim_all_spades_singles"),
+    ("utilised_outs_none", ["S*-**"], "drawable_cards_all", "expected_claim_all_spades_single_wildcard")
 ])
-def test_when_claim_out_strings_then_correct_values_claimed(utilised_outs, out_strings, drawable_cards, expected):
+def test_when_claim_out_strings_then_correct_values_claimed(utilised_outs, out_strings, drawable_cards, expected, request):
+    utilised_outs = request.getfixturevalue(utilised_outs)
+    drawable_cards = request.getfixturevalue(drawable_cards)
+    expected = request.getfixturevalue(expected)
     actual = claim_out_strings(utilised_outs, out_strings, drawable_cards)
     assert actual == expected

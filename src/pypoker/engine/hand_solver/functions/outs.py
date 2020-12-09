@@ -567,16 +567,18 @@ def _outs_high_card(hole_cards: List[Card], board_cards: List[Card], available_c
 def _create_combos_for_out_string(out_string: str, drawable_cards: List[Card]) -> List[str]:
     """
     Method to create all possible draw combinations with the drawable cards based on the out string provided.
+    each combination is represented by a string of the card ID's broken apart by dashes (-)
 
     :param out_string: string describing the out conditions
     :param drawable_card: list opf card objects representing all possible draw cards.
+    :return: List of strings representing the card outs
     """
 
     card_candidates = []
 
-    for card_str in out_string.split("-"):
-        suit = card_str[0]
-        value = card_str[1]
+    for out_component in out_string.split("-"):
+        suit = out_component[0]
+        value = out_component[1]
 
         if suit == "*" and value == "*":
             card_candidates.append([card.identity for card in drawable_cards])
@@ -597,11 +599,11 @@ def _create_combos_for_out_string(out_string: str, drawable_cards: List[Card]) -
                 ]
             )
         else:
-            card_candidates.append([card_str])
+            card_candidates.append([out_component])
 
     combos = product(*card_candidates)
     combos = [sorted(list(combo)) for combo in combos]
     combos = [combo for combo in combos if len(combo) == len(set(combo))]
-    combos.sort()
-    combos = list(combo for combo, _ in groupby(combos))
+    combos = ["-".join(combo) for combo in combos]
+    combos = sorted(list(set(combos)))
     return combos
