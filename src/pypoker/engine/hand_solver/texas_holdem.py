@@ -245,9 +245,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     scenario[OUT_STRING]
                     for scenario in player_out_scenarios[player_name]
                 ]
-                claimed_outs = self.claim_out_strings(
-                    utilised_outs, potential_outs, drawable_cards
-                )
+                claimed_outs = [self.claim_out_strings(utilised_outs, out_string, drawable_cards) for out_string in potential_outs]
+                claimed_outs = [item for sublist in claimed_outs for item in sublist]
+
                 wins[player_name] += len(claimed_outs)
                 utilised_outs.extend(claimed_outs)
             else:
@@ -260,7 +260,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
                         continue
                     for scenario in out_scenarios:
                         scenario["OUTS"] = self.claim_out_strings(
-                            utilised_outs, [scenario[OUT_STRING]], drawable_cards
+                            utilised_outs, scenario[OUT_STRING], drawable_cards
                         )
                         combined_outs[player].extend(scenario["OUTS"])
 

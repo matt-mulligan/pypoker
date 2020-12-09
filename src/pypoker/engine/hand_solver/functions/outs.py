@@ -21,7 +21,7 @@ from pypoker.engine.hand_solver.utils import get_all_combinations
 ####################
 #  PUBLIC METHODS  #
 ####################
-def find_outs_scenarios(game_type: str, hand_type: str, **kwargs: Dict) -> str:
+def find_outs_scenarios(game_type: str, hand_type: str, **kwargs) -> str:
     """
     Public method to find any outs sceanrios that are possible for the given hand and the given hand type
 
@@ -120,25 +120,19 @@ def build_out_string(suits: List[str], values: List[int], draws: int) -> str:
     return "-".join(out_string_parts)
 
 
-def claim_out_strings(utilised_outs: List[str], out_strings: List[str], drawable_cards: List[Card]) -> List[str]:
+def claim_out_string(utilised_outs: List[str], out_string: str, drawable_cards: List[Card]) -> List[str]:
     """
     Public method to claim all possible out combinations for the cards given
 
     :param utilised_outs: List of out strings that have already been claimed
-    :param out_strings: List of out strings that we want to assess for claiming
+    :param out_string: out string that we want to assess for claiming
     :param drawable_cards: List of card objects representing all of the cards yet to be drawn
     """
 
-    test_outs = utilised_outs.copy()
-    claimed_outs = []
+    combos = _create_card_combinations_for_out_string(out_string, drawable_cards)
+    combos = [combo for combo in combos if combo not in utilised_outs]
 
-    for out in out_strings:
-        combos = _create_combos_for_out_string(out, drawable_cards)
-        combos = [combo for combo in combos if combo not in test_outs]
-        test_outs.extend(combos)
-        claimed_outs.extend(combos)
-
-    return claimed_outs
+    return combos
 
 
 ###################################################
@@ -203,6 +197,11 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
             ):
                 usable_cards = drawn_suit_cards + hypothetical_draw_cards
                 usable_card_vals = [card.value for card in usable_cards]
+
+                # Account for the possibility of an 5->A straight
+                if 14 in usable_card_vals:
+                    usable_card_vals.append(1)
+
                 usable_card_vals.sort()
 
                 gaps = [
@@ -224,6 +223,13 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
                         for card in hypothetical_draw_cards
                     )
                 ]
+
+                # handling for a 5->1 straight
+                for run in runs:
+                    if run[1] - run[0] >= 4 and run == (1, 5):
+                        non_ace_draw_cards = [card for card in hypothetical_draw_cards if card.value != 14]
+                        if all((run[1] - 4) <= card.value <= run[1] for card in non_ace_draw_cards):
+                            qualifying_straights.append(run)
 
                 for straight_vals in qualifying_straights:
                     suits = []
@@ -564,7 +570,7 @@ def _outs_high_card(hole_cards: List[Card], board_cards: List[Card], available_c
 ############################
 #  Private helper methods  #
 ############################
-def _create_combos_for_out_string(out_string: str, drawable_cards: List[Card]) -> List[str]:
+def _create_card_combinations_for_out_string(out_string: str, drawable_cards: List[Card]) -> List[str]:
     """
     Method to create all possible draw combinations with the drawable cards based on the out string provided.
     each combination is represented by a string of the card ID's broken apart by dashes (-)
