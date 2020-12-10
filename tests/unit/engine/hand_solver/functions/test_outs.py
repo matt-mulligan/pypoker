@@ -4,7 +4,8 @@ from pytest import mark, fixture, raises
 
 from fixtures.cards import get_hand
 from pypoker.deck import Card, Deck
-from pypoker.engine.hand_solver.functions.outs import build_out_string, claim_out_string, find_outs_scenarios
+from pypoker.engine.hand_solver.functions.outs import build_out_string, claim_out_string, find_outs_scenarios, \
+    tiebreak_outs_draw
 
 
 ##############
@@ -796,3 +797,65 @@ def test_when_find_outs_scenarios_then_correct_out_scenarios_returned(
     )
 
     assert actual == expected
+
+
+def test_when_tiebreak_outs_draw_and_bad_game_type_then_raise_error():
+    with raises(ValueError, match="Game type provided 'BAD_GAME_TYPE' is not an acceptable value"):
+        tiebreak_outs_draw("BAD_GAME_TYPE", "Straight Flush")
+
+
+def test_when_tiebreak_outs_draw_and_bad_hand_type_then_raise_error():
+    with raises(ValueError, match="Hand type provided 'WINNING_HAND_TYPE' is not an acceptable value"):
+        tiebreak_outs_draw("Texas Holdem", "WINNING_HAND_TYPE")
+
+
+@mark.parametrize("game_type, hand_type, kwargs", [
+    ("Texas Holdem", "Straight Flush", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Quads", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Full House", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Flush", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Straight", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Trips", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Two Pair", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Pair", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "High Card", {"DERP": "WHOOPS"}),
+    ("Texas Holdem", "Straight Flush", {}),
+    ("Texas Holdem", "Quads", {}),
+    ("Texas Holdem", "Full House", {}),
+    ("Texas Holdem", "Flush", {}),
+    ("Texas Holdem", "Straight", {}),
+    ("Texas Holdem", "Trips", {}),
+    ("Texas Holdem", "Two Pair", {}),
+    ("Texas Holdem", "Pair", {}),
+    ("Texas Holdem", "High Card", {})
+])
+def test_when_tiebreak_outs_draw_and_incorrect_kwargs_passed_then_raise_error(game_type, hand_type, kwargs):
+    with raises(ValueError, match=f"Kwargs object '{kwargs}' does not contain all keys required for "
+                                  f"this method"):
+        tiebreak_outs_draw(game_type, hand_type, **kwargs)
+
+
+@mark.parametrize("game_type, hand_type, kwargs", [
+    ("Texas Holdem", "Straight Flush",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Quads",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Full House",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Flush",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Straight",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Trips",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Two Pair",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "Pair",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+    ("Texas Holdem", "High Card",
+     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+
+])
+def test_when_tiebreak_outs_draw_and_too_many_kwargs_passed_then_raise_error(game_type, hand_type, kwargs):
+    with raises(ValueError, match=f"Kwargs object '{kwargs}' contains additional keys from what is expected"):
+        tiebreak_outs_draw(game_type, hand_type, **kwargs)

@@ -85,6 +85,43 @@ def find_outs_scenarios(game_type: str, hand_type: str, **kwargs) -> str:
     return describe_method(**kwargs)
 
 
+def tiebreak_outs_draw(game_type: str, hand_type: str, **kwargs) -> str:
+    """
+    Public method used to determine the winner of a possible draw if more than one player is claiming it for a
+    specific hand type.
+    This method utilises the tiebreaker information built by the "find_outs_scenarios" method as well as the
+    players own hole cards and board/draw cards if required.
+    """
+
+    _check_game_type(game_type)
+    _check_hand_type(game_type, hand_type)
+    tb_key = f"{game_type}-{hand_type}"
+
+    kwargs_required_keys, describe_method = {
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_straight_flush),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_quads),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_full_house),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_flush),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_straight),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_trips),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_two_pair),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_pair),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}":
+            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_high_card),
+    }[tb_key]
+
+    _check_kwargs(kwargs, kwargs_required_keys)
+    return describe_method(**kwargs)
+
+
 def build_out_string(suits: List[str], values: List[int], draws: int) -> str:
     """
     THis public shared method will produce a list of out strings, that represent what cards can be drawn to give
@@ -155,9 +192,9 @@ def claim_out_string(utilised_outs: List[str], out_string: str, drawable_cards: 
     return combos
 
 
-###################################################
-#  PRIVATE IMPLEMENTATION METHODS - TEXAS HOLDEM  #
-###################################################
+##########################################################
+#  PRIVATE IMPLEMENTATION METHODS - OUTS - TEXAS HOLDEM  #
+##########################################################
 def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
@@ -689,6 +726,433 @@ def _outs_high_card(hole_cards: List[Card], board_cards: List[Card], available_c
 
     return draw_scenarios
 
+
+#######################################################################
+#  PRIVATE IMPLEMENTATION METHODS - OUTS TIEBRERAKERS - TEXAS HOLDEM  #
+#######################################################################
+def _outs_tb_straight_flush(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger straight flush hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
+    winners = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker == max_tiebreaker
+    ]
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_quads(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger quads hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
+    possible_winners = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker == max_tiebreaker
+    ]
+
+    if len(possible_winners) == 1:
+        return possible_winners[0]
+
+    player_kickers = {}
+    for player in possible_winners:
+        player_values = [card.value for card in hole_cards[player]]
+        player_values.extend([card.value for card in board_cards])
+        player_values.extend([card.value for card in drawn_cards])
+        player_values = [
+            value for value in player_values if value != max_tiebreaker
+        ]
+
+        player_kickers[player] = max(player_values)
+
+    max_kicker = max([kicker for kicker in player_kickers.values()])
+    winners = [
+        player for player, kicker in player_kickers.items() if kicker == max_kicker
+    ]
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_full_house(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger full house hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_trips = max([tiebreaker[0] for tiebreaker in tiebreakers.values()])
+    max_trips_players = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker[0] == max_trips
+    ]
+
+    if len(max_trips_players) == 1:
+        return max_trips_players[0]
+
+    max_pair = max(
+        [
+            tiebreaker[1]
+            for player, tiebreaker in tiebreakers.items()
+            if player in max_trips_players
+        ]
+    )
+    max_pair_players = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker[1] == max_pair and player in max_trips_players
+    ]
+
+    return (
+        max_pair_players[0]
+        if len(max_pair_players) == 1
+        else f"TIE({','.join(max_pair_players)})"
+    )
+
+
+def _outs_tb_flush(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger flush hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    player_flush_values = {}
+    for player, cards in hole_cards.items():
+        flush_values = [
+            card.value for card in cards if card.suit == tiebreakers[player]
+        ]
+        flush_values.extend(
+            [card.value for card in board_cards if card.suit == tiebreakers[player]]
+        )
+        flush_values.extend(
+            [card.value for card in drawn_cards if card.suit == tiebreakers[player]]
+        )
+
+        player_flush_values[player] = sorted(flush_values, reverse=True)
+
+    winners = [player for player in hole_cards.keys()]
+
+    for index in range(5):
+        max_index_value = max(
+            [
+                values[index]
+                for player, values in player_flush_values.items()
+                if player in winners
+            ]
+        )
+
+        winners = [
+            player
+            for player in winners
+            if player_flush_values[player][index] == max_index_value
+        ]
+
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_straight(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger straight hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
+    winners = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker == max_tiebreaker
+    ]
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_trips(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger trips hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
+    possible_winners = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker == max_tiebreaker
+    ]
+
+    if len(possible_winners) == 1:
+        return possible_winners[0]
+
+    player_kickers = {}
+    for player in possible_winners:
+        player_values = [card.value for card in hole_cards[player]]
+        player_values.extend([card.value for card in board_cards])
+        player_values.extend([card.value for card in drawn_cards])
+        player_values = [
+            value for value in player_values if value != max_tiebreaker
+        ]
+
+        player_kickers[player] = sorted(player_values, reverse=True)
+
+    winners = [player for player in possible_winners]
+    for index in range(2):
+        max_index_value = max(
+            [
+                values[index]
+                for player, values in player_kickers.items()
+                if player in winners
+            ]
+        )
+
+        winners = [
+            player
+            for player in winners
+            if player_kickers[player][index] == max_index_value
+        ]
+
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_two_pair(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger two pair hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_high_pair = max([tiebreaker[0] for tiebreaker in tiebreakers.values()])
+    max_high_pair_players = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker[0] == max_high_pair
+    ]
+
+    if len(max_high_pair_players) == 1:
+        return max_high_pair_players[0]
+
+    max_low_pair = max(
+        [
+            tiebreaker[1]
+            for player, tiebreaker in tiebreakers.items()
+            if player in max_high_pair_players
+        ]
+    )
+    max_low_pair_players = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker[1] == max_low_pair and player in max_high_pair_players
+    ]
+
+    if len(max_low_pair_players) == 1:
+        return max_low_pair_players[0]
+
+    player_kickers = {}
+    for player in max_low_pair_players:
+        player_values = [card.value for card in hole_cards[player]]
+        player_values.extend([card.value for card in board_cards])
+        player_values.extend([card.value for card in drawn_cards])
+        player_values = [
+            value
+            for value in player_values
+            if value not in [max_high_pair, max_low_pair]
+        ]
+
+        player_kickers[player] = max(player_values)
+
+    max_kicker = max([kicker for kicker in player_kickers.values()])
+    winners = [
+        player for player, kicker in player_kickers.items() if kicker == max_kicker
+    ]
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_pair(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger pair hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    max_tiebreaker = max([tiebreaker for tiebreaker in tiebreakers.values()])
+    possible_winners = [
+        player
+        for player, tiebreaker in tiebreakers.items()
+        if tiebreaker == max_tiebreaker
+    ]
+
+    if len(possible_winners) == 1:
+        return possible_winners[0]
+
+    player_kickers = {}
+    for player in possible_winners:
+        player_values = [card.value for card in hole_cards[player]]
+        player_values.extend([card.value for card in board_cards])
+        player_values.extend([card.value for card in drawn_cards])
+        player_values = [
+            value for value in player_values if value != max_tiebreaker
+        ]
+
+        player_kickers[player] = sorted(player_values, reverse=True)
+
+    winners = [player for player in possible_winners]
+    for index in range(3):
+        max_index_value = max(
+            [
+                values[index]
+                for player, values in player_kickers.items()
+                if player in winners
+            ]
+        )
+
+        winners = [
+            player
+            for player in winners
+            if player_kickers[player][index] == max_index_value
+        ]
+
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+
+
+def _outs_tb_high_card(
+    tiebreakers: Dict,
+    hole_cards: Dict[str, List[Card]],
+    board_cards: List[Card],
+    drawn_cards: List[Card],
+) -> str:
+    """
+    Private method to determine which player would have the stronger high card hand. given the drawn cards.
+
+    :param tiebreakers: dictionary of each players tiebreak information for this draw.
+    :param hole_cards: dictionary of each players hole cards
+    :param board_cards: List of the board cards that have been dealt
+    :param drawn_cards: List of cards that would be drawn in this scenario
+
+    :return: Name of the winning player. if a tie occurs, then return a TIE(<PLAYER_NAMES>) where PLAYER_NAMES is
+             a comma-separated list of the players who have tied
+    """
+
+    player_kickers = {}
+    for player in hole_cards.keys():
+        player_values = [card.value for card in hole_cards[player]]
+        player_values.extend([card.value for card in board_cards])
+        player_values.extend([card.value for card in drawn_cards])
+
+        player_kickers[player] = sorted(player_values, reverse=True)
+
+    winners = [player for player in tiebreakers.keys()]
+    for index in range(5):
+        max_index_value = max(
+            [
+                values[index]
+                for player, values in player_kickers.items()
+                if player in winners
+            ]
+        )
+
+        winners = [
+            player
+            for player in winners
+            if player_kickers[player][index] == max_index_value
+        ]
+
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
 
 ############################
