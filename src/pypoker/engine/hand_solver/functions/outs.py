@@ -99,15 +99,15 @@ def tiebreak_outs_draw(game_type: str, hand_type: str, **kwargs) -> str:
 
     kwargs_required_keys, describe_method = {
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_straight_flush),
+            (["tiebreakers"], _outs_tb_straight_flush),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}":
             (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_quads),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_full_house),
+            (["tiebreakers"], _outs_tb_full_house),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}":
             (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_flush),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_straight),
+            (["tiebreakers"], _outs_tb_straight),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}":
             (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_trips),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}":

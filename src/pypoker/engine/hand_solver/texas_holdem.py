@@ -10,7 +10,8 @@ from pypoker.engine.hand_solver.constants import (
     HAND_DESCRIPTION,
     TIEBREAKER,
     OUT_STRING, HAND_TYPE_STRAIGHT_FLUSH, HAND_TYPE_QUADS, HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT,
-    HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD, GAME_TYPE_TEXAS_HOLDEM,
+    HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD, GAME_TYPE_TEXAS_HOLDEM, TB_DRAWS_KWAGRS,
+    TB_DRAWS_KWARGS_ALL, TB_DRAWS_KWARGS_TIEBREAKER,
 )
 from pypoker.engine.hand_solver.functions import hand_test, rank_hand_type, describe_hand, find_outs_scenarios
 from pypoker.engine.hand_solver.functions.outs import claim_out_string, tiebreak_outs_draw
@@ -251,9 +252,13 @@ class TexasHoldemHandSolver(BaseHandSolver):
                             hole_cards[player] = player_hole_cards[player]
 
                         drawn_cards = [Card(card_id) for card_id in out_ids]
-                        winner = tiebreak_outs_draw(GAME_TYPE_TEXAS_HOLDEM, self._hand_rankings[HAND_TITLE],
-                            tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
-                        )
+                        kwarg_set = TB_DRAWS_KWAGRS[self._hand_rankings[HAND_TITLE]]
+                        kwargs = {
+                            TB_DRAWS_KWARGS_ALL: {"tiebreakers": tiebreakers, "hole_cards": hole_cards,
+                                                  "board_cards": board_cards, "drawn_cards": drawn_cards},
+                            TB_DRAWS_KWARGS_TIEBREAKER: {"tiebreakers": tiebreakers}
+                        }[kwarg_set]
+                        winner = tiebreak_outs_draw(GAME_TYPE_TEXAS_HOLDEM, hand_info[HAND_TITLE], **kwargs)
                         if winner not in wins.keys():
                             wins[winner] = 1
                         else:

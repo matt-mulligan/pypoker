@@ -2,8 +2,9 @@ from itertools import product
 
 from pytest import mark, fixture, raises
 
-from fixtures.cards import get_hand
+from fixtures.cards import get_hand, get_player_hands_dict
 from pypoker.deck import Card, Deck
+from pypoker.engine.hand_solver.constants import GAME_TYPE_TEXAS_HOLDEM
 from pypoker.engine.hand_solver.functions.outs import build_out_string, claim_out_string, find_outs_scenarios, \
     tiebreak_outs_draw
 
@@ -708,92 +709,205 @@ def test_when_find_outs_scenarios_and_too_many_kwargs_passed_then_raise_error(ga
         find_outs_scenarios(game_type, hand_type, **kwargs)
 
 
-@mark.parametrize("game_type, hand_type, hole_cards, board_cards, non_available_cards, expected", [
-    ("Texas Holdem", "Straight Flush", ["S8", "ST"], ["C2", "S9", "H4", "S7"], ["S8", "ST", "C2", "S9", "S7"], "out_scenarios_straight_flush_001"),
-    ("Texas Holdem", "Straight Flush", ["S7", "ST"], ["C2", "S9", "S6"], ["S7", "ST", "C2", "S9", "S6"], "out_scenarios_straight_flush_002"),
-    ("Texas Holdem", "Straight Flush", ["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_flush_003"),
-    ("Texas Holdem", "Straight Flush", ["S7", "H4"], ["H5", "HA", "C3"], ["S7", "H4", "H5", "HA", "C3"], "out_scenarios_straight_flush_004"),
-    ("Texas Holdem", "Straight Flush", ["H7", "H4"], ["H5", "H6", "H8"], ["H7", "H4", "H5", "H6", "H8"], "out_scenarios_straight_flush_005"),
-    ("Texas Holdem", "Straight Flush", ["S7", "H4"], ["H5", "SA", "C3"], ["S7", "H4", "H5", "SA", "C3"], "out_scenarios_none"),
-    ("Texas Holdem", "Straight Flush", ["CK", "DT"], ["D9", "D7", "D6"], ["CK", "DT", "D9", "D7", "D6", "D8"], "out_scenarios_none"),
-    ("Texas Holdem", "Quads", ["H4", "C4"], ["S5", "C2", "DK"], ["H4", "C4", "S5", "C2", "DK"], "out_scenarios_quads_001"),
-    ("Texas Holdem", "Quads", ["H4", "C4"], ["S5", "D5", "DK"], ["H4", "C4", "S5", "D5", "DK"], "out_scenarios_quads_002"),
-    ("Texas Holdem", "Quads", ["H4", "C4"], ["S4", "D5", "DK"], ["H4", "C4", "S4", "D5", "DK"], "out_scenarios_quads_003"),
-    ("Texas Holdem", "Quads", ["HK", "CA"], [], ["HK", "CA"], "out_scenarios_quads_004"),
-    ("Texas Holdem", "Quads", ["H7", "C7"], ["S7", "D5", "DK", "SK"], ["H7", "C7", "S7", "D5", "DK", "SK"], "out_scenarios_quads_005"),
-    ("Texas Holdem", "Quads", ["HK", "CA"], ["CK", "DA", "D8", "C7"], ["HK", "CA", "CK", "DA", "D8", "C7"], "out_scenarios_none"),
-    ("Texas Holdem", "Quads", ["HK", "CA"], ["CK", "DA", "D8"], ["HK", "CK", "DK", "CA", "DA", "SA", "D8"], "out_scenarios_none"),
-    ("Texas Holdem", "Quads", ["HK", "CK"], ["DK", "SK", "D8"], ["HK", "CK", "DK", "SK", "D8"], "out_scenarios_none"),
-    ("Texas Holdem", "Full House", ["HK", "DA"], ["CK", "SA", "C7", "D9"], ["HK", "DA", "CK", "SA", "C7", "D9"], "out_scenarios_full_house_001"),
-    ("Texas Holdem", "Full House", ["HK", "DK"], ["CK", "SA", "C7", "D4"], ["HK", "DK", "CK", "SA", "C7", "D4"], "out_scenarios_full_house_002"),
-    ("Texas Holdem", "Full House", ["HK", "DK"], ["C9", "S9", "C7", "D7"], ["HK", "DK", "C9", "S9", "C7", "D7"],
-     "out_scenarios_full_house_003"),
-    ("Texas Holdem", "Full House", ["HK", "DK"], ["CK", "S7", "C7", "C9"], ["HK", "DK", "CK", "S7", "C7", "C9"],
-     "out_scenarios_full_house_004"),
-    ("Texas Holdem", "Full House", ["H7", "D7"], ["C7", "SQ", "C5"], ["H7", "D7", "C7", "SQ", "C5"],
-     "out_scenarios_full_house_005"),
-    ("Texas Holdem", "Full House", ["HQ", "DQ"], [], ["HQ", "DQ"], "out_scenarios_full_house_006"),
-    ("Texas Holdem", "Full House", ["HQ", "DQ"], ["SK", "D2", "H8"], ["HQ", "DQ", "SK", "D2", "H8"], "out_scenarios_full_house_007"),
-    ("Texas Holdem", "Full House", ["HQ", "DT"], ["SK", "D2", "H8"], ["HQ", "DT", "SK", "D2", "H8"],
-     "out_scenarios_none"),
-    ("Texas Holdem", "Full House", ["HQ", "DT"], ["SK", "D2", "H8", "HK"], ["HQ", "DT", "SK", "D2", "H8", "HK"],
-     "out_scenarios_none"),
-    ("Texas Holdem", "Full House", ["HQ", "DT"], ["SQ", "CT", "H8"], ["HQ", "DT", "SQ", "CT", "H8", "CQ", "DQ", "HT", "ST", "C8", "S8", "D8"],
-     "out_scenarios_none"),
-    ("Texas Holdem", "Flush", ["HQ", "DT"], ["HK", "D2", "H8"], ["HQ", "DT", "HK", "D2", "H8"], "out_scenarios_flush_001"),
-    ("Texas Holdem", "Flush", ["HQ", "HT"], ["HK", "D2", "H8"], ["HQ", "HT", "HK", "D2", "H8"], "out_scenarios_flush_002"),
-    ("Texas Holdem", "Flush", ["HQ", "DT"], ["HK", "D2", "H8", "H2"], ["HQ", "DT", "HK", "D2", "H8", "H2"], "out_scenarios_flush_003"),
-    ("Texas Holdem", "Flush", ["HQ", "HT"], [], ["HQ", "HT"], "out_scenarios_flush_004"),
-    ("Texas Holdem", "Flush", ["HJ", "H9"], ["H5", "H2", "H6"], ["HJ", "H9", "H5", "H2", "H6"], "out_scenarios_flush_005"),
-    ("Texas Holdem", "Flush", ["HJ", "C9"], ["S5", "D2", "C6"], ["HJ", "C9", "S5", "D2", "C6"], "out_scenarios_none"),
-    ("Texas Holdem", "Flush", ["HJ", "C9"], ["S5", "D2", "C6", "C2"], ["HJ", "C9", "S5", "D2", "C6", "C2"], "out_scenarios_none"),
-    ("Texas Holdem", "Straight", ["S8", "HT"], ["C2", "C9", "H4", "S7"], ["S8", "HT", "C2", "C9", "H4", "S7"], "out_scenarios_straight_001"),
-    ("Texas Holdem", "Straight", ["S7", "HT"], ["C2", "S9", "D6"], ["S7", "HT", "C2", "S9", "D6"], "out_scenarios_straight_002"),
-    ("Texas Holdem", "Straight", ["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_003"),
-    ("Texas Holdem", "Straight", ["S7", "H4"], ["C5", "HA", "C3"], ["S7", "H4", "C5", "HA", "C3"], "out_scenarios_straight_004"),
-    ("Texas Holdem", "Straight", ["H7", "C4"], ["H5", "S6", "D8"], ["H7", "C4", "H5", "S6", "D8"], "out_scenarios_straight_005"),
-    ("Texas Holdem", "Straight", ["H7", "C4"], ["HK", "SJ", "DJ"], ["H7", "C4", "HK", "SJ", "DJ"], "out_scenarios_none"),
-    ("Texas Holdem", "Straight", ["H7", "C4"], ["H6", "S3", "DJ"], ["H7", "C4", "H6", "S3", "DJ", "S5", "C5", "H5", "D5"], "out_scenarios_none"),
-    ("Texas Holdem", "Trips", ["H3", "D3"], ["C2", "D2", "S9"], ["H3", "D3", "C2", "D2", "S9"], "out_scenarios_trips_001"),
-    ("Texas Holdem", "Trips", ["H3", "D7"], ["C2", "D9", "SK"], ["H3", "D7", "C2", "D9", "SK"],
-     "out_scenarios_trips_002"),
-    ("Texas Holdem", "Trips", ["H7", "D7"], ["C7", "D6", "SK"], ["H7", "D7", "C7", "D6", "SK"], "out_scenarios_trips_003"),
-    ("Texas Holdem", "Trips", ["H7", "DA"], [], ["H7", "DA"], "out_scenarios_trips_004"),
-    ("Texas Holdem", "Trips", ["H7", "DA"], ["C2", "D5", "CQ", "ST"], ["H7", "DA", "C2", "D5", "CQ", "ST"], "out_scenarios_none"),
-    ("Texas Holdem", "Trips", ["H7", "D7"], ["C2", "D5", "CQ", "ST"], ["H7", "D7", "C2", "D5", "CQ", "ST", "C7", "S7"], "out_scenarios_none"),
-    ("Texas Holdem", "Two Pair", ["H9", "CJ"], ["D2", "S6", "HK"], ["H9", "CJ", "D2", "S6", "HK"],
-     "out_scenarios_two_pair_001"),
-    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D2", "S6", "HK", "D8"], ["H9", "C9", "D2", "S6", "HK", "D8"],
-     "out_scenarios_two_pair_002"),
-    ("Texas Holdem", "Two Pair", ["H6", "C6"], ["D2", "S8", "HK"], ["H6", "C6", "D2", "S8", "HK"],
-     "out_scenarios_two_pair_003"),
-    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D6", "S6", "HK", "S4"], ["H9", "C9", "D6", "S6", "HK", "S4"],
-     "out_scenarios_two_pair_004"),
-    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D8", "S8", "HK"], ["H9", "C9", "D8", "S8", "HK"],
-     "out_scenarios_two_pair_005"),
-    ("Texas Holdem", "Two Pair", ["H9", "C7"], [], ["H9", "C7"],
-     "out_scenarios_two_pair_006"),
-    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D9", "S9", "HK", "S3"], ["H9", "C9", "D9", "S9", "HK", "S3"],
-     "out_scenarios_two_pair_007"),
-    ("Texas Holdem", "Two Pair", ["H9", "C7"], ["D6", "S2", "HK", "SJ"], ["H9", "C7", "D6", "S2", "HK", "SJ"],
-     "out_scenarios_none"),
-    ("Texas Holdem", "Pair", ["C2", "D4"], ["H8", "CK", "CA", "D3"], ["C2", "D4", "H8", "CK", "CA", "D3"], "out_scenarios_pair_001"),
-    ("Texas Holdem", "Pair", ["D5", "H3"], [], ["D5", "H3"], "out_scenarios_pair_002"),
-    ("Texas Holdem", "Pair", ["D7", "H7"], ["C4", "S8", "DT"], ["D7", "H7" "C4", "S8", "DT"], "out_scenarios_pair_003"),
-    ("Texas Holdem", "Pair", ["D7", "H7"], ["C8", "S8", "DT", "C6"], ["D7", "H7", "C8", "S8", "DT", "C6"], "out_scenarios_pair_004"),
-    ("Texas Holdem", "High Card", ["D7", "HQ"], ["C8", "S2", "DT", "C6"], ["D7", "HQ", "C8", "S2", "DT", "C6"], "out_scenarios_high_card_001"),
-    ("Texas Holdem", "High Card", ["D7", "HJ"], [], ["D7", "HJ"], "out_scenarios_high_card_002")
-
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["S8", "ST"], ["C2", "S9", "H4", "S7"], ["S8", "ST", "C2", "S9", "S7"], "out_scenarios_straight_flush_001"),
+    (["S7", "ST"], ["C2", "S9", "S6"], ["S7", "ST", "C2", "S9", "S6"], "out_scenarios_straight_flush_002"),
+    (["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_flush_003"),
+    (["S7", "H4"], ["H5", "HA", "C3"], ["S7", "H4", "H5", "HA", "C3"], "out_scenarios_straight_flush_004"),
+    (["H7", "H4"], ["H5", "H6", "H8"], ["H7", "H4", "H5", "H6", "H8"], "out_scenarios_straight_flush_005"),
+    (["S7", "H4"], ["H5", "SA", "C3"], ["S7", "H4", "H5", "SA", "C3"], "out_scenarios_none"),
+    (["CK", "DT"], ["D9", "D7", "D6"], ["CK", "DT", "D9", "D7", "D6", "D8"], "out_scenarios_none"),
 ])
-def test_when_find_outs_scenarios_then_correct_out_scenarios_returned(
-        game_type, hand_type, hole_cards, board_cards, non_available_cards, expected, request
+def test_when_find_outs_scenarios_and_texas_holdem_and_straight_flush_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
 ):
     hole_cards = [Card(card) for card in hole_cards]
     board_cards = [Card(card) for card in board_cards]
     available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
     expected = request.getfixturevalue(expected)
     actual = find_outs_scenarios(
-        game_type, hand_type, hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+        "Texas Holdem", "Straight Flush", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["H4", "C4"], ["S5", "C2", "DK"], ["H4", "C4", "S5", "C2", "DK"], "out_scenarios_quads_001"),
+    (["H4", "C4"], ["S5", "D5", "DK"], ["H4", "C4", "S5", "D5", "DK"], "out_scenarios_quads_002"),
+    (["H4", "C4"], ["S4", "D5", "DK"], ["H4", "C4", "S4", "D5", "DK"], "out_scenarios_quads_003"),
+    (["HK", "CA"], [], ["HK", "CA"], "out_scenarios_quads_004"),
+    (["H7", "C7"], ["S7", "D5", "DK", "SK"], ["H7", "C7", "S7", "D5", "DK", "SK"], "out_scenarios_quads_005"),
+    (["HK", "CA"], ["CK", "DA", "D8", "C7"], ["HK", "CA", "CK", "DA", "D8", "C7"], "out_scenarios_none"),
+    (["HK", "CA"], ["CK", "DA", "D8"], ["HK", "CK", "DK", "CA", "DA", "SA", "D8"], "out_scenarios_none"),
+    (["HK", "CK"], ["DK", "SK", "D8"], ["HK", "CK", "DK", "SK", "D8"], "out_scenarios_none"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_quads_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Quads", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["HK", "DA"], ["CK", "SA", "C7", "D9"], ["HK", "DA", "CK", "SA", "C7", "D9"], "out_scenarios_full_house_001"),
+    (["HK", "DK"], ["CK", "SA", "C7", "D4"], ["HK", "DK", "CK", "SA", "C7", "D4"], "out_scenarios_full_house_002"),
+    (["HK", "DK"], ["C9", "S9", "C7", "D7"], ["HK", "DK", "C9", "S9", "C7", "D7"], "out_scenarios_full_house_003"),
+    (["HK", "DK"], ["CK", "S7", "C7", "C9"], ["HK", "DK", "CK", "S7", "C7", "C9"], "out_scenarios_full_house_004"),
+    (["H7", "D7"], ["C7", "SQ", "C5"], ["H7", "D7", "C7", "SQ", "C5"], "out_scenarios_full_house_005"),
+    (["HQ", "DQ"], [], ["HQ", "DQ"], "out_scenarios_full_house_006"),
+    (["HQ", "DQ"], ["SK", "D2", "H8"], ["HQ", "DQ", "SK", "D2", "H8"], "out_scenarios_full_house_007"),
+    (["HQ", "DT"], ["SK", "D2", "H8"], ["HQ", "DT", "SK", "D2", "H8"], "out_scenarios_none"),
+    (["HQ", "DT"], ["SK", "D2", "H8", "HK"], ["HQ", "DT", "SK", "D2", "H8", "HK"], "out_scenarios_none"),
+    (["HQ", "DT"], ["SQ", "CT", "H8"], ["HQ", "DT", "SQ", "CT", "H8", "CQ", "DQ", "HT", "ST", "C8", "S8", "D8"],
+     "out_scenarios_none"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_full_house_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Full House", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["HQ", "DT"], ["HK", "D2", "H8"], ["HQ", "DT", "HK", "D2", "H8"], "out_scenarios_flush_001"),
+    (["HQ", "HT"], ["HK", "D2", "H8"], ["HQ", "HT", "HK", "D2", "H8"], "out_scenarios_flush_002"),
+    (["HQ", "DT"], ["HK", "D2", "H8", "H2"], ["HQ", "DT", "HK", "D2", "H8", "H2"], "out_scenarios_flush_003"),
+    (["HQ", "HT"], [], ["HQ", "HT"], "out_scenarios_flush_004"),
+    (["HJ", "H9"], ["H5", "H2", "H6"], ["HJ", "H9", "H5", "H2", "H6"], "out_scenarios_flush_005"),
+    (["HJ", "C9"], ["S5", "D2", "C6"], ["HJ", "C9", "S5", "D2", "C6"], "out_scenarios_none"),
+    (["HJ", "C9"], ["S5", "D2", "C6", "C2"], ["HJ", "C9", "S5", "D2", "C6", "C2"], "out_scenarios_none"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_flush_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Flush", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["S8", "HT"], ["C2", "C9", "H4", "S7"], ["S8", "HT", "C2", "C9", "H4", "S7"], "out_scenarios_straight_001"),
+    (["S7", "HT"], ["C2", "S9", "D6"], ["S7", "HT", "C2", "S9", "D6"], "out_scenarios_straight_002"),
+    (["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_003"),
+    (["S7", "H4"], ["C5", "HA", "C3"], ["S7", "H4", "C5", "HA", "C3"], "out_scenarios_straight_004"),
+    (["H7", "C4"], ["H5", "S6", "D8"], ["H7", "C4", "H5", "S6", "D8"], "out_scenarios_straight_005"),
+    (["H7", "C4"], ["HK", "SJ", "DJ"], ["H7", "C4", "HK", "SJ", "DJ"], "out_scenarios_none"),
+    (["H7", "C4"], ["H6", "S3", "DJ"], ["H7", "C4", "H6", "S3", "DJ", "S5", "C5", "H5", "D5"], "out_scenarios_none"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_straight_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Straight", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["H3", "D3"], ["C2", "D2", "S9"], ["H3", "D3", "C2", "D2", "S9"], "out_scenarios_trips_001"),
+    (["H3", "D7"], ["C2", "D9", "SK"], ["H3", "D7", "C2", "D9", "SK"], "out_scenarios_trips_002"),
+    (["H7", "D7"], ["C7", "D6", "SK"], ["H7", "D7", "C7", "D6", "SK"], "out_scenarios_trips_003"),
+    (["H7", "DA"], [], ["H7", "DA"], "out_scenarios_trips_004"),
+    (["H7", "DA"], ["C2", "D5", "CQ", "ST"], ["H7", "DA", "C2", "D5", "CQ", "ST"], "out_scenarios_none"),
+    (["H7", "D7"], ["C2", "D5", "CQ", "ST"], ["H7", "D7", "C2", "D5", "CQ", "ST", "C7", "S7"], "out_scenarios_none"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_trips_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Trips", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["H9", "CJ"], ["D2", "S6", "HK"], ["H9", "CJ", "D2", "S6", "HK"], "out_scenarios_two_pair_001"),
+    (["H9", "C9"], ["D2", "S6", "HK", "D8"], ["H9", "C9", "D2", "S6", "HK", "D8"], "out_scenarios_two_pair_002"),
+    (["H6", "C6"], ["D2", "S8", "HK"], ["H6", "C6", "D2", "S8", "HK"], "out_scenarios_two_pair_003"),
+    (["H9", "C9"], ["D6", "S6", "HK", "S4"], ["H9", "C9", "D6", "S6", "HK", "S4"], "out_scenarios_two_pair_004"),
+    (["H9", "C9"], ["D8", "S8", "HK"], ["H9", "C9", "D8", "S8", "HK"], "out_scenarios_two_pair_005"),
+    (["H9", "C7"], [], ["H9", "C7"], "out_scenarios_two_pair_006"),
+    (["H9", "C9"], ["D9", "S9", "HK", "S3"], ["H9", "C9", "D9", "S9", "HK", "S3"], "out_scenarios_two_pair_007"),
+    (["H9", "C7"], ["D6", "S2", "HK", "SJ"], ["H9", "C7", "D6", "S2", "HK", "SJ"], "out_scenarios_none"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_two_pair_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Two Pair", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["C2", "D4"], ["H8", "CK", "CA", "D3"], ["C2", "D4", "H8", "CK", "CA", "D3"], "out_scenarios_pair_001"),
+    (["D5", "H3"], [], ["D5", "H3"], "out_scenarios_pair_002"),
+    (["D7", "H7"], ["C4", "S8", "DT"], ["D7", "H7" "C4", "S8", "DT"], "out_scenarios_pair_003"),
+    (["D7", "H7"], ["C8", "S8", "DT", "C6"], ["D7", "H7", "C8", "S8", "DT", "C6"], "out_scenarios_pair_004"),
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_pair_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "Pair", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
+    )
+
+    assert actual == expected
+
+
+@mark.parametrize("hole_cards, board_cards, non_available_cards, expected", [
+    (["D7", "HQ"], ["C8", "S2", "DT", "C6"], ["D7", "HQ", "C8", "S2", "DT", "C6"], "out_scenarios_high_card_001"),
+    (["D7", "HJ"], [], ["D7", "HJ"], "out_scenarios_high_card_002")
+])
+def test_when_find_outs_scenarios_and_texas_holdem_and_high_card_then_correct_out_scenarios_returned(
+        hole_cards, board_cards, non_available_cards, expected, request
+):
+    hole_cards = [Card(card) for card in hole_cards]
+    board_cards = [Card(card) for card in board_cards]
+    available_cards = [card for card in Deck().cards_all if card.identity not in non_available_cards]
+    expected = request.getfixturevalue(expected)
+    actual = find_outs_scenarios(
+        "Texas Holdem", "High Card", hole_cards=hole_cards, board_cards=board_cards, available_cards=available_cards
     )
 
     assert actual == expected
@@ -837,15 +951,15 @@ def test_when_tiebreak_outs_draw_and_incorrect_kwargs_passed_then_raise_error(ga
 
 @mark.parametrize("game_type, hand_type, kwargs", [
     ("Texas Holdem", "Straight Flush",
-     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+     {"tiebreakers": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "Quads",
      {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "Full House",
-     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+     {"tiebreakers": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "Flush",
      {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "Straight",
-     {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
+     {"tiebreakers": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "Trips",
      {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "Two Pair",
@@ -854,8 +968,16 @@ def test_when_tiebreak_outs_draw_and_incorrect_kwargs_passed_then_raise_error(ga
      {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
     ("Texas Holdem", "High Card",
      {"tiebreakers": "BLAH", "hole_cards": "BLAH", "board_cards": "BLAH", "drawn_cards": "BLAH", "DERP": "WHOOPS"}),
-
 ])
 def test_when_tiebreak_outs_draw_and_too_many_kwargs_passed_then_raise_error(game_type, hand_type, kwargs):
     with raises(ValueError, match=f"Kwargs object '{kwargs}' contains additional keys from what is expected"):
         tiebreak_outs_draw(game_type, hand_type, **kwargs)
+
+
+# @mark.parametrize("tiebreakers, expected", [
+#     ("tb_dict_straight_flush_001", "player_c")
+# ])
+# def test_when_tiebreak_outs_draw_and_texas_holdem_and_straight_flush_then_correct_winner_returned(tiebreakers, expected):
+#     tiebreakers = get_tiebreaker_dict(tiebreakers)
+#     actual = tiebreak_outs_draw("Texas Holdem", "Straight Flush", tiebreakers=tiebreakers)
+#     assert actual == expected
