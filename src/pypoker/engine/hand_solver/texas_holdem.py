@@ -1,5 +1,4 @@
-from collections import Counter
-from itertools import combinations, product, groupby
+from itertools import groupby
 from typing import List, Dict
 
 from pypoker.deck import Card, Deck
@@ -9,18 +8,13 @@ from pypoker.engine.hand_solver.constants import (
     HAND_RANK,
     BEST_HAND,
     HAND_DESCRIPTION,
-    OUTS_METHOD,
     OUTS_TB_METHOD,
-    SUIT_HEARTS,
-    SUIT_SPADES,
-    SUIT_DIAMONDS,
-    SUIT_CLUBS,
     TIEBREAKER,
-    CARD_VALUES,
     OUT_STRING, HAND_TYPE_STRAIGHT_FLUSH, HAND_TYPE_QUADS, HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT,
     HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD, GAME_TYPE_TEXAS_HOLDEM,
 )
-from pypoker.engine.hand_solver.functions import hand_test, rank_hand_type, describe_hand
+from pypoker.engine.hand_solver.functions import hand_test, rank_hand_type, describe_hand, find_outs_scenarios
+from pypoker.engine.hand_solver.functions.outs import claim_out_string
 from pypoker.engine.hand_solver.utils import get_all_combinations
 
 
@@ -51,55 +45,46 @@ class TexasHoldemHandSolver(BaseHandSolver):
             {
                 HAND_TITLE: HAND_TYPE_STRAIGHT_FLUSH,
                 HAND_RANK: 1,
-                OUTS_METHOD: self._outs_straight_flush,
                 OUTS_TB_METHOD: self._outs_tb_straight_flush,
             },
             {
                 HAND_TITLE: HAND_TYPE_QUADS,
                 HAND_RANK: 2,
-                OUTS_METHOD: self._outs_quads,
                 OUTS_TB_METHOD: self._outs_tb_quads,
             },
             {
                 HAND_TITLE: HAND_TYPE_FULL_HOUSE,
                 HAND_RANK: 3,
-                OUTS_METHOD: self._outs_full_house,
                 OUTS_TB_METHOD: self._outs_tb_full_house,
             },
             {
                 HAND_TITLE: HAND_TYPE_FLUSH,
                 HAND_RANK: 4,
-                OUTS_METHOD: self._outs_flush,
                 OUTS_TB_METHOD: self._outs_tb_flush,
             },
             {
                 HAND_TITLE: HAND_TYPE_STRAIGHT,
                 HAND_RANK: 5,
-                OUTS_METHOD: self._outs_straight,
                 OUTS_TB_METHOD: self._outs_tb_straight,
             },
             {
                 HAND_TITLE: HAND_TYPE_TRIPS,
                 HAND_RANK: 6,
-                OUTS_METHOD: self._outs_trips,
                 OUTS_TB_METHOD: self._outs_tb_trips,
             },
             {
                 HAND_TITLE: HAND_TYPE_TWO_PAIR,
                 HAND_RANK: 7,
-                OUTS_METHOD: self._outs_two_pair,
                 OUTS_TB_METHOD: self._outs_tb_two_pair,
             },
             {
                 HAND_TITLE: HAND_TYPE_PAIR,
                 HAND_RANK: 8,
-                OUTS_METHOD: self._outs_pair,
                 OUTS_TB_METHOD: self._outs_tb_pair,
             },
             {
                 HAND_TITLE: HAND_TYPE_HIGH_CARD,
                 HAND_RANK: 9,
-                OUTS_METHOD: self._outs_high_card,
                 OUTS_TB_METHOD: self._outs_tb_high_card,
             },
         ]
@@ -215,8 +200,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     >= hand_info[HAND_RANK]
                     <= current_best_hand_rank
                 ):
-                    player_outs = hand_info[OUTS_METHOD](
-                        player_hole_cards[player], board_cards, drawable_cards
+                    player_outs = find_outs_scenarios(
+                        GAME_TYPE_TEXAS_HOLDEM, hand_info[HAND_TITLE], hole_cards=player_hole_cards[player],
+                        board_cards=board_cards, available_cards=drawable_cards
                     )
                     if hand_info[HAND_RANK] not in ranked_player_outs.keys():
                         ranked_player_outs[hand_info[HAND_RANK]] = {player: player_outs}
@@ -245,7 +231,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     scenario[OUT_STRING]
                     for scenario in player_out_scenarios[player_name]
                 ]
-                claimed_outs = [self.claim_out_strings(utilised_outs, out_string, drawable_cards) for out_string in potential_outs]
+                claimed_outs = [claim_out_string(utilised_outs, out_string, drawable_cards) for out_string in potential_outs]
                 claimed_outs = [item for sublist in claimed_outs for item in sublist]
 
                 wins[player_name] += len(claimed_outs)
@@ -259,9 +245,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     if not out_scenarios:
                         continue
                     for scenario in out_scenarios:
-                        scenario["OUTS"] = self.claim_out_strings(
-                            utilised_outs, scenario[OUT_STRING], drawable_cards
-                        )
+                        scenario["OUTS"] = claim_out_string(utilised_outs, scenario[OUT_STRING], drawable_cards)
                         combined_outs[player].extend(scenario["OUTS"])
 
                 for player, out_scenarios in player_out_scenarios.items():

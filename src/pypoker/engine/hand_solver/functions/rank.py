@@ -17,7 +17,7 @@ from pypoker.engine.hand_solver.utils import hand_is_ace_low_straight, order_han
 ###################
 #  PUBLIC METHOD  #
 ###################
-def rank_hand_type(game_type: str, hand_type: str, **kwargs: Dict) -> Dict:
+def rank_hand_type(game_type: str, hand_type: str, **kwargs) -> Dict:
     """
     Public method that ranks hands of a specific type against each other
 
