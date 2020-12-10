@@ -23,7 +23,27 @@ from pypoker.engine.hand_solver.utils import get_all_combinations
 ####################
 def find_outs_scenarios(game_type: str, hand_type: str, **kwargs) -> str:
     """
-    Public method to find any outs sceanrios that are possible for the given hand and the given hand type
+    Public method to find any all out scenarios for a given set of hole and board cards for the specified hand and game type.
+    Note that this method will attempt to find all scenarios to produce hands of this type that are BETTER than any current hand of this type the player can make
+    for example:
+        Game Type: Texas Holdem
+        Hand Type: Full House
+        hole_cards: ["H7", "C7"]
+        board_cards: ["D7", "SQ", "D2",]
+
+        This method would return out strings for 7/2->A and Q/7
+        It will not however return outs for 2/7 as the outs for this would ultimate also give you 7/2 and that is a strong hand
+
+    A similar example:
+        Game Type: Texas Holdem
+        Hand Type: Full House
+        hole_cards: ["HT", "CT"]
+        board_cards: ["DT", "SJ", "DJ"]
+
+        the player already has a full house (T/J) so the method will only return out scenarios that improve this position
+        the method would return scenarios for T/Q | T/K | T/A | J/T
+        it will not return outs for T/2->9 as the current full house is better than this.
+
 
     :param game_type: indicates what type of poker game you are playing. Tested against constants.GAME_TYPES
     :param hand_type: indicates the hand type you are testing for. Tested against constants.<GAME_TYPE>_HAND_TYPES
@@ -201,6 +221,7 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
                 # Account for the possibility of an 5->A straight
                 if 14 in usable_card_vals:
                     usable_card_vals.append(1)
+                    usable_card_vals.sort()
 
                 usable_card_vals.sort()
 
@@ -214,22 +235,27 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
                 )
                 runs = list(zip(edges, edges))
 
-                qualifying_straights = [
-                    run
-                    for run in runs
-                    if run[1] - run[0] >= 4
-                    and all(
-                        (run[1] - 4) <= card.value <= run[1]
-                        for card in hypothetical_draw_cards
-                    )
-                ]
-
-                # handling for a 5->1 straight
+                # check possible straights to ensure they have at least 5 positions and all drawn cards are required
+                # checks to ensure that the
+                qualifying_straights = []
                 for run in runs:
-                    if run[1] - run[0] >= 4 and run == (1, 5):
-                        non_ace_draw_cards = [card for card in hypothetical_draw_cards if card.value != 14]
-                        if all((run[1] - 4) <= card.value <= run[1] for card in non_ace_draw_cards):
-                            qualifying_straights.append(run)
+                    if run[1] - run[0] < 4:
+                        continue
+
+                    drawn_suit_cards_values = [card.value for card in drawn_suit_cards]
+                    hypothetical_draw_cards_values = [card.value for card in hypothetical_draw_cards]
+                    straight_values = list(range(run[1] - 4, run[1] + 1))
+                    required_straight_values = [value for value in straight_values if value not in drawn_suit_cards_values]
+
+                    if run[0] == 1:
+                        hypothetical_draw_cards_values.append(1)
+                        hypothetical_draw_cards_values = [value for value in hypothetical_draw_cards_values if value != 14]
+
+                    hypothetical_draw_cards_values.sort()
+                    required_straight_values.sort()
+
+                    if required_straight_values == hypothetical_draw_cards_values:
+                        qualifying_straights.append(run)
 
                 for straight_vals in qualifying_straights:
                     suits = []
@@ -261,10 +287,11 @@ def _outs_quads(hole_cards: List[Card], board_cards: List[Card], available_cards
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
+    current_quads = [value for value, count in drawn_value_counter.items() if count >= 4]
     value_eligable = [
         value
-        for value, count in drawn_value_counter.items()
-        if count + draws >= 4 and available_values_counter[value] + value >= 4
+        for value in CARD_VALUES
+        if drawn_value_counter[value] + draws >= 4 and available_values_counter[value] + drawn_value_counter[value] >= 4 and value not in current_quads
     ]
 
     for value in value_eligable:
@@ -311,6 +338,7 @@ def _outs_full_house(hole_cards: List[Card], board_cards: List[Card], available_
         and available_values_counter[value] + drawn_value_counter[value] >= 2
     ]
 
+    # OLD APPROACH - does not account for situations with multiple full houses available (three pairs problem)
     for trip_info, pair_info in product(trips_eligable, pair_eligable):
         # check we havent selected the same value for both trips and pairs
         if trip_info[0] == pair_info[0]:
@@ -320,6 +348,18 @@ def _outs_full_house(hole_cards: List[Card], board_cards: List[Card], available_
         pair_draws_required = max([2 - pair_info[1], 0])
 
         if trip_draws_required + pair_draws_required > draws:
+            continue
+
+        current_trips = [value for value, counter in drawn_value_counter.items() if counter >= 3]
+        if current_trips and trip_info[0] < max(current_trips):
+            continue
+
+        current_pairs = [value for value, counter in drawn_value_counter.items() if counter >= 2]
+        current_pairs = [value for value in current_pairs if value != trip_info[0]]
+        if current_pairs and pair_info[0] < max(current_pairs):
+            continue
+
+        if trip_info[0] in current_trips and pair_info[0] in current_pairs:
             continue
 
         suits = ["ANY" for _ in range(trip_draws_required + pair_draws_required)]
@@ -332,6 +372,7 @@ def _outs_full_house(hole_cards: List[Card], board_cards: List[Card], available_
                 TIEBREAKER: (trip_info[0], pair_info[0]),
             }
         )
+
     return draw_scenarios
 
 
@@ -375,15 +416,39 @@ def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards
 
     for suit in suit_eligable:
         draws_required = max([5 - suit_drawn[suit], 0])
-        suits = [suit for _ in range(draws_required)]
-        values = ["ANY" for _ in range(draws_required)]
+        if draws_required == 0:  # Player already has a flush, look to improve it with specific outs
+            current_flush_values = sorted([card.value for card in drawn_cards if card.suit == suit], reverse=True)
+            better_flush_values = [card.value for card in available_cards if card.suit == suit and card.value > max(current_flush_values)]
+            for flush_value in better_flush_values:
+                suits = [suit]
+                suits.extend(["ANY" for _ in range(draws - 1)])
+                values = [flush_value]
+                values.extend(["ANY" for _ in range(draws - 1)])
+                tb_values = [flush_value]
+                tb_values.extend(current_flush_values[:4])
+                tb_values = [str(val) for val in tb_values]
+                tb_values = "-".join(tb_values)
 
-        draw_scenarios.append(
-            {
-                OUT_STRING: build_out_string(suits, values, draws),
-                TIEBREAKER: suit,
-            }
-        )
+                draw_scenarios.append(
+                    {
+                        OUT_STRING: build_out_string(suits, values, draws),
+                        TIEBREAKER: (suit, tb_values),
+                    }
+                )
+
+        else:  # Player doesn't have a flush already, give generic outs
+            suits = [suit for _ in range(draws_required)]
+            values = ["ANY" for _ in range(draws_required)]
+            tb_values = "-".join([str(card.value) for card in sorted(drawn_cards, reverse=True) if card.suit == suit])
+            tb_values = "-".join([tb_values, *["*" for _ in range(draws_required)]])
+            tb_values = tb_values[1:] if draws_required == 5 else tb_values
+
+            draw_scenarios.append(
+                {
+                    OUT_STRING: build_out_string(suits, values, draws),
+                    TIEBREAKER: (suit, tb_values),
+                }
+            )
 
     return draw_scenarios
 
@@ -414,6 +479,11 @@ def _outs_straight(hole_cards: List[Card], board_cards: List[Card], available_ca
         for possible_draw in combinations(not_drawn_values, draws_used):
             combined_values = sorted(drawn_values + list(possible_draw))
 
+            # Account for the possibility of an 5->A straight
+            if 14 in combined_values:
+                combined_values.append(1)
+                combined_values.sort()
+
             gaps = [
                 [s, e]
                 for s, e in zip(combined_values, combined_values[1:])
@@ -422,12 +492,27 @@ def _outs_straight(hole_cards: List[Card], board_cards: List[Card], available_ca
             edges = iter(combined_values[:1] + sum(gaps, []) + combined_values[-1:])
             runs = list(zip(edges, edges))
 
-            qualifying_straights = [
-                run
-                for run in runs
-                if run[1] - run[0] >= 4
-                and all((run[1] - 4) <= value <= run[1] for value in possible_draw)
-            ]
+            # check possible straights to ensure they have at least 5 positions and all drawn cards are required
+            # checks to ensure that the
+            qualifying_straights = []
+            for run in runs:
+                if run[1] - run[0] < 4:
+                    continue
+
+                drawn_cards_values = [card.value for card in drawn_cards]
+                possible_draw_values = [value for value in possible_draw]
+                straight_values = list(range(run[1] - 4, run[1] + 1))
+                required_straight_values = [value for value in straight_values if value not in drawn_cards_values]
+
+                if run[0] == 1:
+                    possible_draw_values.append(1)
+                    possible_draw_values = [value for value in possible_draw_values if value != 14]
+
+                possible_draw_values.sort()
+                required_straight_values.sort()
+
+                if required_straight_values == possible_draw_values:
+                    qualifying_straights.append(run)
 
             for straight_vals in qualifying_straights:
                 suits = ["ANY" for _ in possible_draw]
@@ -455,12 +540,15 @@ def _outs_trips(hole_cards: List[Card], board_cards: List[Card], available_cards
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
+    current_trips = [value for value, count in drawn_value_counter.items() if count >= 3]
+    current_trips = 0 if not current_trips else max(current_trips)
 
     trips_eligable = [
         (value, drawn_value_counter[value])
         for value in CARD_VALUES
         if drawn_value_counter[value] + draws >= 3
         and available_values_counter[value] + drawn_value_counter[value] >= 3
+        and value > current_trips
     ]
 
     for value, count in trips_eligable:
@@ -492,6 +580,7 @@ def _outs_two_pair(hole_cards: List[Card], board_cards: List[Card], available_ca
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
+    current_pairs = [value for value, count in drawn_value_counter.items() if count >= 2]
 
     pair_eligable = [
         (value, drawn_value_counter[value])
@@ -503,6 +592,13 @@ def _outs_two_pair(hole_cards: List[Card], board_cards: List[Card], available_ca
     for pair_a, pair_b in combinations(pair_eligable, 2):
         high_pair = pair_a if pair_a[0] > pair_b[0] else pair_b
         low_pair = pair_a if pair_a[0] < pair_b[0] else pair_b
+        all_pairs = sorted(list({high_pair[0], low_pair[0], *current_pairs}), reverse=True)
+
+        if all_pairs[0] != high_pair[0] or all_pairs[1] != low_pair[0]:
+            continue
+
+        if high_pair[0] in current_pairs and low_pair[0] in current_pairs:
+            continue
 
         high_pair_draws_req = max([2 - high_pair[1], 0])
         low_pair_draws_req = max([2 - low_pair[1], 0])
@@ -534,6 +630,7 @@ def _outs_pair(hole_cards: List[Card], board_cards: List[Card], available_cards:
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
+    current_pairs = [value for value, count in drawn_value_counter.items() if count >= 2]
 
     pair_eligable = [
         (value, drawn_value_counter[value])
@@ -543,6 +640,8 @@ def _outs_pair(hole_cards: List[Card], board_cards: List[Card], available_cards:
     ]
 
     for pair in pair_eligable:
+        if current_pairs and pair[0] <= max(current_pairs):
+            continue
         draws_req = max([2 - pair[1], 0])
         suits = ["ANY" for _ in range(draws_req)]
         values = [pair[0] for _ in range(draws_req)]
@@ -564,7 +663,32 @@ def _outs_high_card(hole_cards: List[Card], board_cards: List[Card], available_c
     :param available_cards: List of card objects representing the cards that can be drawn.
     """
 
-    return []
+    draw_scenarios = []
+    draws = 5 - len(board_cards)
+    if draws <= 0:
+        return draw_scenarios
+
+    drawn_cards = hole_cards + board_cards
+
+    current_high_card = max([card.value for card in drawn_cards])
+    available_values = list(set([card.value for card in available_cards]))
+    viable_values = [value for value in available_values if value > current_high_card]
+
+    for value in viable_values:
+        suits = ["ANY"]
+        suits.extend(["ANY" for _ in range(draws - 1)])
+        values = [value]
+        values.extend(["ANY" for _ in range(draws - 1)])
+
+        draw_scenarios.append(
+            {
+                OUT_STRING: build_out_string(suits, values, draws),
+                TIEBREAKER: value,
+            }
+        )
+
+    return draw_scenarios
+
 
 
 ############################

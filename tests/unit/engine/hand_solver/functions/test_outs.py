@@ -227,6 +227,372 @@ def out_scenarios_straight_flush_004():
     return [{'out_string': 'H3-H2', 'tiebreaker': 5}]
 
 
+@fixture
+def out_scenarios_straight_flush_005():
+    return [{'out_string': 'H9-**', 'tiebreaker': 9}, {'out_string': 'HT-H9', 'tiebreaker': 10}]
+
+
+@fixture
+def out_scenarios_quads_001():
+    return [{"out_string": "*4-*4", "tiebreaker": 4}]
+
+
+@fixture
+def out_scenarios_quads_002():
+    return [{"out_string": "*4-*4", "tiebreaker": 4}, {"out_string": "*5-*5", "tiebreaker": 5}]
+
+
+@fixture
+def out_scenarios_quads_003():
+    return [{"out_string": "*4-**", "tiebreaker": 4}]
+
+
+@fixture
+def out_scenarios_quads_004():
+    return sorted([
+        {"out_string": "*A-*A-*A-**-**", "tiebreaker": 14}, {"out_string": "*K-*K-*K-**-**", "tiebreaker": 13},
+        {"out_string": "*Q-*Q-*Q-*Q-**", "tiebreaker": 12}, {"out_string": "*J-*J-*J-*J-**", "tiebreaker": 11},
+        {"out_string": "*T-*T-*T-*T-**", "tiebreaker": 10}, {"out_string": "*9-*9-*9-*9-**", "tiebreaker": 9},
+        {"out_string": "*8-*8-*8-*8-**", "tiebreaker": 8}, {"out_string": "*7-*7-*7-*7-**", "tiebreaker": 7},
+        {"out_string": "*6-*6-*6-*6-**", "tiebreaker": 6}, {"out_string": "*5-*5-*5-*5-**", "tiebreaker": 5},
+        {"out_string": "*4-*4-*4-*4-**", "tiebreaker": 4}, {"out_string": "*3-*3-*3-*3-**", "tiebreaker": 3},
+        {"out_string": "*2-*2-*2-*2-**", "tiebreaker": 2}
+    ], key=lambda scenario: scenario["tiebreaker"])
+
+
+@fixture
+def out_scenarios_quads_005():
+    return [{"out_string": "*7", "tiebreaker": 7}]
+
+
+@fixture
+def out_scenarios_full_house_001():
+    return [{"out_string": "*K", "tiebreaker": (13, 14)}, {"out_string": "*A", "tiebreaker": (14, 13)}]
+
+
+@fixture
+def out_scenarios_full_house_002():
+    return [
+        {"out_string": "*4", "tiebreaker": (13, 4)}, {"out_string": "*7", "tiebreaker": (13, 7)},
+        {"out_string": "*A", "tiebreaker": (13, 14)}
+    ]
+
+
+@fixture
+def out_scenarios_full_house_003():
+    return [
+        {"out_string": "*7", "tiebreaker": (7, 13)}, {"out_string": "*9", "tiebreaker": (9, 13)},
+        {"out_string": "*K", "tiebreaker": (13, 9)}
+    ]
+
+
+@fixture
+def out_scenarios_full_house_004():
+    return [{"out_string": "*9", "tiebreaker": (13, 9)}]
+
+
+@fixture
+def out_scenarios_full_house_005():
+    return sorted([
+        {"out_string": "*5-**", "tiebreaker": (7, 5)}, {"out_string": "*Q-**", "tiebreaker": (7, 12)},
+        {"out_string": "*3-*3", "tiebreaker": (7, 3)}, {"out_string": "*4-*4", "tiebreaker": (7, 4)},
+        {"out_string": "*2-*2", "tiebreaker": (7, 2)}, {"out_string": "*6-*6", "tiebreaker": (7, 6)},
+        {"out_string": "*8-*8", "tiebreaker": (7, 8)}, {"out_string": "*9-*9", "tiebreaker": (7, 9)},
+        {"out_string": "*T-*T", "tiebreaker": (7, 10)}, {"out_string": "*J-*J", "tiebreaker": (7, 11)},
+        {"out_string": "*Q-*Q", "tiebreaker": (12, 7)}, {"out_string": "*K-*K", "tiebreaker": (7, 13)},
+        {"out_string": "*A-*A", "tiebreaker": (7, 14)}
+    ], key=lambda scenario: scenario["tiebreaker"])
+
+
+@fixture
+def out_scenarios_full_house_006():
+    return [
+        {'out_string': '*2-*2-*2-**-**', 'tiebreaker': (2, 12)}, {'out_string': '*2-*2-*2-*K-*K', 'tiebreaker': (2, 13)},
+        {'out_string': '*2-*2-*2-*A-*A', 'tiebreaker': (2, 14)}, {'out_string': '*3-*3-*3-**-**', 'tiebreaker': (3, 12)},
+        {'out_string': '*3-*3-*3-*K-*K', 'tiebreaker': (3, 13)}, {'out_string': '*3-*3-*3-*A-*A', 'tiebreaker': (3, 14)},
+        {'out_string': '*4-*4-*4-**-**', 'tiebreaker': (4, 12)}, {'out_string': '*4-*4-*4-*K-*K', 'tiebreaker': (4, 13)},
+        {'out_string': '*4-*4-*4-*A-*A', 'tiebreaker': (4, 14)}, {'out_string': '*5-*5-*5-**-**', 'tiebreaker': (5, 12)},
+        {'out_string': '*5-*5-*5-*K-*K', 'tiebreaker': (5, 13)}, {'out_string': '*5-*5-*5-*A-*A', 'tiebreaker': (5, 14)},
+        {'out_string': '*6-*6-*6-**-**', 'tiebreaker': (6, 12)}, {'out_string': '*6-*6-*6-*K-*K', 'tiebreaker': (6, 13)},
+        {'out_string': '*6-*6-*6-*A-*A', 'tiebreaker': (6, 14)}, {'out_string': '*7-*7-*7-**-**', 'tiebreaker': (7, 12)},
+        {'out_string': '*7-*7-*7-*K-*K', 'tiebreaker': (7, 13)}, {'out_string': '*7-*7-*7-*A-*A', 'tiebreaker': (7, 14)},
+        {'out_string': '*8-*8-*8-**-**', 'tiebreaker': (8, 12)}, {'out_string': '*8-*8-*8-*K-*K', 'tiebreaker': (8, 13)},
+        {'out_string': '*8-*8-*8-*A-*A', 'tiebreaker': (8, 14)}, {'out_string': '*9-*9-*9-**-**', 'tiebreaker': (9, 12)},
+        {'out_string': '*9-*9-*9-*K-*K', 'tiebreaker': (9, 13)}, {'out_string': '*9-*9-*9-*A-*A', 'tiebreaker': (9, 14)},
+        {'out_string': '*T-*T-*T-**-**', 'tiebreaker': (10, 12)}, {'out_string': '*T-*T-*T-*K-*K', 'tiebreaker': (10, 13)},
+        {'out_string': '*T-*T-*T-*A-*A', 'tiebreaker': (10, 14)}, {'out_string': '*J-*J-*J-**-**', 'tiebreaker': (11, 12)},
+        {'out_string': '*J-*J-*J-*K-*K', 'tiebreaker': (11, 13)}, {'out_string': '*J-*J-*J-*A-*A', 'tiebreaker': (11, 14)},
+        {'out_string': '*Q-*2-*2-**-**', 'tiebreaker': (12, 2)}, {'out_string': '*Q-*3-*3-**-**', 'tiebreaker': (12, 3)},
+        {'out_string': '*Q-*4-*4-**-**', 'tiebreaker': (12, 4)}, {'out_string': '*Q-*5-*5-**-**', 'tiebreaker': (12, 5)},
+        {'out_string': '*Q-*6-*6-**-**', 'tiebreaker': (12, 6)}, {'out_string': '*Q-*7-*7-**-**', 'tiebreaker': (12, 7)},
+        {'out_string': '*Q-*8-*8-**-**', 'tiebreaker': (12, 8)}, {'out_string': '*Q-*9-*9-**-**', 'tiebreaker': (12, 9)},
+        {'out_string': '*Q-*T-*T-**-**', 'tiebreaker': (12, 10)}, {'out_string': '*Q-*J-*J-**-**', 'tiebreaker': (12, 11)},
+        {'out_string': '*Q-*K-*K-**-**', 'tiebreaker': (12, 13)}, {'out_string': '*Q-*A-*A-**-**', 'tiebreaker': (12, 14)},
+        {'out_string': '*K-*K-*K-**-**', 'tiebreaker': (13, 12)}, {'out_string': '*K-*K-*K-*A-*A', 'tiebreaker': (13, 14)},
+        {'out_string': '*A-*A-*A-**-**', 'tiebreaker': (14, 12)}, {'out_string': '*A-*A-*A-*K-*K', 'tiebreaker': (14, 13)}
+    ]
+
+
+@fixture
+def out_scenarios_full_house_007():
+    return [
+        {'out_string': '*2-*2', 'tiebreaker': (2, 12)}, {'out_string': '*8-*8', 'tiebreaker': (8, 12)},
+        {"out_string": "*Q-*2", "tiebreaker": (12, 2)}, {"out_string": "*Q-*8", "tiebreaker": (12, 8)},
+        {"out_string": "*Q-*K", "tiebreaker": (12, 13)}, {'out_string': '*K-*K', 'tiebreaker': (13, 12)}
+    ]
+
+
+@fixture
+def out_scenarios_flush_001():
+    return [{'out_string': 'H*-H*', 'tiebreaker': ("Hearts", "13-12-8-*-*")}]
+
+
+@fixture
+def out_scenarios_flush_002():
+    return [{'out_string': 'H*-**', 'tiebreaker': ("Hearts", "13-12-10-8-*")}]
+
+
+@fixture
+def out_scenarios_flush_003():
+    return [{'out_string': 'H*', 'tiebreaker': ("Hearts", "13-12-8-2-*")}]
+
+
+@fixture
+def out_scenarios_flush_004():
+    return [
+        {'out_string': 'H*-H*-H*-**-**', 'tiebreaker': ('Hearts', '12-10-*-*-*')},
+        {'out_string': 'C*-C*-C*-C*-C*', 'tiebreaker': ('Clubs', '*-*-*-*-*')} ,
+        {'out_string': 'D*-D*-D*-D*-D*', 'tiebreaker': ('Diamonds', '*-*-*-*-*')},
+        {'out_string': 'S*-S*-S*-S*-S*', 'tiebreaker': ('Spades', '*-*-*-*-*')}
+    ]
+
+
+@fixture
+def out_scenarios_flush_005():
+    return [
+        {'out_string': 'HQ-**', 'tiebreaker': ('Hearts', '12-11-9-6-5')},
+        {'out_string': 'HK-**', 'tiebreaker': ('Hearts', '13-11-9-6-5')},
+        {'out_string': 'HA-**', 'tiebreaker': ('Hearts', '14-11-9-6-5')}
+    ]
+
+
+@fixture
+def out_scenarios_straight_001():
+    return [{'out_string': '*J', 'tiebreaker': 11}, {'out_string': '*6', 'tiebreaker': 10}]
+
+
+@fixture
+def out_scenarios_straight_002():
+    return [{'out_string': '*8-**', 'tiebreaker': 10}, {'out_string': '*J-*8', 'tiebreaker': 11}]
+
+
+@fixture
+def out_scenarios_straight_003():
+    return [
+        {'out_string': '*8-*6-*5-**-**', 'tiebreaker': 8}, {'out_string': '*6-*5-*3-**-**', 'tiebreaker': 7},
+        {'out_string': '*A-*5-*3-*2-**', 'tiebreaker': 5}, {'out_string': '*J-*T-*9-*8-**', 'tiebreaker': 11},
+        {'out_string': '*T-*9-*8-*6-**', 'tiebreaker': 10}, {'out_string': '*9-*8-*6-*5-**', 'tiebreaker': 9},
+        {'out_string': '*A-*K-*Q-*J-*T', 'tiebreaker': 14}, {'out_string': '*K-*Q-*J-*T-*9', 'tiebreaker': 13},
+        {'out_string': '*Q-*J-*T-*9-*8', 'tiebreaker': 12}
+    ]
+
+
+@fixture
+def out_scenarios_straight_004():
+    return [
+        {'out_string': '*6-**', 'tiebreaker': 7}, {'out_string': '*2-**', 'tiebreaker': 5},
+        {'out_string': '*8-*6', 'tiebreaker': 8},
+    ]
+
+
+@fixture
+def out_scenarios_straight_005():
+    return [{'out_string': '*9-**', 'tiebreaker': 9}, {'out_string': '*T-*9', 'tiebreaker': 10}]
+
+
+@fixture
+def out_scenarios_trips_001():
+    return [
+        {"out_string": "*2-**", "tiebreaker": 2}, {"out_string": "*3-**", "tiebreaker": 3},
+        {"out_string": "*9-*9", "tiebreaker": 9}
+    ]
+
+
+@fixture
+def out_scenarios_trips_002():
+    return [
+        {'out_string': '*2-*2', 'tiebreaker': 2}, {'out_string': '*3-*3', 'tiebreaker': 3},
+        {'out_string': '*7-*7', 'tiebreaker': 7}, {'out_string': '*9-*9', 'tiebreaker': 9},
+        {'out_string': '*K-*K', 'tiebreaker': 13}
+    ]
+
+
+@fixture
+def out_scenarios_trips_003():
+    return [{'out_string': '*K-*K', 'tiebreaker': 13}]
+
+
+@fixture
+def out_scenarios_trips_004():
+    return [
+        {'out_string': '*2-*2-*2-**-**', 'tiebreaker': 2}, {'out_string': '*3-*3-*3-**-**', 'tiebreaker': 3},
+        {'out_string': '*4-*4-*4-**-**', 'tiebreaker': 4}, {'out_string': '*5-*5-*5-**-**', 'tiebreaker': 5},
+        {'out_string': '*6-*6-*6-**-**', 'tiebreaker': 6}, {'out_string': '*7-*7-**-**-**', 'tiebreaker': 7},
+        {'out_string': '*8-*8-*8-**-**', 'tiebreaker': 8}, {'out_string': '*9-*9-*9-**-**', 'tiebreaker': 9},
+        {'out_string': '*T-*T-*T-**-**', 'tiebreaker': 10}, {'out_string': '*J-*J-*J-**-**', 'tiebreaker': 11},
+        {'out_string': '*Q-*Q-*Q-**-**', 'tiebreaker': 12}, {'out_string': '*K-*K-*K-**-**', 'tiebreaker': 13},
+        {'out_string': '*A-*A-**-**-**', 'tiebreaker': 14}
+    ]
+
+
+@fixture
+def out_scenarios_two_pair_001():
+    return [
+        {'out_string': '*6-*2', 'tiebreaker': (6, 2)}, {'out_string': '*9-*2', 'tiebreaker': (9, 2)},
+        {'out_string': '*J-*2', 'tiebreaker': (11, 2)}, {'out_string': '*K-*2', 'tiebreaker': (13, 2)},
+        {'out_string': '*9-*6', 'tiebreaker': (9, 6)}, {'out_string': '*J-*6', 'tiebreaker': (11, 6)},
+        {'out_string': '*K-*6', 'tiebreaker': (13, 6)}, {'out_string': '*J-*9', 'tiebreaker': (11, 9)},
+        {'out_string': '*K-*9', 'tiebreaker': (13, 9)}, {'out_string': '*K-*J', 'tiebreaker': (13, 11)}
+    ]
+
+
+@fixture
+def out_scenarios_two_pair_002():
+    return [
+        {'out_string': '*2', 'tiebreaker': (9, 2)}, {'out_string': '*6', 'tiebreaker': (9, 6)},
+        {'out_string': '*8', 'tiebreaker': (9, 8)}, {'out_string': '*K', 'tiebreaker': (13, 9)}
+    ]
+
+
+@fixture
+def out_scenarios_two_pair_003():
+    return [
+        {'out_string': '*2-**', 'tiebreaker': (6, 2)}, {'out_string': '*3-*3', 'tiebreaker': (6, 3)},
+        {'out_string': '*4-*4', 'tiebreaker': (6, 4)}, {'out_string': '*5-*5', 'tiebreaker': (6, 5)},
+        {'out_string': '*7-*7', 'tiebreaker': (7, 6)}, {'out_string': '*8-**', 'tiebreaker': (8, 6)},
+        {'out_string': '*9-*9', 'tiebreaker': (9, 6)}, {'out_string': '*T-*T', 'tiebreaker': (10, 6)},
+        {'out_string': '*J-*J', 'tiebreaker': (11, 6)}, {'out_string': '*Q-*Q', 'tiebreaker': (12, 6)},
+        {'out_string': '*K-**', 'tiebreaker': (13, 6)}, {'out_string': '*A-*A', 'tiebreaker': (14, 6)},
+        {'out_string': '*K-*8', 'tiebreaker': (13, 8)}
+    ]
+
+
+@fixture
+def out_scenarios_two_pair_004():
+    return [{'out_string': '*K', 'tiebreaker': (13, 9)}]
+
+
+@fixture
+def out_scenarios_two_pair_005():
+    return [
+        {'out_string': '*T-*T', 'tiebreaker': (10, 9)}, {'out_string': '*J-*J', 'tiebreaker': (11, 9)},
+        {'out_string': '*Q-*Q', 'tiebreaker': (12, 9)}, {'out_string': '*K-**', 'tiebreaker': (13, 9)},
+        {'out_string': '*A-*A', 'tiebreaker': (14, 9)}
+    ]
+
+
+@fixture
+def out_scenarios_two_pair_006():
+    return [
+        {'out_string': '*3-*3-*2-*2-**', 'tiebreaker': (3, 2)}, {'out_string': '*4-*4-*2-*2-**', 'tiebreaker': (4, 2)},
+        {'out_string': '*5-*5-*2-*2-**', 'tiebreaker': (5, 2)}, {'out_string': '*6-*6-*2-*2-**', 'tiebreaker': (6, 2)},
+        {'out_string': '*7-*2-*2-**-**', 'tiebreaker': (7, 2)}, {'out_string': '*8-*8-*2-*2-**', 'tiebreaker': (8, 2)},
+        {'out_string': '*9-*2-*2-**-**', 'tiebreaker': (9, 2)}, {'out_string': '*T-*T-*2-*2-**', 'tiebreaker': (10, 2)},
+        {'out_string': '*J-*J-*2-*2-**', 'tiebreaker': (11, 2)}, {'out_string': '*Q-*Q-*2-*2-**', 'tiebreaker': (12, 2)},
+        {'out_string': '*K-*K-*2-*2-**', 'tiebreaker': (13, 2)}, {'out_string': '*A-*A-*2-*2-**', 'tiebreaker': (14, 2)},
+        {'out_string': '*4-*4-*3-*3-**', 'tiebreaker': (4, 3)}, {'out_string': '*5-*5-*3-*3-**', 'tiebreaker': (5, 3)},
+        {'out_string': '*6-*6-*3-*3-**', 'tiebreaker': (6, 3)}, {'out_string': '*7-*3-*3-**-**', 'tiebreaker': (7, 3)},
+        {'out_string': '*8-*8-*3-*3-**', 'tiebreaker': (8, 3)}, {'out_string': '*9-*3-*3-**-**', 'tiebreaker': (9, 3)},
+        {'out_string': '*T-*T-*3-*3-**', 'tiebreaker': (10, 3)}, {'out_string': '*J-*J-*3-*3-**', 'tiebreaker': (11, 3)},
+        {'out_string': '*Q-*Q-*3-*3-**', 'tiebreaker': (12, 3)}, {'out_string': '*K-*K-*3-*3-**', 'tiebreaker': (13, 3)},
+        {'out_string': '*A-*A-*3-*3-**', 'tiebreaker': (14, 3)}, {'out_string': '*5-*5-*4-*4-**', 'tiebreaker': (5, 4)},
+        {'out_string': '*6-*6-*4-*4-**', 'tiebreaker': (6, 4)}, {'out_string': '*7-*4-*4-**-**', 'tiebreaker': (7, 4)},
+        {'out_string': '*8-*8-*4-*4-**', 'tiebreaker': (8, 4)}, {'out_string': '*9-*4-*4-**-**', 'tiebreaker': (9, 4)},
+        {'out_string': '*T-*T-*4-*4-**', 'tiebreaker': (10, 4)}, {'out_string': '*J-*J-*4-*4-**', 'tiebreaker': (11, 4)},
+        {'out_string': '*Q-*Q-*4-*4-**', 'tiebreaker': (12, 4)}, {'out_string': '*K-*K-*4-*4-**', 'tiebreaker': (13, 4)},
+        {'out_string': '*A-*A-*4-*4-**', 'tiebreaker': (14, 4)}, {'out_string': '*6-*6-*5-*5-**', 'tiebreaker': (6, 5)},
+        {'out_string': '*7-*5-*5-**-**', 'tiebreaker': (7, 5)}, {'out_string': '*8-*8-*5-*5-**', 'tiebreaker': (8, 5)},
+        {'out_string': '*9-*5-*5-**-**', 'tiebreaker': (9, 5)}, {'out_string': '*T-*T-*5-*5-**', 'tiebreaker': (10, 5)},
+        {'out_string': '*J-*J-*5-*5-**', 'tiebreaker': (11, 5)}, {'out_string': '*Q-*Q-*5-*5-**', 'tiebreaker': (12, 5)},
+        {'out_string': '*K-*K-*5-*5-**', 'tiebreaker': (13, 5)}, {'out_string': '*A-*A-*5-*5-**', 'tiebreaker': (14, 5)},
+        {'out_string': '*7-*6-*6-**-**', 'tiebreaker': (7, 6)}, {'out_string': '*8-*8-*6-*6-**', 'tiebreaker': (8, 6)},
+        {'out_string': '*9-*6-*6-**-**', 'tiebreaker': (9, 6)}, {'out_string': '*T-*T-*6-*6-**', 'tiebreaker': (10, 6)},
+        {'out_string': '*J-*J-*6-*6-**', 'tiebreaker': (11, 6)}, {'out_string': '*Q-*Q-*6-*6-**', 'tiebreaker': (12, 6)},
+        {'out_string': '*K-*K-*6-*6-**', 'tiebreaker': (13, 6)}, {'out_string': '*A-*A-*6-*6-**', 'tiebreaker': (14, 6)},
+        {'out_string': '*8-*8-*7-**-**', 'tiebreaker': (8, 7)}, {'out_string': '*9-*7-**-**-**', 'tiebreaker': (9, 7)},
+        {'out_string': '*T-*T-*7-**-**', 'tiebreaker': (10, 7)}, {'out_string': '*J-*J-*7-**-**', 'tiebreaker': (11, 7)},
+        {'out_string': '*Q-*Q-*7-**-**', 'tiebreaker': (12, 7)}, {'out_string': '*K-*K-*7-**-**', 'tiebreaker': (13, 7)},
+        {'out_string': '*A-*A-*7-**-**', 'tiebreaker': (14, 7)}, {'out_string': '*9-*8-*8-**-**', 'tiebreaker': (9, 8)},
+        {'out_string': '*T-*T-*8-*8-**', 'tiebreaker': (10, 8)}, {'out_string': '*J-*J-*8-*8-**', 'tiebreaker': (11, 8)},
+        {'out_string': '*Q-*Q-*8-*8-**', 'tiebreaker': (12, 8)}, {'out_string': '*K-*K-*8-*8-**', 'tiebreaker': (13, 8)},
+        {'out_string': '*A-*A-*8-*8-**', 'tiebreaker': (14, 8)}, {'out_string': '*T-*T-*9-**-**', 'tiebreaker': (10, 9)},
+        {'out_string': '*J-*J-*9-**-**', 'tiebreaker': (11, 9)}, {'out_string': '*Q-*Q-*9-**-**', 'tiebreaker': (12, 9)},
+        {'out_string': '*K-*K-*9-**-**', 'tiebreaker': (13, 9)}, {'out_string': '*A-*A-*9-**-**', 'tiebreaker': (14, 9)},
+        {'out_string': '*J-*J-*T-*T-**', 'tiebreaker': (11, 10)}, {'out_string': '*Q-*Q-*T-*T-**', 'tiebreaker': (12, 10)},
+        {'out_string': '*K-*K-*T-*T-**', 'tiebreaker': (13, 10)}, {'out_string': '*A-*A-*T-*T-**', 'tiebreaker': (14, 10)},
+        {'out_string': '*Q-*Q-*J-*J-**', 'tiebreaker': (12, 11)}, {'out_string': '*K-*K-*J-*J-**', 'tiebreaker': (13, 11)},
+        {'out_string': '*A-*A-*J-*J-**', 'tiebreaker': (14, 11)}, {'out_string': '*K-*K-*Q-*Q-**', 'tiebreaker': (13, 12)},
+        {'out_string': '*A-*A-*Q-*Q-**', 'tiebreaker': (14, 12)}, {'out_string': '*A-*A-*K-*K-**', 'tiebreaker': (14, 13)}
+    ]
+
+
+@fixture
+def out_scenarios_two_pair_007():
+    return [{'out_string': '*3', 'tiebreaker': (9, 3)}, {'out_string': '*K', 'tiebreaker': (13, 9)}]
+
+
+@fixture
+def out_scenarios_pair_001():
+    return [
+        {'out_string': '*2', 'tiebreaker': 2}, {'out_string': '*3', 'tiebreaker': 3},
+        {'out_string': '*4', 'tiebreaker': 4}, {'out_string': '*8', 'tiebreaker': 8},
+        {'out_string': '*K', 'tiebreaker': 13}, {'out_string': '*A', 'tiebreaker': 14}
+    ]
+
+
+@fixture
+def out_scenarios_pair_002():
+    return [
+        {'out_string': '*2-*2-**-**-**', 'tiebreaker': 2}, {'out_string': '*3-**-**-**-**', 'tiebreaker': 3},
+        {'out_string': '*4-*4-**-**-**', 'tiebreaker': 4}, {'out_string': '*5-**-**-**-**', 'tiebreaker': 5},
+        {'out_string': '*6-*6-**-**-**', 'tiebreaker': 6}, {'out_string': '*7-*7-**-**-**', 'tiebreaker': 7},
+        {'out_string': '*8-*8-**-**-**', 'tiebreaker': 8}, {'out_string': '*9-*9-**-**-**', 'tiebreaker': 9},
+        {'out_string': '*T-*T-**-**-**', 'tiebreaker': 10}, {'out_string': '*J-*J-**-**-**', 'tiebreaker': 11},
+        {'out_string': '*Q-*Q-**-**-**', 'tiebreaker': 12}, {'out_string': '*K-*K-**-**-**', 'tiebreaker': 13},
+        {'out_string': '*A-*A-**-**-**', 'tiebreaker': 14}
+    ]
+
+
+@fixture
+def out_scenarios_pair_003():
+    return [
+        {'out_string': '*8-**', 'tiebreaker': 8}, {'out_string': '*9-*9', 'tiebreaker': 9},
+        {'out_string': '*T-**', 'tiebreaker': 10}, {'out_string': '*J-*J', 'tiebreaker': 11},
+        {'out_string': '*Q-*Q', 'tiebreaker': 12}, {'out_string': '*K-*K', 'tiebreaker': 13},
+        {'out_string': '*A-*A', 'tiebreaker': 14}
+    ]
+
+
+@fixture
+def out_scenarios_pair_004():
+    return [
+        {'out_string': '*T', 'tiebreaker': 10}
+    ]
+
+
+@fixture
+def out_scenarios_high_card_001():
+    return [{'out_string': '*K', 'tiebreaker': 13}, {'out_string': '*A', 'tiebreaker': 14}]
+
+
+@fixture
+def out_scenarios_high_card_002():
+    return [
+        {'out_string': '*Q-**-**-**-**', 'tiebreaker': 12}, {'out_string': '*K-**-**-**-**', 'tiebreaker': 13},
+        {'out_string': '*A-**-**-**-**', 'tiebreaker': 14}
+    ]
+
+
 @mark.parametrize("suits, values, draws, expected", [
     (["Spades"], [2], 5, "S2-**-**-**-**"),
     (["Spades", "Hearts"], [2, 14], 5, "S2-HA-**-**-**"),
@@ -342,10 +708,81 @@ def test_when_find_outs_scenarios_and_too_many_kwargs_passed_then_raise_error(ga
 
 
 @mark.parametrize("game_type, hand_type, hole_cards, board_cards, non_available_cards, expected", [
-    # ("Texas Holdem", "Straight Flush", ["S8", "ST"], ["C2", "S9", "H4", "S7"], ["S8", "ST", "C2", "S9", "S7"], "out_scenarios_straight_flush_001"),
-    # ("Texas Holdem", "Straight Flush", ["S7", "ST"], ["C2", "S9", "S6"], ["S7", "ST", "C2", "S9", "S6"], "out_scenarios_straight_flush_002"),
-    # ("Texas Holdem", "Straight Flush", ["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_flush_003"),
-    ("Texas Holdem", "Straight Flush", ["S7", "H4"], ["H5", "HA", "C3"], ["S7", "H4", "H5", "HA", "C3"], "out_scenarios_straight_flush_004")
+    ("Texas Holdem", "Straight Flush", ["S8", "ST"], ["C2", "S9", "H4", "S7"], ["S8", "ST", "C2", "S9", "S7"], "out_scenarios_straight_flush_001"),
+    ("Texas Holdem", "Straight Flush", ["S7", "ST"], ["C2", "S9", "S6"], ["S7", "ST", "C2", "S9", "S6"], "out_scenarios_straight_flush_002"),
+    ("Texas Holdem", "Straight Flush", ["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_flush_003"),
+    ("Texas Holdem", "Straight Flush", ["S7", "H4"], ["H5", "HA", "C3"], ["S7", "H4", "H5", "HA", "C3"], "out_scenarios_straight_flush_004"),
+    ("Texas Holdem", "Straight Flush", ["H7", "H4"], ["H5", "H6", "H8"], ["H7", "H4", "H5", "H6", "H8"], "out_scenarios_straight_flush_005"),
+    ("Texas Holdem", "Straight Flush", ["S7", "H4"], ["H5", "SA", "C3"], ["S7", "H4", "H5", "SA", "C3"], "out_scenarios_none"),
+    ("Texas Holdem", "Straight Flush", ["CK", "DT"], ["D9", "D7", "D6"], ["CK", "DT", "D9", "D7", "D6", "D8"], "out_scenarios_none"),
+    ("Texas Holdem", "Quads", ["H4", "C4"], ["S5", "C2", "DK"], ["H4", "C4", "S5", "C2", "DK"], "out_scenarios_quads_001"),
+    ("Texas Holdem", "Quads", ["H4", "C4"], ["S5", "D5", "DK"], ["H4", "C4", "S5", "D5", "DK"], "out_scenarios_quads_002"),
+    ("Texas Holdem", "Quads", ["H4", "C4"], ["S4", "D5", "DK"], ["H4", "C4", "S4", "D5", "DK"], "out_scenarios_quads_003"),
+    ("Texas Holdem", "Quads", ["HK", "CA"], [], ["HK", "CA"], "out_scenarios_quads_004"),
+    ("Texas Holdem", "Quads", ["H7", "C7"], ["S7", "D5", "DK", "SK"], ["H7", "C7", "S7", "D5", "DK", "SK"], "out_scenarios_quads_005"),
+    ("Texas Holdem", "Quads", ["HK", "CA"], ["CK", "DA", "D8", "C7"], ["HK", "CA", "CK", "DA", "D8", "C7"], "out_scenarios_none"),
+    ("Texas Holdem", "Quads", ["HK", "CA"], ["CK", "DA", "D8"], ["HK", "CK", "DK", "CA", "DA", "SA", "D8"], "out_scenarios_none"),
+    ("Texas Holdem", "Quads", ["HK", "CK"], ["DK", "SK", "D8"], ["HK", "CK", "DK", "SK", "D8"], "out_scenarios_none"),
+    ("Texas Holdem", "Full House", ["HK", "DA"], ["CK", "SA", "C7", "D9"], ["HK", "DA", "CK", "SA", "C7", "D9"], "out_scenarios_full_house_001"),
+    ("Texas Holdem", "Full House", ["HK", "DK"], ["CK", "SA", "C7", "D4"], ["HK", "DK", "CK", "SA", "C7", "D4"], "out_scenarios_full_house_002"),
+    ("Texas Holdem", "Full House", ["HK", "DK"], ["C9", "S9", "C7", "D7"], ["HK", "DK", "C9", "S9", "C7", "D7"],
+     "out_scenarios_full_house_003"),
+    ("Texas Holdem", "Full House", ["HK", "DK"], ["CK", "S7", "C7", "C9"], ["HK", "DK", "CK", "S7", "C7", "C9"],
+     "out_scenarios_full_house_004"),
+    ("Texas Holdem", "Full House", ["H7", "D7"], ["C7", "SQ", "C5"], ["H7", "D7", "C7", "SQ", "C5"],
+     "out_scenarios_full_house_005"),
+    ("Texas Holdem", "Full House", ["HQ", "DQ"], [], ["HQ", "DQ"], "out_scenarios_full_house_006"),
+    ("Texas Holdem", "Full House", ["HQ", "DQ"], ["SK", "D2", "H8"], ["HQ", "DQ", "SK", "D2", "H8"], "out_scenarios_full_house_007"),
+    ("Texas Holdem", "Full House", ["HQ", "DT"], ["SK", "D2", "H8"], ["HQ", "DT", "SK", "D2", "H8"],
+     "out_scenarios_none"),
+    ("Texas Holdem", "Full House", ["HQ", "DT"], ["SK", "D2", "H8", "HK"], ["HQ", "DT", "SK", "D2", "H8", "HK"],
+     "out_scenarios_none"),
+    ("Texas Holdem", "Full House", ["HQ", "DT"], ["SQ", "CT", "H8"], ["HQ", "DT", "SQ", "CT", "H8", "CQ", "DQ", "HT", "ST", "C8", "S8", "D8"],
+     "out_scenarios_none"),
+    ("Texas Holdem", "Flush", ["HQ", "DT"], ["HK", "D2", "H8"], ["HQ", "DT", "HK", "D2", "H8"], "out_scenarios_flush_001"),
+    ("Texas Holdem", "Flush", ["HQ", "HT"], ["HK", "D2", "H8"], ["HQ", "HT", "HK", "D2", "H8"], "out_scenarios_flush_002"),
+    ("Texas Holdem", "Flush", ["HQ", "DT"], ["HK", "D2", "H8", "H2"], ["HQ", "DT", "HK", "D2", "H8", "H2"], "out_scenarios_flush_003"),
+    ("Texas Holdem", "Flush", ["HQ", "HT"], [], ["HQ", "HT"], "out_scenarios_flush_004"),
+    ("Texas Holdem", "Flush", ["HJ", "H9"], ["H5", "H2", "H6"], ["HJ", "H9", "H5", "H2", "H6"], "out_scenarios_flush_005"),
+    ("Texas Holdem", "Flush", ["HJ", "C9"], ["S5", "D2", "C6"], ["HJ", "C9", "S5", "D2", "C6"], "out_scenarios_none"),
+    ("Texas Holdem", "Flush", ["HJ", "C9"], ["S5", "D2", "C6", "C2"], ["HJ", "C9", "S5", "D2", "C6", "C2"], "out_scenarios_none"),
+    ("Texas Holdem", "Straight", ["S8", "HT"], ["C2", "C9", "H4", "S7"], ["S8", "HT", "C2", "C9", "H4", "S7"], "out_scenarios_straight_001"),
+    ("Texas Holdem", "Straight", ["S7", "HT"], ["C2", "S9", "D6"], ["S7", "HT", "C2", "S9", "D6"], "out_scenarios_straight_002"),
+    ("Texas Holdem", "Straight", ["S7", "H4"], [], ["S7", "H4"], "out_scenarios_straight_003"),
+    ("Texas Holdem", "Straight", ["S7", "H4"], ["C5", "HA", "C3"], ["S7", "H4", "C5", "HA", "C3"], "out_scenarios_straight_004"),
+    ("Texas Holdem", "Straight", ["H7", "C4"], ["H5", "S6", "D8"], ["H7", "C4", "H5", "S6", "D8"], "out_scenarios_straight_005"),
+    ("Texas Holdem", "Straight", ["H7", "C4"], ["HK", "SJ", "DJ"], ["H7", "C4", "HK", "SJ", "DJ"], "out_scenarios_none"),
+    ("Texas Holdem", "Straight", ["H7", "C4"], ["H6", "S3", "DJ"], ["H7", "C4", "H6", "S3", "DJ", "S5", "C5", "H5", "D5"], "out_scenarios_none"),
+    ("Texas Holdem", "Trips", ["H3", "D3"], ["C2", "D2", "S9"], ["H3", "D3", "C2", "D2", "S9"], "out_scenarios_trips_001"),
+    ("Texas Holdem", "Trips", ["H3", "D7"], ["C2", "D9", "SK"], ["H3", "D7", "C2", "D9", "SK"],
+     "out_scenarios_trips_002"),
+    ("Texas Holdem", "Trips", ["H7", "D7"], ["C7", "D6", "SK"], ["H7", "D7", "C7", "D6", "SK"], "out_scenarios_trips_003"),
+    ("Texas Holdem", "Trips", ["H7", "DA"], [], ["H7", "DA"], "out_scenarios_trips_004"),
+    ("Texas Holdem", "Trips", ["H7", "DA"], ["C2", "D5", "CQ", "ST"], ["H7", "DA", "C2", "D5", "CQ", "ST"], "out_scenarios_none"),
+    ("Texas Holdem", "Trips", ["H7", "D7"], ["C2", "D5", "CQ", "ST"], ["H7", "D7", "C2", "D5", "CQ", "ST", "C7", "S7"], "out_scenarios_none"),
+    ("Texas Holdem", "Two Pair", ["H9", "CJ"], ["D2", "S6", "HK"], ["H9", "CJ", "D2", "S6", "HK"],
+     "out_scenarios_two_pair_001"),
+    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D2", "S6", "HK", "D8"], ["H9", "C9", "D2", "S6", "HK", "D8"],
+     "out_scenarios_two_pair_002"),
+    ("Texas Holdem", "Two Pair", ["H6", "C6"], ["D2", "S8", "HK"], ["H6", "C6", "D2", "S8", "HK"],
+     "out_scenarios_two_pair_003"),
+    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D6", "S6", "HK", "S4"], ["H9", "C9", "D6", "S6", "HK", "S4"],
+     "out_scenarios_two_pair_004"),
+    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D8", "S8", "HK"], ["H9", "C9", "D8", "S8", "HK"],
+     "out_scenarios_two_pair_005"),
+    ("Texas Holdem", "Two Pair", ["H9", "C7"], [], ["H9", "C7"],
+     "out_scenarios_two_pair_006"),
+    ("Texas Holdem", "Two Pair", ["H9", "C9"], ["D9", "S9", "HK", "S3"], ["H9", "C9", "D9", "S9", "HK", "S3"],
+     "out_scenarios_two_pair_007"),
+    ("Texas Holdem", "Two Pair", ["H9", "C7"], ["D6", "S2", "HK", "SJ"], ["H9", "C7", "D6", "S2", "HK", "SJ"],
+     "out_scenarios_none"),
+    ("Texas Holdem", "Pair", ["C2", "D4"], ["H8", "CK", "CA", "D3"], ["C2", "D4", "H8", "CK", "CA", "D3"], "out_scenarios_pair_001"),
+    ("Texas Holdem", "Pair", ["D5", "H3"], [], ["D5", "H3"], "out_scenarios_pair_002"),
+    ("Texas Holdem", "Pair", ["D7", "H7"], ["C4", "S8", "DT"], ["D7", "H7" "C4", "S8", "DT"], "out_scenarios_pair_003"),
+    ("Texas Holdem", "Pair", ["D7", "H7"], ["C8", "S8", "DT", "C6"], ["D7", "H7", "C8", "S8", "DT", "C6"], "out_scenarios_pair_004"),
+    ("Texas Holdem", "High Card", ["D7", "HQ"], ["C8", "S2", "DT", "C6"], ["D7", "HQ", "C8", "S2", "DT", "C6"], "out_scenarios_high_card_001"),
+    ("Texas Holdem", "High Card", ["D7", "HJ"], [], ["D7", "HJ"], "out_scenarios_high_card_002")
+
 ])
 def test_when_find_outs_scenarios_then_correct_out_scenarios_returned(
         game_type, hand_type, hole_cards, board_cards, non_available_cards, expected, request
