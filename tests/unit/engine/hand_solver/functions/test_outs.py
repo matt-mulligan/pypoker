@@ -2,7 +2,7 @@ from itertools import product
 
 from pytest import mark, fixture, raises
 
-from fixtures.cards import get_hand, get_player_hands_dict
+from fixtures.cards import get_hand, get_player_hands_dict, get_tiebreaker_dict
 from pypoker.deck import Card, Deck
 from pypoker.engine.hand_solver.constants import GAME_TYPE_TEXAS_HOLDEM
 from pypoker.engine.hand_solver.functions.outs import build_out_string, claim_out_string, find_outs_scenarios, \
@@ -346,35 +346,35 @@ def out_scenarios_full_house_007():
 
 @fixture
 def out_scenarios_flush_001():
-    return [{'out_string': 'H*-H*', 'tiebreaker': ("Hearts", "13-12-8-*-*")}]
+    return [{'out_string': 'H*-H*', 'tiebreaker': "Hearts"}]
 
 
 @fixture
 def out_scenarios_flush_002():
-    return [{'out_string': 'H*-**', 'tiebreaker': ("Hearts", "13-12-10-8-*")}]
+    return [{'out_string': 'H*-**', 'tiebreaker': "Hearts"}]
 
 
 @fixture
 def out_scenarios_flush_003():
-    return [{'out_string': 'H*', 'tiebreaker': ("Hearts", "13-12-8-2-*")}]
+    return [{'out_string': 'H*', 'tiebreaker': "Hearts"}]
 
 
 @fixture
 def out_scenarios_flush_004():
     return [
-        {'out_string': 'H*-H*-H*-**-**', 'tiebreaker': ('Hearts', '12-10-*-*-*')},
-        {'out_string': 'C*-C*-C*-C*-C*', 'tiebreaker': ('Clubs', '*-*-*-*-*')} ,
-        {'out_string': 'D*-D*-D*-D*-D*', 'tiebreaker': ('Diamonds', '*-*-*-*-*')},
-        {'out_string': 'S*-S*-S*-S*-S*', 'tiebreaker': ('Spades', '*-*-*-*-*')}
+        {'out_string': 'H*-H*-H*-**-**', 'tiebreaker': 'Hearts'},
+        {'out_string': 'C*-C*-C*-C*-C*', 'tiebreaker': 'Clubs'},
+        {'out_string': 'D*-D*-D*-D*-D*', 'tiebreaker': 'Diamonds'},
+        {'out_string': 'S*-S*-S*-S*-S*', 'tiebreaker': 'Spades'}
     ]
 
 
 @fixture
 def out_scenarios_flush_005():
     return [
-        {'out_string': 'HQ-**', 'tiebreaker': ('Hearts', '12-11-9-6-5')},
-        {'out_string': 'HK-**', 'tiebreaker': ('Hearts', '13-11-9-6-5')},
-        {'out_string': 'HA-**', 'tiebreaker': ('Hearts', '14-11-9-6-5')}
+        {'out_string': 'HQ-**', 'tiebreaker': 'Hearts'},
+        {'out_string': 'HK-**', 'tiebreaker': 'Hearts'},
+        {'out_string': 'HA-**', 'tiebreaker': 'Hearts'}
     ]
 
 
@@ -974,10 +974,60 @@ def test_when_tiebreak_outs_draw_and_too_many_kwargs_passed_then_raise_error(gam
         tiebreak_outs_draw(game_type, hand_type, **kwargs)
 
 
-# @mark.parametrize("tiebreakers, expected", [
-#     ("tb_dict_straight_flush_001", "player_c")
+@mark.parametrize("tiebreakers, expected", [
+    ("tb_dict_straight_flush_001", "player_b"),
+    ("tb_dict_straight_flush_002", "TIE(player_a,player_c)"),
+    ("tb_dict_straight_flush_003", "TIE(player_a,player_b,player_d)"),
+    ("tb_dict_straight_flush_004", "TIE(player_a,player_b,player_c,player_d)")
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_straight_flush_then_correct_winner_returned(tiebreakers, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    actual = tiebreak_outs_draw("Texas Holdem", "Straight Flush", tiebreakers=tiebreakers)
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+    ("tb_dict_quads_001", "hole_tb_quads_001", "board_tb_quads_001", "draws_tb_quads_001", "player_a"),
+    ("tb_dict_quads_002", "hole_tb_quads_002", "board_tb_quads_002", "draws_tb_quads_002", "player_c"),
+    ("tb_dict_quads_002", "hole_tb_quads_003", "board_tb_quads_002", "draws_tb_quads_002", "TIE(player_a,player_c)"),
+    ("tb_dict_quads_002", "hole_tb_quads_004", "board_tb_quads_002", "draws_tb_quads_002", "TIE(player_a,player_b,player_c)"),
+    ("tb_dict_quads_002", "hole_tb_quads_002", "board_tb_quads_002", "draws_tb_quads_003", "TIE(player_a,player_b,player_c)"),
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_quads_then_correct_winner_returned(
+        tiebreakers, hole_cards, board_cards, drawn_cards, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_hand(board_cards)
+    drawn_cards = get_hand(drawn_cards)
+    actual = tiebreak_outs_draw(
+        "Texas Holdem", "Quads",
+        tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+    )
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, expected", [
+    ("tb_dict_full_house_001", "player_b"),
+    ("tb_dict_full_house_002", "player_c"),
+    ("tb_dict_full_house_003", "TIE(player_a,player_b)")
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_full_house_then_correct_winner_returned(tiebreakers, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    actual = tiebreak_outs_draw("Texas Holdem", "Full House", tiebreakers=tiebreakers)
+    assert actual == expected
+
+
+# @mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+#     ("tb_dict_flush_001", "hole_tb_flush_001", "board_tb_flush_001", "draws_tb_flush_001", "player_a"),
 # ])
-# def test_when_tiebreak_outs_draw_and_texas_holdem_and_straight_flush_then_correct_winner_returned(tiebreakers, expected):
+# def test_when_tiebreak_outs_draw_and_texas_holdem_and_flush_then_correct_winner_returned(
+#         tiebreakers, hole_cards, board_cards, drawn_cards, expected):
 #     tiebreakers = get_tiebreaker_dict(tiebreakers)
-#     actual = tiebreak_outs_draw("Texas Holdem", "Straight Flush", tiebreakers=tiebreakers)
+#     hole_cards = get_player_hands_dict(hole_cards)
+#     board_cards = get_hand(board_cards)
+#     drawn_cards = get_hand(drawn_cards)
+#     actual = tiebreak_outs_draw(
+#         "Texas Holdem", "Flush",
+#         tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+#     )
 #     assert actual == expected

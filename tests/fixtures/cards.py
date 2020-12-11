@@ -333,7 +333,25 @@ def get_hand(hand_name):
         "nine_hands_mixed_F": ["DT", "ST", "SA", "S2", "HT"],
         "nine_hands_mixed_G": ["H9", "C2", "D2", "D9", "DJ"],
         "nine_hands_mixed_H": ["DT", "CT", "CJ", "H3", "D7"],
-        "nine_hands_mixed_I": ["HK", "SQ", "C4", "C6", "H9"]
+        "nine_hands_mixed_I": ["HK", "SQ", "C4", "C6", "H9"],
+        "board_quads_001": ["HQ", "DQ", "D8"],
+        "draws_quads_001": ["SQ", "HJ"],
+        "hole_cards_tb_quads_001": ["DQ", "HQ"],
+        "hole_cards_tb_quads_002": ["D8", "H8"],
+        "hole_cards_tb_quads_003": ["D7", "H7"],
+        "hole_cards_tb_quads_004": ["DJ", "H8"],
+        "hole_cards_tb_quads_005": ["DA", "H2"],
+        "hole_cards_tb_quads_006": ["DT", "H7"],
+        "hole_cards_tb_quads_007": ["D5", "H8"],
+        "hole_cards_tb_quads_008": ["ST", "H2"],
+        "hole_cards_tb_quads_009": ["DT", "H7"],
+        "hole_cards_tb_quads_010": ["CT", "H8"],
+        "hole_cards_tb_quads_011": ["ST", "H2"],
+        "board_tb_quads_001": ["CQ", "C8", "D2"],
+        "board_tb_quads_002": ["CQ", "SQ", "DQ"],
+        "draws_tb_quads_001": ["SQ", "S8"],
+        "draws_tb_quads_002": ["HQ", "S4"],
+        "draws_tb_quads_003": ["HQ", "HA"]
     }[hand_name]
 
     return [get_card(card_id) for card_id in cards]
@@ -848,5 +866,37 @@ def get_player_hands_dict(scenario):
             "player_e": get_hand("nine_hands_mixed_E"), "player_f": get_hand("nine_hands_mixed_F"),
             "player_g": get_hand("nine_hands_mixed_G"), "player_h": get_hand("nine_hands_mixed_H"),
             "player_i": get_hand("nine_hands_mixed_I")
+        },
+        "hole_tb_quads_001": {
+            "player_a": get_hand("hole_cards_tb_quads_001"), "player_b": get_hand("hole_cards_tb_quads_002")
+        },
+        "hole_tb_quads_002": {
+            "player_a": get_hand("hole_cards_tb_quads_003"), "player_b": get_hand("hole_cards_tb_quads_004"),
+            "player_c": get_hand("hole_cards_tb_quads_005")
+        },
+        "hole_tb_quads_003": {
+            "player_a": get_hand("hole_cards_tb_quads_006"), "player_b": get_hand("hole_cards_tb_quads_007"),
+            "player_c": get_hand("hole_cards_tb_quads_008")
+        },
+        "hole_tb_quads_004": {
+            "player_a": get_hand("hole_cards_tb_quads_009"), "player_b": get_hand("hole_cards_tb_quads_010"),
+            "player_c": get_hand("hole_cards_tb_quads_011")
         }
         }[scenario]
+
+
+def get_tiebreaker_dict(name):
+    """
+    Test Helper method to build tiebreaker dictionary objects used when testing.
+    """
+    return {
+        "tb_dict_straight_flush_001": {"player_a": 9, "player_b": 12, "player_c": 10},
+        "tb_dict_straight_flush_002": {"player_a": 11, "player_b": 7, "player_c": 11},
+        "tb_dict_straight_flush_003": {"player_a": 9, "player_b": 9, "player_c": 8, "player_d": 9},
+        "tb_dict_straight_flush_004": {"player_a": 7, "player_b": 7, "player_c": 7, "player_d": 7},
+        "tb_dict_quads_001": {"player_a": 12, "player_b": 8},
+        "tb_dict_quads_002": {"player_a": 12, "player_b": 12, "player_c": 12},
+        "tb_dict_full_house_001": {"player_a": (7, 13), "player_b": (12, 7), "player_c": (7, 12)},
+        "tb_dict_full_house_002": {"player_a": (7, 9), "player_b": (6, 14), "player_c": (7, 10)},
+        "tb_dict_full_house_003": {"player_a": (7, 9), "player_b": (7, 9), "player_c": (4, 11)}
+    }[name]

@@ -7,7 +7,7 @@ are represented by an out-string
 """
 from collections import Counter
 from itertools import product, groupby, combinations
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from pypoker.deck import Card
 from pypoker.engine.hand_solver.constants import GAME_TYPE_TEXAS_HOLDEM, HAND_TYPE_STRAIGHT_FLUSH, \
@@ -60,7 +60,7 @@ def find_outs_scenarios(game_type: str, hand_type: str, **kwargs) -> str:
     _check_hand_type(game_type, hand_type)
     outs_key = f"{game_type}-{hand_type}"
 
-    kwargs_required_keys, describe_method = {
+    kwargs_required_keys, outs_scenario_method = {
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}":
             (["hole_cards", "board_cards", "available_cards"], _outs_straight_flush),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}":
@@ -82,7 +82,7 @@ def find_outs_scenarios(game_type: str, hand_type: str, **kwargs) -> str:
     }[outs_key]
 
     _check_kwargs(kwargs, kwargs_required_keys)
-    return describe_method(**kwargs)
+    return outs_scenario_method(**kwargs)
 
 
 def tiebreak_outs_draw(game_type: str, hand_type: str, **kwargs) -> str:
@@ -97,7 +97,7 @@ def tiebreak_outs_draw(game_type: str, hand_type: str, **kwargs) -> str:
     _check_hand_type(game_type, hand_type)
     tb_key = f"{game_type}-{hand_type}"
 
-    kwargs_required_keys, describe_method = {
+    kwargs_required_keys, draw_tb_method = {
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}":
             (["tiebreakers"], _outs_tb_straight_flush),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}":
@@ -119,10 +119,10 @@ def tiebreak_outs_draw(game_type: str, hand_type: str, **kwargs) -> str:
     }[tb_key]
 
     _check_kwargs(kwargs, kwargs_required_keys)
-    return describe_method(**kwargs)
+    return draw_tb_method(**kwargs)
 
 
-def build_out_string(suits: List[str], values: List[int], draws: int) -> str:
+def build_out_string(suits: List[str], values: List[Union[int, str]], draws: int) -> str:
     """
     THis public shared method will produce a list of out strings, that represent what cards can be drawn to give
     the player an out.
@@ -461,29 +461,22 @@ def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards
                 suits.extend(["ANY" for _ in range(draws - 1)])
                 values = [flush_value]
                 values.extend(["ANY" for _ in range(draws - 1)])
-                tb_values = [flush_value]
-                tb_values.extend(current_flush_values[:4])
-                tb_values = [str(val) for val in tb_values]
-                tb_values = "-".join(tb_values)
 
                 draw_scenarios.append(
                     {
                         OUT_STRING: build_out_string(suits, values, draws),
-                        TIEBREAKER: (suit, tb_values),
+                        TIEBREAKER: suit
                     }
                 )
 
         else:  # Player doesn't have a flush already, give generic outs
             suits = [suit for _ in range(draws_required)]
             values = ["ANY" for _ in range(draws_required)]
-            tb_values = "-".join([str(card.value) for card in sorted(drawn_cards, reverse=True) if card.suit == suit])
-            tb_values = "-".join([tb_values, *["*" for _ in range(draws_required)]])
-            tb_values = tb_values[1:] if draws_required == 5 else tb_values
 
             draw_scenarios.append(
                 {
                     OUT_STRING: build_out_string(suits, values, draws),
-                    TIEBREAKER: (suit, tb_values),
+                    TIEBREAKER: suit,
                 }
             )
 
@@ -730,12 +723,7 @@ def _outs_high_card(hole_cards: List[Card], board_cards: List[Card], available_c
 #######################################################################
 #  PRIVATE IMPLEMENTATION METHODS - OUTS TIEBRERAKERS - TEXAS HOLDEM  #
 #######################################################################
-def _outs_tb_straight_flush(
-    tiebreakers: Dict,
-    hole_cards: Dict[str, List[Card]],
-    board_cards: List[Card],
-    drawn_cards: List[Card],
-) -> str:
+def _outs_tb_straight_flush(tiebreakers: Dict) -> str:
     """
     Private method to determine which player would have the stronger straight flush hand. given the drawn cards.
 
@@ -803,12 +791,7 @@ def _outs_tb_quads(
     return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
 
-def _outs_tb_full_house(
-    tiebreakers: Dict,
-    hole_cards: Dict[str, List[Card]],
-    board_cards: List[Card],
-    drawn_cards: List[Card],
-) -> str:
+def _outs_tb_full_house(tiebreakers: Dict) -> str:
     """
     Private method to determine which player would have the stronger full house hand. given the drawn cards.
 
@@ -903,12 +886,7 @@ def _outs_tb_flush(
     return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
 
 
-def _outs_tb_straight(
-    tiebreakers: Dict,
-    hole_cards: Dict[str, List[Card]],
-    board_cards: List[Card],
-    drawn_cards: List[Card],
-) -> str:
+def _outs_tb_straight(tiebreakers: Dict) -> str:
     """
     Private method to determine which player would have the stronger straight hand. given the drawn cards.
 
