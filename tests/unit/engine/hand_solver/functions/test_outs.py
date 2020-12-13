@@ -1017,17 +1017,123 @@ def test_when_tiebreak_outs_draw_and_texas_holdem_and_full_house_then_correct_wi
     assert actual == expected
 
 
-# @mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
-#     ("tb_dict_flush_001", "hole_tb_flush_001", "board_tb_flush_001", "draws_tb_flush_001", "player_a"),
-# ])
-# def test_when_tiebreak_outs_draw_and_texas_holdem_and_flush_then_correct_winner_returned(
-#         tiebreakers, hole_cards, board_cards, drawn_cards, expected):
-#     tiebreakers = get_tiebreaker_dict(tiebreakers)
-#     hole_cards = get_player_hands_dict(hole_cards)
-#     board_cards = get_hand(board_cards)
-#     drawn_cards = get_hand(drawn_cards)
-#     actual = tiebreak_outs_draw(
-#         "Texas Holdem", "Flush",
-#         tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
-#     )
-#     assert actual == expected
+@mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+    ("tb_dict_flush_001", "hole_tb_flush_001", "board_tb_flush_001", "draws_tb_flush_001", "player_a"),
+    ("tb_dict_flush_001", "hole_tb_flush_002", "board_tb_flush_002", "draws_tb_flush_002", "player_b"),
+    ("tb_dict_flush_001", "hole_tb_flush_003", "board_tb_flush_003", "draws_tb_flush_003", "player_c"),
+    ("tb_dict_flush_001", "hole_tb_flush_004", "board_tb_flush_004", "draws_tb_flush_004", "player_a"),
+    ("tb_dict_flush_001", "hole_tb_flush_005", "board_tb_flush_005", "draws_tb_flush_005", "player_b"),
+    ("tb_dict_flush_001", "hole_tb_flush_006", "board_tb_flush_006", "draws_tb_flush_006", "player_c"),
+    ("tb_dict_flush_001", "hole_tb_flush_007", "board_tb_flush_007", "draws_tb_flush_007", "player_a"),
+    ("tb_dict_flush_001", "hole_tb_flush_008", "board_tb_flush_008", "draws_tb_flush_008", "player_b"),
+    ("tb_dict_flush_001", "hole_tb_flush_009", "board_tb_flush_009", "draws_tb_flush_009", "TIE(player_a,player_b,player_c)"),
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_flush_then_correct_winner_returned(
+        tiebreakers, hole_cards, board_cards, drawn_cards, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_hand(board_cards)
+    drawn_cards = get_hand(drawn_cards)
+    actual = tiebreak_outs_draw(
+        "Texas Holdem", "Flush",
+        tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+    )
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, expected", [
+    ("tb_dict_straight_001", "player_a"),
+    ("tb_dict_straight_002", "TIE(player_a,player_c)"),
+    ("tb_dict_straight_003", "TIE(player_a,player_b,player_c)")
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_straight_then_correct_winner_returned(tiebreakers, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    actual = tiebreak_outs_draw("Texas Holdem", "Straight", tiebreakers=tiebreakers)
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+    ("tb_dict_trips_001", "hole_tb_trips_001", "board_tb_trips_001", "draws_tb_trips_001", "player_a"),  # win on tiebreaker alone
+    ("tb_dict_trips_002", "hole_tb_trips_002", "board_tb_trips_002", "draws_tb_trips_002", "player_b"),  # all past tiebreaker, win on first kicker
+    ("tb_dict_trips_002", "hole_tb_trips_003", "board_tb_trips_003", "draws_tb_trips_003", "player_c"),  # all past tiebreaker, win on second kicker
+    ("tb_dict_trips_003", "hole_tb_trips_004", "board_tb_trips_004", "draws_tb_trips_004", "player_a"),  # subset past tiebreaker, player failing tiebreaker has bigger kicker
+    ("tb_dict_trips_003", "hole_tb_trips_005", "board_tb_trips_005", "draws_tb_trips_005", "TIE(player_a,player_c)"),  # tie
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_trips_then_correct_winner_returned(
+        tiebreakers, hole_cards, board_cards, drawn_cards, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_hand(board_cards)
+    drawn_cards = get_hand(drawn_cards)
+    actual = tiebreak_outs_draw(
+        "Texas Holdem", "Trips",
+        tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+    )
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+    ("tb_dict_two_pair_001", "hole_tb_two_pair_001", "board_tb_two_pair_001", "draws_tb_two_pair_001", "player_a"),  # win on first tiebreaker
+    ("tb_dict_two_pair_002", "hole_tb_two_pair_001", "board_tb_two_pair_001", "draws_tb_two_pair_001", "player_b"),
+    # win on second tiebreaker tiebreaker
+    ("tb_dict_two_pair_003", "hole_tb_two_pair_001", "board_tb_two_pair_001", "draws_tb_two_pair_001", "player_c"),
+    # win on kicker.
+    ("tb_dict_two_pair_003", "hole_tb_two_pair_002", "board_tb_two_pair_002", "draws_tb_two_pair_002", "TIE(player_b,player_c)"),
+    # tie
+    ("tb_dict_two_pair_003", "hole_tb_two_pair_002", "board_tb_two_pair_003", "draws_tb_two_pair_003", "TIE(player_a,player_b,player_c)"),
+    # tie
+    ("tb_dict_two_pair_004", "hole_tb_two_pair_003", "board_tb_two_pair_002", "draws_tb_two_pair_002", "player_b"),
+    # two plays throuhg to kickers, player missing tiebreaker would have better kicker
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_two_pair_then_correct_winner_returned(
+        tiebreakers, hole_cards, board_cards, drawn_cards, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_hand(board_cards)
+    drawn_cards = get_hand(drawn_cards)
+    actual = tiebreak_outs_draw(
+        "Texas Holdem", "Two Pair",
+        tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+    )
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+    ("tb_dict_pair_001", "hole_tb_pair_001", "board_tb_pair_001", "draws_tb_pair_001", "player_a"),  # win on tiebreaker
+    ("tb_dict_pair_002", "hole_tb_pair_001", "board_tb_pair_001", "draws_tb_pair_001", "player_b"),  # win on first kicker
+    ("tb_dict_pair_002", "hole_tb_pair_001", "board_tb_pair_002", "draws_tb_pair_001", "player_b"),  # win on second kicker
+    ("tb_dict_pair_002", "hole_tb_pair_001", "board_tb_pair_003", "draws_tb_pair_001", "player_b"),  # win on third kicker
+    ("tb_dict_pair_002", "hole_tb_pair_001", "board_tb_pair_004", "draws_tb_pair_001", "TIE(player_a,player_b,player_c)"),  # tie
+    ("tb_dict_pair_003", "hole_tb_pair_001", "board_tb_pair_002", "draws_tb_pair_001", "player_c"),  # player_b lost on tiebreaker but had better kicker
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_pair_then_correct_winner_returned(
+        tiebreakers, hole_cards, board_cards, drawn_cards, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_hand(board_cards)
+    drawn_cards = get_hand(drawn_cards)
+    actual = tiebreak_outs_draw(
+        "Texas Holdem", "Pair",
+        tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+    )
+    assert actual == expected
+
+
+@mark.parametrize("tiebreakers, hole_cards, board_cards, drawn_cards, expected", [
+    ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_001", "draws_tb_high_card_001", "player_a"),  # win on second kicker
+    ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_002", "draws_tb_high_card_001", "player_a"),  # win on third kicker
+    ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_003", "draws_tb_high_card_001", "player_a"),  # win on fourth kicker
+    ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_004", "draws_tb_high_card_001", "player_a"),  # win on fifth kicker
+    ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_005", "draws_tb_high_card_001", "TIE(player_a,player_b)")  # tie
+])
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_pair_then_correct_winner_returned(
+        tiebreakers, hole_cards, board_cards, drawn_cards, expected):
+    tiebreakers = get_tiebreaker_dict(tiebreakers)
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_hand(board_cards)
+    drawn_cards = get_hand(drawn_cards)
+    actual = tiebreak_outs_draw(
+        "Texas Holdem", "High Card",
+        tiebreakers=tiebreakers, hole_cards=hole_cards, board_cards=board_cards, drawn_cards=drawn_cards
+    )
+    assert actual == expected

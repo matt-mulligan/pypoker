@@ -742,7 +742,7 @@ def _outs_tb_straight_flush(tiebreakers: Dict) -> str:
         for player, tiebreaker in tiebreakers.items()
         if tiebreaker == max_tiebreaker
     ]
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_quads(
@@ -788,7 +788,7 @@ def _outs_tb_quads(
     winners = [
         player for player, kicker in player_kickers.items() if kicker == max_kicker
     ]
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_full_house(tiebreakers: Dict) -> str:
@@ -883,7 +883,7 @@ def _outs_tb_flush(
             if player_flush_values[player][index] == max_index_value
         ]
 
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_straight(tiebreakers: Dict) -> str:
@@ -905,7 +905,7 @@ def _outs_tb_straight(tiebreakers: Dict) -> str:
         for player, tiebreaker in tiebreakers.items()
         if tiebreaker == max_tiebreaker
     ]
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_trips(
@@ -963,7 +963,7 @@ def _outs_tb_trips(
             if player_kickers[player][index] == max_index_value
         ]
 
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_two_pair(
@@ -1027,7 +1027,7 @@ def _outs_tb_two_pair(
     winners = [
         player for player, kicker in player_kickers.items() if kicker == max_kicker
     ]
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_pair(
@@ -1085,7 +1085,7 @@ def _outs_tb_pair(
             if player_kickers[player][index] == max_index_value
         ]
 
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 def _outs_tb_high_card(
@@ -1130,7 +1130,7 @@ def _outs_tb_high_card(
             if player_kickers[player][index] == max_index_value
         ]
 
-    return winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+    return winners[0] if len(winners) == 1 else f"TIE({','.join(sorted(winners))})"
 
 
 ############################
