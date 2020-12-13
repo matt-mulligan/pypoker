@@ -6,12 +6,29 @@ this module contains the implementation of all hand ranking logic for hands of t
 from typing import List, Dict
 
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.constants import GAME_TYPE_TEXAS_HOLDEM, HAND_TYPE_STRAIGHT_FLUSH, \
-    HAND_TYPE_QUADS, HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT, HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, \
-    HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD
-from pypoker.engine.hand_solver.functions.shared import _check_game_type, _check_hand_type, _check_kwargs
-from pypoker.engine.hand_solver.utils import hand_is_ace_low_straight, order_hands_highest_card, \
-    hands_have_same_card_values, hand_highest_value_tuple
+from pypoker.engine.hand_solver.constants import (
+    GAME_TYPE_TEXAS_HOLDEM,
+    HAND_TYPE_STRAIGHT_FLUSH,
+    HAND_TYPE_QUADS,
+    HAND_TYPE_FULL_HOUSE,
+    HAND_TYPE_FLUSH,
+    HAND_TYPE_STRAIGHT,
+    HAND_TYPE_TRIPS,
+    HAND_TYPE_TWO_PAIR,
+    HAND_TYPE_PAIR,
+    HAND_TYPE_HIGH_CARD,
+)
+from pypoker.engine.hand_solver.functions.shared import (
+    _check_game_type,
+    _check_hand_type,
+    _check_kwargs,
+)
+from pypoker.engine.hand_solver.utils import (
+    hand_is_ace_low_straight,
+    order_hands_highest_card,
+    hands_have_same_card_values,
+    hand_highest_value_tuple,
+)
 
 
 ###################
@@ -34,9 +51,15 @@ def rank_hand_type(game_type: str, hand_type: str, **kwargs) -> Dict:
     rank_key = f"{game_type}-{hand_type}"
 
     kwargs_required_keys, rank_method = {
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (["hands"], _rank_straight_flush),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (
+            ["hands"],
+            _rank_straight_flush,
+        ),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}": (["hands"], _rank_quads),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (["hands"], _rank_full_house),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (
+            ["hands"],
+            _rank_full_house,
+        ),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}": (["hands"], _rank_flush),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}": (["hands"], _rank_straight),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}": (["hands"], _rank_trips),
@@ -105,9 +128,7 @@ def _rank_quads(hands: List[List[Card]]):
         ranked_hands[current_rank] = [quad_value_hands[0]]
 
         for hand in quad_value_hands[1:]:
-            if hands_have_same_card_values(
-                    hand, ranked_hands[current_rank][0]
-            ):
+            if hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
                 ranked_hands[current_rank].append(hand)
             else:
                 current_rank += 1
@@ -228,9 +249,7 @@ def _rank_trips(hands: List[List[Card]]):
         ranked_hands[current_rank] = [trips_value_hands[0]]
 
         for hand in trips_value_hands[1:]:
-            if hands_have_same_card_values(
-                    hand, ranked_hands[current_rank][0]
-            ):
+            if hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
                 ranked_hands[current_rank].append(hand)
             else:
                 current_rank += 1
@@ -257,7 +276,7 @@ def _rank_two_pair(hands: List[List[Card]]):
         kicker_value = list(
             filter(
                 lambda card: card.value != high_pair_value
-                             and card.value != low_pair_value,
+                and card.value != low_pair_value,
                 hand,
             )
         )[0].value
@@ -265,9 +284,7 @@ def _rank_two_pair(hands: List[List[Card]]):
             (hand, high_pair_value, low_pair_value, kicker_value)
         )
 
-    hands_two_pair_kicker.sort(
-        key=lambda tup: (tup[1], tup[2], tup[3]), reverse=True
-    )
+    hands_two_pair_kicker.sort(key=lambda tup: (tup[1], tup[2], tup[3]), reverse=True)
 
     current_rank = 1
     current_high_pair = hands_two_pair_kicker[0][1]
@@ -277,9 +294,9 @@ def _rank_two_pair(hands: List[List[Card]]):
 
     for hand, high_pair, low_pair, kicker in hands_two_pair_kicker[1:]:
         if (
-                high_pair == current_high_pair
-                and low_pair == current_low_pair
-                and kicker == current_kicker
+            high_pair == current_high_pair
+            and low_pair == current_low_pair
+            and kicker == current_kicker
         ):
             ranked_hands[current_rank].append(hand)
         else:
@@ -319,9 +336,7 @@ def _rank_pair(hands: List[List[Card]]):
         ranked_hands[current_rank] = [pair_value_hands[0]]
 
         for hand in pair_value_hands[1:]:
-            if hands_have_same_card_values(
-                    hand, ranked_hands[current_rank][0]
-            ):
+            if hands_have_same_card_values(hand, ranked_hands[current_rank][0]):
                 ranked_hands[current_rank].append(hand)
             else:
                 current_rank += 1
@@ -365,8 +380,7 @@ def _reorder_ace_low_straight_hands(ordered_hands):
     """
 
     ace_low_straight_hands = [
-        True if hand_is_ace_low_straight(hand) else False
-        for hand in ordered_hands
+        True if hand_is_ace_low_straight(hand) else False for hand in ordered_hands
     ]
     ace_low_straight_index_hand = [
         (index, ordered_hands[index])

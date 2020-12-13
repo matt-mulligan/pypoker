@@ -115,12 +115,12 @@ def hands_have_same_card_values(hand_a, hand_b):
 
     hand_a.sort(key=lambda card: card.value, reverse=True)
     hand_b.sort(key=lambda card: card.value, reverse=True)
-    return all(
-        card_a.value == card_b.value for card_a, card_b in zip(hand_a, hand_b)
-    )
+    return all(card_a.value == card_b.value for card_a, card_b in zip(hand_a, hand_b))
 
 
-def get_all_combinations(hole_cards: List[Card], board_cards: List[Card], hand_size: int):
+def get_all_combinations(
+    hole_cards: List[Card], board_cards: List[Card], hand_size: int
+):
     """
     This private method will get all possible hand combinations for a
 

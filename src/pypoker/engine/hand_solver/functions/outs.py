@@ -10,11 +10,30 @@ from itertools import product, groupby, combinations
 from typing import List, Dict, Union
 
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.constants import GAME_TYPE_TEXAS_HOLDEM, HAND_TYPE_STRAIGHT_FLUSH, \
-    HAND_TYPE_QUADS, HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT, HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, \
-    HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD, SUIT_HEARTS, SUIT_CLUBS, SUIT_DIAMONDS, SUIT_SPADES, OUT_STRING, TIEBREAKER, \
-    CARD_VALUES
-from pypoker.engine.hand_solver.functions.shared import _check_game_type, _check_hand_type, _check_kwargs
+from pypoker.engine.hand_solver.constants import (
+    GAME_TYPE_TEXAS_HOLDEM,
+    HAND_TYPE_STRAIGHT_FLUSH,
+    HAND_TYPE_QUADS,
+    HAND_TYPE_FULL_HOUSE,
+    HAND_TYPE_FLUSH,
+    HAND_TYPE_STRAIGHT,
+    HAND_TYPE_TRIPS,
+    HAND_TYPE_TWO_PAIR,
+    HAND_TYPE_PAIR,
+    HAND_TYPE_HIGH_CARD,
+    SUIT_HEARTS,
+    SUIT_CLUBS,
+    SUIT_DIAMONDS,
+    SUIT_SPADES,
+    OUT_STRING,
+    TIEBREAKER,
+    CARD_VALUES,
+)
+from pypoker.engine.hand_solver.functions.shared import (
+    _check_game_type,
+    _check_hand_type,
+    _check_kwargs,
+)
 from pypoker.engine.hand_solver.utils import get_all_combinations
 
 
@@ -61,24 +80,42 @@ def find_outs_scenarios(game_type: str, hand_type: str, **kwargs) -> str:
     outs_key = f"{game_type}-{hand_type}"
 
     kwargs_required_keys, outs_scenario_method = {
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_straight_flush),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_quads),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_full_house),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_flush),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_straight),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_trips),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_two_pair),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_pair),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}":
-            (["hole_cards", "board_cards", "available_cards"], _outs_high_card),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_straight_flush,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_quads,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_full_house,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_flush,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_straight,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_trips,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_two_pair,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_pair,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}": (
+            ["hole_cards", "board_cards", "available_cards"],
+            _outs_high_card,
+        ),
     }[outs_key]
 
     _check_kwargs(kwargs, kwargs_required_keys)
@@ -98,31 +135,51 @@ def tiebreak_outs_draw(game_type: str, hand_type: str, **kwargs) -> str:
     tb_key = f"{game_type}-{hand_type}"
 
     kwargs_required_keys, draw_tb_method = {
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}":
-            (["tiebreakers"], _outs_tb_straight_flush),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_quads),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}":
-            (["tiebreakers"], _outs_tb_full_house),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_flush),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}":
-            (["tiebreakers"], _outs_tb_straight),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_trips),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_two_pair),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_pair),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}":
-            (["tiebreakers", "hole_cards", "board_cards", "drawn_cards"], _outs_tb_high_card),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (
+            ["tiebreakers"],
+            _outs_tb_straight_flush,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}": (
+            ["tiebreakers", "hole_cards", "board_cards", "drawn_cards"],
+            _outs_tb_quads,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (
+            ["tiebreakers"],
+            _outs_tb_full_house,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}": (
+            ["tiebreakers", "hole_cards", "board_cards", "drawn_cards"],
+            _outs_tb_flush,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}": (
+            ["tiebreakers"],
+            _outs_tb_straight,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}": (
+            ["tiebreakers", "hole_cards", "board_cards", "drawn_cards"],
+            _outs_tb_trips,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}": (
+            ["tiebreakers", "hole_cards", "board_cards", "drawn_cards"],
+            _outs_tb_two_pair,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}": (
+            ["tiebreakers", "hole_cards", "board_cards", "drawn_cards"],
+            _outs_tb_pair,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}": (
+            ["tiebreakers", "hole_cards", "board_cards", "drawn_cards"],
+            _outs_tb_high_card,
+        ),
     }[tb_key]
 
     _check_kwargs(kwargs, kwargs_required_keys)
     return draw_tb_method(**kwargs)
 
 
-def build_out_string(suits: List[str], values: List[Union[int, str]], draws: int) -> str:
+def build_out_string(
+    suits: List[str], values: List[Union[int, str]], draws: int
+) -> str:
     """
     THis public shared method will produce a list of out strings, that represent what cards can be drawn to give
     the player an out.
@@ -177,7 +234,9 @@ def build_out_string(suits: List[str], values: List[Union[int, str]], draws: int
     return "-".join(out_string_parts)
 
 
-def claim_out_string(utilised_outs: List[str], out_string: str, drawable_cards: List[Card]) -> List[str]:
+def claim_out_string(
+    utilised_outs: List[str], out_string: str, drawable_cards: List[Card]
+) -> List[str]:
     """
     Public method to claim all possible out combinations for the cards given
 
@@ -195,7 +254,9 @@ def claim_out_string(utilised_outs: List[str], out_string: str, drawable_cards: 
 ##########################################################
 #  PRIVATE IMPLEMENTATION METHODS - OUTS - TEXAS HOLDEM  #
 ##########################################################
-def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_straight_flush(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -217,16 +278,12 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
         SUIT_SPADES: sum([1 for card in drawn_cards if card.suit == SUIT_SPADES]),
     }
     suit_remaining = {
-        SUIT_HEARTS: sum(
-            [1 for card in available_cards if card.suit == SUIT_HEARTS]
-        ),
+        SUIT_HEARTS: sum([1 for card in available_cards if card.suit == SUIT_HEARTS]),
         SUIT_CLUBS: sum([1 for card in available_cards if card.suit == SUIT_CLUBS]),
         SUIT_DIAMONDS: sum(
             [1 for card in available_cards if card.suit == SUIT_DIAMONDS]
         ),
-        SUIT_SPADES: sum(
-            [1 for card in available_cards if card.suit == SUIT_SPADES]
-        ),
+        SUIT_SPADES: sum([1 for card in available_cards if card.suit == SUIT_SPADES]),
     }
 
     suit_eligable = [
@@ -237,9 +294,7 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
 
     for suit in suit_eligable:
         drawn_suit_cards = [card for card in drawn_cards if card.suit == suit]
-        available_suit_cards = [
-            card for card in available_cards if card.suit == suit
-        ]
+        available_suit_cards = [card for card in available_cards if card.suit == suit]
 
         drawn_suit_cards = sorted(
             drawn_suit_cards, key=lambda card: card.value, reverse=True
@@ -280,13 +335,23 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
                         continue
 
                     drawn_suit_cards_values = [card.value for card in drawn_suit_cards]
-                    hypothetical_draw_cards_values = [card.value for card in hypothetical_draw_cards]
+                    hypothetical_draw_cards_values = [
+                        card.value for card in hypothetical_draw_cards
+                    ]
                     straight_values = list(range(run[1] - 4, run[1] + 1))
-                    required_straight_values = [value for value in straight_values if value not in drawn_suit_cards_values]
+                    required_straight_values = [
+                        value
+                        for value in straight_values
+                        if value not in drawn_suit_cards_values
+                    ]
 
                     if run[0] == 1:
                         hypothetical_draw_cards_values.append(1)
-                        hypothetical_draw_cards_values = [value for value in hypothetical_draw_cards_values if value != 14]
+                        hypothetical_draw_cards_values = [
+                            value
+                            for value in hypothetical_draw_cards_values
+                            if value != 14
+                        ]
 
                     hypothetical_draw_cards_values.sort()
                     required_straight_values.sort()
@@ -310,7 +375,9 @@ def _outs_straight_flush(hole_cards: List[Card], board_cards: List[Card], availa
     return draw_scenarios
 
 
-def _outs_quads(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_quads(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -324,11 +391,15 @@ def _outs_quads(hole_cards: List[Card], board_cards: List[Card], available_cards
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
-    current_quads = [value for value, count in drawn_value_counter.items() if count >= 4]
+    current_quads = [
+        value for value, count in drawn_value_counter.items() if count >= 4
+    ]
     value_eligable = [
         value
         for value in CARD_VALUES
-        if drawn_value_counter[value] + draws >= 4 and available_values_counter[value] + drawn_value_counter[value] >= 4 and value not in current_quads
+        if drawn_value_counter[value] + draws >= 4
+        and available_values_counter[value] + drawn_value_counter[value] >= 4
+        and value not in current_quads
     ]
 
     for value in value_eligable:
@@ -346,7 +417,9 @@ def _outs_quads(hole_cards: List[Card], board_cards: List[Card], available_cards
     return draw_scenarios
 
 
-def _outs_full_house(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_full_house(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -387,11 +460,15 @@ def _outs_full_house(hole_cards: List[Card], board_cards: List[Card], available_
         if trip_draws_required + pair_draws_required > draws:
             continue
 
-        current_trips = [value for value, counter in drawn_value_counter.items() if counter >= 3]
+        current_trips = [
+            value for value, counter in drawn_value_counter.items() if counter >= 3
+        ]
         if current_trips and trip_info[0] < max(current_trips):
             continue
 
-        current_pairs = [value for value, counter in drawn_value_counter.items() if counter >= 2]
+        current_pairs = [
+            value for value, counter in drawn_value_counter.items() if counter >= 2
+        ]
         current_pairs = [value for value in current_pairs if value != trip_info[0]]
         if current_pairs and pair_info[0] < max(current_pairs):
             continue
@@ -413,7 +490,9 @@ def _outs_full_house(hole_cards: List[Card], board_cards: List[Card], available_
     return draw_scenarios
 
 
-def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_flush(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -427,22 +506,16 @@ def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards
     suit_drawn = {
         SUIT_HEARTS: sum([1 for card in drawn_cards if card.suit == SUIT_HEARTS]),
         SUIT_CLUBS: sum([1 for card in drawn_cards if card.suit == SUIT_CLUBS]),
-        SUIT_DIAMONDS: sum(
-            [1 for card in drawn_cards if card.suit == SUIT_DIAMONDS]
-        ),
+        SUIT_DIAMONDS: sum([1 for card in drawn_cards if card.suit == SUIT_DIAMONDS]),
         SUIT_SPADES: sum([1 for card in drawn_cards if card.suit == SUIT_SPADES]),
     }
     suit_remaining = {
-        SUIT_HEARTS: sum(
-            [1 for card in available_cards if card.suit == SUIT_HEARTS]
-        ),
+        SUIT_HEARTS: sum([1 for card in available_cards if card.suit == SUIT_HEARTS]),
         SUIT_CLUBS: sum([1 for card in available_cards if card.suit == SUIT_CLUBS]),
         SUIT_DIAMONDS: sum(
             [1 for card in available_cards if card.suit == SUIT_DIAMONDS]
         ),
-        SUIT_SPADES: sum(
-            [1 for card in available_cards if card.suit == SUIT_SPADES]
-        ),
+        SUIT_SPADES: sum([1 for card in available_cards if card.suit == SUIT_SPADES]),
     }
 
     suit_eligable = [
@@ -453,9 +526,17 @@ def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards
 
     for suit in suit_eligable:
         draws_required = max([5 - suit_drawn[suit], 0])
-        if draws_required == 0:  # Player already has a flush, look to improve it with specific outs
-            current_flush_values = sorted([card.value for card in drawn_cards if card.suit == suit], reverse=True)
-            better_flush_values = [card.value for card in available_cards if card.suit == suit and card.value > max(current_flush_values)]
+        if (
+            draws_required == 0
+        ):  # Player already has a flush, look to improve it with specific outs
+            current_flush_values = sorted(
+                [card.value for card in drawn_cards if card.suit == suit], reverse=True
+            )
+            better_flush_values = [
+                card.value
+                for card in available_cards
+                if card.suit == suit and card.value > max(current_flush_values)
+            ]
             for flush_value in better_flush_values:
                 suits = [suit]
                 suits.extend(["ANY" for _ in range(draws - 1)])
@@ -465,7 +546,7 @@ def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards
                 draw_scenarios.append(
                     {
                         OUT_STRING: build_out_string(suits, values, draws),
-                        TIEBREAKER: suit
+                        TIEBREAKER: suit,
                     }
                 )
 
@@ -483,7 +564,9 @@ def _outs_flush(hole_cards: List[Card], board_cards: List[Card], available_cards
     return draw_scenarios
 
 
-def _outs_straight(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_straight(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -495,9 +578,7 @@ def _outs_straight(hole_cards: List[Card], board_cards: List[Card], available_ca
     draws = 5 - len(board_cards)
     drawn_cards = hole_cards + board_cards
 
-    drawn_values = sorted(
-        list(set([card.value for card in drawn_cards])), reverse=True
-    )
+    drawn_values = sorted(list(set([card.value for card in drawn_cards])), reverse=True)
     available_values = sorted(
         list(set([card.value for card in available_cards])), reverse=True
     )
@@ -532,11 +613,17 @@ def _outs_straight(hole_cards: List[Card], board_cards: List[Card], available_ca
                 drawn_cards_values = [card.value for card in drawn_cards]
                 possible_draw_values = [value for value in possible_draw]
                 straight_values = list(range(run[1] - 4, run[1] + 1))
-                required_straight_values = [value for value in straight_values if value not in drawn_cards_values]
+                required_straight_values = [
+                    value
+                    for value in straight_values
+                    if value not in drawn_cards_values
+                ]
 
                 if run[0] == 1:
                     possible_draw_values.append(1)
-                    possible_draw_values = [value for value in possible_draw_values if value != 14]
+                    possible_draw_values = [
+                        value for value in possible_draw_values if value != 14
+                    ]
 
                 possible_draw_values.sort()
                 required_straight_values.sort()
@@ -556,7 +643,9 @@ def _outs_straight(hole_cards: List[Card], board_cards: List[Card], available_ca
     return draw_scenarios
 
 
-def _outs_trips(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_trips(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -570,7 +659,9 @@ def _outs_trips(hole_cards: List[Card], board_cards: List[Card], available_cards
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
-    current_trips = [value for value, count in drawn_value_counter.items() if count >= 3]
+    current_trips = [
+        value for value, count in drawn_value_counter.items() if count >= 3
+    ]
     current_trips = 0 if not current_trips else max(current_trips)
 
     trips_eligable = [
@@ -596,7 +687,9 @@ def _outs_trips(hole_cards: List[Card], board_cards: List[Card], available_cards
     return draw_scenarios
 
 
-def _outs_two_pair(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_two_pair(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -610,7 +703,9 @@ def _outs_two_pair(hole_cards: List[Card], board_cards: List[Card], available_ca
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
-    current_pairs = [value for value, count in drawn_value_counter.items() if count >= 2]
+    current_pairs = [
+        value for value, count in drawn_value_counter.items() if count >= 2
+    ]
 
     pair_eligable = [
         (value, drawn_value_counter[value])
@@ -622,7 +717,9 @@ def _outs_two_pair(hole_cards: List[Card], board_cards: List[Card], available_ca
     for pair_a, pair_b in combinations(pair_eligable, 2):
         high_pair = pair_a if pair_a[0] > pair_b[0] else pair_b
         low_pair = pair_a if pair_a[0] < pair_b[0] else pair_b
-        all_pairs = sorted(list({high_pair[0], low_pair[0], *current_pairs}), reverse=True)
+        all_pairs = sorted(
+            list({high_pair[0], low_pair[0], *current_pairs}), reverse=True
+        )
 
         if all_pairs[0] != high_pair[0] or all_pairs[1] != low_pair[0]:
             continue
@@ -646,7 +743,9 @@ def _outs_two_pair(hole_cards: List[Card], board_cards: List[Card], available_ca
     return draw_scenarios
 
 
-def _outs_pair(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_pair(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -660,7 +759,9 @@ def _outs_pair(hole_cards: List[Card], board_cards: List[Card], available_cards:
 
     drawn_value_counter = Counter([card.value for card in drawn_cards])
     available_values_counter = Counter([card.value for card in available_cards])
-    current_pairs = [value for value, count in drawn_value_counter.items() if count >= 2]
+    current_pairs = [
+        value for value, count in drawn_value_counter.items() if count >= 2
+    ]
 
     pair_eligable = [
         (value, drawn_value_counter[value])
@@ -685,7 +786,9 @@ def _outs_pair(hole_cards: List[Card], board_cards: List[Card], available_cards:
     return draw_scenarios
 
 
-def _outs_high_card(hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]) -> List[Dict]:
+def _outs_high_card(
+    hole_cards: List[Card], board_cards: List[Card], available_cards: List[Card]
+) -> List[Dict]:
     """
     Private method to find all of the possible draw scenarios to get the player this specific draw type.
     :param hole_cards: List of card objects representing the players hole cards
@@ -778,9 +881,7 @@ def _outs_tb_quads(
         player_values = [card.value for card in hole_cards[player]]
         player_values.extend([card.value for card in board_cards])
         player_values.extend([card.value for card in drawn_cards])
-        player_values = [
-            value for value in player_values if value != max_tiebreaker
-        ]
+        player_values = [value for value in player_values if value != max_tiebreaker]
 
         player_kickers[player] = max(player_values)
 
@@ -941,9 +1042,7 @@ def _outs_tb_trips(
         player_values = [card.value for card in hole_cards[player]]
         player_values.extend([card.value for card in board_cards])
         player_values.extend([card.value for card in drawn_cards])
-        player_values = [
-            value for value in player_values if value != max_tiebreaker
-        ]
+        player_values = [value for value in player_values if value != max_tiebreaker]
 
         player_kickers[player] = sorted(player_values, reverse=True)
 
@@ -1063,9 +1162,7 @@ def _outs_tb_pair(
         player_values = [card.value for card in hole_cards[player]]
         player_values.extend([card.value for card in board_cards])
         player_values.extend([card.value for card in drawn_cards])
-        player_values = [
-            value for value in player_values if value != max_tiebreaker
-        ]
+        player_values = [value for value in player_values if value != max_tiebreaker]
 
         player_kickers[player] = sorted(player_values, reverse=True)
 
@@ -1136,7 +1233,9 @@ def _outs_tb_high_card(
 ############################
 #  Private helper methods  #
 ############################
-def _create_card_combinations_for_out_string(out_string: str, drawable_cards: List[Card]) -> List[str]:
+def _create_card_combinations_for_out_string(
+    out_string: str, drawable_cards: List[Card]
+) -> List[str]:
     """
     Method to create all possible draw combinations with the drawable cards based on the out string provided.
     each combination is represented by a string of the card ID's broken apart by dashes (-)
@@ -1156,19 +1255,11 @@ def _create_card_combinations_for_out_string(out_string: str, drawable_cards: Li
             card_candidates.append([card.identity for card in drawable_cards])
         elif suit == "*":
             card_candidates.append(
-                [
-                    card.identity
-                    for card in drawable_cards
-                    if card.identity[1] == value
-                ]
+                [card.identity for card in drawable_cards if card.identity[1] == value]
             )
         elif value == "*":
             card_candidates.append(
-                [
-                    card.identity
-                    for card in drawable_cards
-                    if card.identity[0] == suit
-                ]
+                [card.identity for card in drawable_cards if card.identity[0] == suit]
             )
         else:
             card_candidates.append([out_component])

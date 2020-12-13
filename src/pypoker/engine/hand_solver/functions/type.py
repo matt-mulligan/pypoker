@@ -7,14 +7,33 @@ methods in this module test if the given hand is of the same type as the type sp
 from typing import List
 
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.functions.shared import _check_game_type, _check_hand_type, _check_kwargs
-from pypoker.engine.hand_solver.utils import hand_all_same_suit, hand_values_continuous, hand_highest_value_tuple
+from pypoker.engine.hand_solver.functions.shared import (
+    _check_game_type,
+    _check_hand_type,
+    _check_kwargs,
+)
+from pypoker.engine.hand_solver.utils import (
+    hand_all_same_suit,
+    hand_values_continuous,
+    hand_highest_value_tuple,
+)
 
 from typing import Dict
 
-from pypoker.engine.hand_solver.constants import GAME_TYPES, TEXAS_HOLDEM_HAND_TYPES, GAME_TYPE_TEXAS_HOLDEM, \
-    HAND_TYPE_STRAIGHT_FLUSH, HAND_TYPE_QUADS, HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT, \
-    HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD
+from pypoker.engine.hand_solver.constants import (
+    GAME_TYPES,
+    TEXAS_HOLDEM_HAND_TYPES,
+    GAME_TYPE_TEXAS_HOLDEM,
+    HAND_TYPE_STRAIGHT_FLUSH,
+    HAND_TYPE_QUADS,
+    HAND_TYPE_FULL_HOUSE,
+    HAND_TYPE_FLUSH,
+    HAND_TYPE_STRAIGHT,
+    HAND_TYPE_TRIPS,
+    HAND_TYPE_TWO_PAIR,
+    HAND_TYPE_PAIR,
+    HAND_TYPE_HIGH_CARD,
+)
 
 
 ###################
@@ -36,15 +55,30 @@ def hand_test(game_type: str, hand_type: str, **kwargs: Dict) -> bool:
     test_key = f"{game_type}-{hand_type}"
 
     kwargs_required_keys, test_method = {
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (["hand"], _hand_test_straight_flush),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (
+            ["hand"],
+            _hand_test_straight_flush,
+        ),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}": (["hand"], _hand_test_quads),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (["hand"], _hand_test_full_house),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (
+            ["hand"],
+            _hand_test_full_house,
+        ),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}": (["hand"], _hand_test_flush),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}": (["hand"], _hand_test_straight),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}": (
+            ["hand"],
+            _hand_test_straight,
+        ),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}": (["hand"], _hand_test_trips),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}": (["hand"], _hand_test_two_pair),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}": (
+            ["hand"],
+            _hand_test_two_pair,
+        ),
         f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}": (["hand"], _hand_test_pair),
-        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}": (["hand"], _hand_test_high_card),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}": (
+            ["hand"],
+            _hand_test_high_card,
+        ),
     }[test_key]
 
     _check_kwargs(kwargs, kwargs_required_keys)
@@ -62,11 +96,7 @@ def _hand_test_straight_flush(hand: List[Card]) -> bool:
     :return: Boolean indicating if the hand is a straight flush
     """
 
-    return (
-            len(hand) == 5
-            and hand_all_same_suit(hand)
-            and hand_values_continuous(hand)
-    )
+    return len(hand) == 5 and hand_all_same_suit(hand) and hand_values_continuous(hand)
 
 
 def _hand_test_quads(hand: List[Card]) -> bool:

@@ -9,12 +9,31 @@ from pypoker.engine.hand_solver.constants import (
     BEST_HAND,
     HAND_DESCRIPTION,
     TIEBREAKER,
-    OUT_STRING, HAND_TYPE_STRAIGHT_FLUSH, HAND_TYPE_QUADS, HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT,
-    HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, HAND_TYPE_PAIR, HAND_TYPE_HIGH_CARD, GAME_TYPE_TEXAS_HOLDEM, TB_DRAWS_KWAGRS,
-    TB_DRAWS_KWARGS_ALL, TB_DRAWS_KWARGS_TIEBREAKER,
+    OUT_STRING,
+    HAND_TYPE_STRAIGHT_FLUSH,
+    HAND_TYPE_QUADS,
+    HAND_TYPE_FULL_HOUSE,
+    HAND_TYPE_FLUSH,
+    HAND_TYPE_STRAIGHT,
+    HAND_TYPE_TRIPS,
+    HAND_TYPE_TWO_PAIR,
+    HAND_TYPE_PAIR,
+    HAND_TYPE_HIGH_CARD,
+    GAME_TYPE_TEXAS_HOLDEM,
+    TB_DRAWS_KWAGRS,
+    TB_DRAWS_KWARGS_ALL,
+    TB_DRAWS_KWARGS_TIEBREAKER,
 )
-from pypoker.engine.hand_solver.functions import hand_test, rank_hand_type, describe_hand, find_outs_scenarios
-from pypoker.engine.hand_solver.functions.outs import claim_out_string, tiebreak_outs_draw
+from pypoker.engine.hand_solver.functions import (
+    hand_test,
+    rank_hand_type,
+    describe_hand,
+    find_outs_scenarios,
+)
+from pypoker.engine.hand_solver.functions.outs import (
+    claim_out_string,
+    tiebreak_outs_draw,
+)
 from pypoker.engine.hand_solver.utils import get_all_combinations
 
 
@@ -50,7 +69,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
             {HAND_TITLE: HAND_TYPE_TRIPS, HAND_RANK: 6},
             {HAND_TITLE: HAND_TYPE_TWO_PAIR, HAND_RANK: 7},
             {HAND_TITLE: HAND_TYPE_PAIR, HAND_RANK: 8},
-            {HAND_TITLE: HAND_TYPE_HIGH_CARD, HAND_RANK: 9}
+            {HAND_TITLE: HAND_TYPE_HIGH_CARD, HAND_RANK: 9},
         ]
 
     ########################
@@ -81,16 +100,27 @@ class TexasHoldemHandSolver(BaseHandSolver):
         )
         all_hands = get_all_combinations(hole_cards, board_cards, hand_size)
         for hand_ranking in self._hand_rankings:
-            matched_hands = [hand for hand in all_hands if hand_test(GAME_TYPE_TEXAS_HOLDEM, hand_ranking[HAND_TITLE],
-                                                                     hand=hand)]
+            matched_hands = [
+                hand
+                for hand in all_hands
+                if hand_test(
+                    GAME_TYPE_TEXAS_HOLDEM, hand_ranking[HAND_TITLE], hand=hand
+                )
+            ]
 
             if matched_hands:
-                best_hand = rank_hand_type(GAME_TYPE_TEXAS_HOLDEM, hand_ranking[HAND_TITLE], hands=matched_hands)[1][0]
+                best_hand = rank_hand_type(
+                    GAME_TYPE_TEXAS_HOLDEM,
+                    hand_ranking[HAND_TITLE],
+                    hands=matched_hands,
+                )[1][0]
                 return {
                     BEST_HAND: best_hand,
                     HAND_TITLE: hand_ranking[HAND_TITLE],
                     HAND_RANK: hand_ranking[HAND_RANK],
-                    HAND_DESCRIPTION: describe_hand(GAME_TYPE_TEXAS_HOLDEM, hand_ranking[HAND_TITLE], hand=best_hand)
+                    HAND_DESCRIPTION: describe_hand(
+                        GAME_TYPE_TEXAS_HOLDEM, hand_ranking[HAND_TITLE], hand=best_hand
+                    ),
                 }
 
     def rank_hands(self, players_hands: Dict[str, List[Card]]):
@@ -119,16 +149,22 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         for rank in ranks:
             hands = list(player_hands_by_rank[rank].values())
-            subranked_hands = rank_hand_type(GAME_TYPE_TEXAS_HOLDEM, self._hand_rankings[rank - 1][HAND_TITLE],
-                                             hands=hands)
+            subranked_hands = rank_hand_type(
+                GAME_TYPE_TEXAS_HOLDEM,
+                self._hand_rankings[rank - 1][HAND_TITLE],
+                hands=hands,
+            )
             subranked_players = self._link_subranked_hands_to_players(
                 subranked_hands, players_hands
             )
 
             for players in subranked_players.values():
                 current_rank += 1
-                hand_desc = describe_hand(GAME_TYPE_TEXAS_HOLDEM,  self._hand_rankings[rank - 1][HAND_TITLE],
-                                          hand=players_hands[players[0]])
+                hand_desc = describe_hand(
+                    GAME_TYPE_TEXAS_HOLDEM,
+                    self._hand_rankings[rank - 1][HAND_TITLE],
+                    hand=players_hands[players[0]],
+                )
                 ranked_player_hands[current_rank] = {
                     "players": players,
                     "hand_description": hand_desc,
@@ -165,8 +201,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     <= current_best_hand_rank
                 ):
                     player_outs = find_outs_scenarios(
-                        GAME_TYPE_TEXAS_HOLDEM, hand_info[HAND_TITLE], hole_cards=player_hole_cards[player],
-                        board_cards=board_cards, available_cards=drawable_cards
+                        GAME_TYPE_TEXAS_HOLDEM,
+                        hand_info[HAND_TITLE],
+                        hole_cards=player_hole_cards[player],
+                        board_cards=board_cards,
+                        available_cards=drawable_cards,
                     )
                     if hand_info[HAND_RANK] not in ranked_player_outs.keys():
                         ranked_player_outs[hand_info[HAND_RANK]] = {player: player_outs}
@@ -195,7 +234,10 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     scenario[OUT_STRING]
                     for scenario in player_out_scenarios[player_name]
                 ]
-                claimed_outs = [claim_out_string(utilised_outs, out_string, drawable_cards) for out_string in potential_outs]
+                claimed_outs = [
+                    claim_out_string(utilised_outs, out_string, drawable_cards)
+                    for out_string in potential_outs
+                ]
                 claimed_outs = [item for sublist in claimed_outs for item in sublist]
 
                 wins[player_name] += len(claimed_outs)
@@ -209,7 +251,9 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     if not out_scenarios:
                         continue
                     for scenario in out_scenarios:
-                        scenario["OUTS"] = claim_out_string(utilised_outs, scenario[OUT_STRING], drawable_cards)
+                        scenario["OUTS"] = claim_out_string(
+                            utilised_outs, scenario[OUT_STRING], drawable_cards
+                        )
                         combined_outs[player].extend(scenario["OUTS"])
 
                 for player, out_scenarios in player_out_scenarios.items():
@@ -254,11 +298,17 @@ class TexasHoldemHandSolver(BaseHandSolver):
                         drawn_cards = [Card(card_id) for card_id in out_ids]
                         kwarg_set = TB_DRAWS_KWAGRS[self._hand_rankings[HAND_TITLE]]
                         kwargs = {
-                            TB_DRAWS_KWARGS_ALL: {"tiebreakers": tiebreakers, "hole_cards": hole_cards,
-                                                  "board_cards": board_cards, "drawn_cards": drawn_cards},
-                            TB_DRAWS_KWARGS_TIEBREAKER: {"tiebreakers": tiebreakers}
+                            TB_DRAWS_KWARGS_ALL: {
+                                "tiebreakers": tiebreakers,
+                                "hole_cards": hole_cards,
+                                "board_cards": board_cards,
+                                "drawn_cards": drawn_cards,
+                            },
+                            TB_DRAWS_KWARGS_TIEBREAKER: {"tiebreakers": tiebreakers},
                         }[kwarg_set]
-                        winner = tiebreak_outs_draw(GAME_TYPE_TEXAS_HOLDEM, hand_info[HAND_TITLE], **kwargs)
+                        winner = tiebreak_outs_draw(
+                            GAME_TYPE_TEXAS_HOLDEM, hand_info[HAND_TITLE], **kwargs
+                        )
                         if winner not in wins.keys():
                             wins[winner] = 1
                         else:
@@ -276,7 +326,6 @@ class TexasHoldemHandSolver(BaseHandSolver):
             player: win_count / draw_combo_num for player, win_count in wins.items()
         }
         return odds
-
 
     #########################
     #  MISC HELPER METHODS  #
