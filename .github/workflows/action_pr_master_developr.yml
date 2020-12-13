@@ -4,7 +4,7 @@ name: Pypoker - PR to Master - Pre-Approval Checks
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 jobs:
   Master_PR_Checks:
