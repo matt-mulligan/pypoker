@@ -10,7 +10,7 @@ from itertools import product, groupby, combinations
 from typing import List, Dict, Union
 
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.constants import (
+from pypoker.engine.hand_logic.constants import (
     GAME_TYPE_TEXAS_HOLDEM,
     HAND_TYPE_STRAIGHT_FLUSH,
     HAND_TYPE_QUADS,
@@ -29,12 +29,12 @@ from pypoker.engine.hand_solver.constants import (
     TIEBREAKER,
     CARD_VALUES,
 )
-from pypoker.engine.hand_solver.functions.shared import (
+from pypoker.engine.hand_logic.functions.shared import (
     _check_game_type,
     _check_hand_type,
     _check_kwargs,
 )
-from pypoker.engine.hand_solver.utils import get_all_combinations
+from pypoker.engine.hand_logic.utils import get_all_combinations
 
 
 ####################

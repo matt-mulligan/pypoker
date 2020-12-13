@@ -4,8 +4,8 @@ from pytest import mark, fixture, raises
 
 from fixtures.cards import get_hand, get_player_hands_dict, get_tiebreaker_dict
 from pypoker.deck import Card, Deck
-from pypoker.engine.hand_solver.constants import GAME_TYPE_TEXAS_HOLDEM
-from pypoker.engine.hand_solver.functions.outs import build_out_string, claim_out_string, find_outs_scenarios, \
+from pypoker.engine.hand_logic.constants import GAME_TYPE_TEXAS_HOLDEM
+from pypoker.engine.hand_logic.functions.outs import build_out_string, claim_out_string, find_outs_scenarios, \
     tiebreak_outs_draw
 
 

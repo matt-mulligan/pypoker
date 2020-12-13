@@ -7,12 +7,12 @@ methods in this module test if the given hand is of the same type as the type sp
 from typing import List
 
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.functions.shared import (
+from pypoker.engine.hand_logic.functions.shared import (
     _check_game_type,
     _check_hand_type,
     _check_kwargs,
 )
-from pypoker.engine.hand_solver.utils import (
+from pypoker.engine.hand_logic.utils import (
     hand_all_same_suit,
     hand_values_continuous,
     hand_highest_value_tuple,
@@ -20,7 +20,7 @@ from pypoker.engine.hand_solver.utils import (
 
 from typing import Dict
 
-from pypoker.engine.hand_solver.constants import (
+from pypoker.engine.hand_logic.constants import (
     GAME_TYPES,
     TEXAS_HOLDEM_HAND_TYPES,
     GAME_TYPE_TEXAS_HOLDEM,

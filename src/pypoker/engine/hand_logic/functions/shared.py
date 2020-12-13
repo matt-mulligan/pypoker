@@ -2,7 +2,7 @@
 Shared functionality used by all of the function modules
 """
 
-from pypoker.engine.hand_solver.constants import (
+from pypoker.engine.hand_logic.constants import (
     GAME_TYPES,
     GAME_TYPE_TEXAS_HOLDEM,
     TEXAS_HOLDEM_HAND_TYPES,

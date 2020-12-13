@@ -1,7 +1,7 @@
 from pytest import raises, mark
 
 from fixtures.cards import get_rank_dictionary, get_hand_sets
-from pypoker.engine.hand_solver.functions import rank_hand_type
+from pypoker.engine.hand_logic.functions import rank_hand_type
 
 
 def test_when_rank_hand_type_and_bad_game_type_then_raise_error():
