@@ -123,6 +123,9 @@ def get_hand(hand_name):
         "hand_0002": ["ST", "H5", "S4", "SK", "S2"],
         "hand_0003": ["ST", "S7", "H8", "DJ", "S9"],
         "hand_0004": ["ST", "S7", "H8", "DQ", "S9"],
+        "hand_0005": ["S4", "C2", "CA", "D5", "D3"],
+        "hand_0006": ["S4", "C2", "C6", "D5", "D3"],
+        "hand_0007": ["SJ", "CQ", "CA", "DK", "DT"],
         "hand_straight_flush_001": ["DA", "DK", "DQ", "DJ", "DT"],
         "hand_straight_flush_002": ["HT", "H9", "H8", "H7", "H6"],
         "hand_straight_flush_003": ["C7", "C6", "C5", "C4", "C3"],
@@ -135,6 +138,7 @@ def get_hand(hand_name):
         "hand_quads_002": ["HQ", "DQ", "SQ", "CQ", "HJ"],
         "hand_quads_003": ["HQ", "DQ", "SQ", "CQ", "HJ"],
         "hand_quads_004": ["HQ", "DQ", "SQ", "CQ", "HJ"],
+        "hand_quads_short_001": ["HQ", "DQ", "SQ", "CQ"],
         "hand_full_house_001": ["HK", "SK", "D9", "C9", "S9"],
         "hand_full_house_002": ["HJ", "DJ", "D4", "S4", "C4"],
         "hand_full_house_003": ["DQ", "CQ", "SQ", "HJ", "CJ"],
@@ -157,16 +161,26 @@ def get_hand(hand_name):
         "hand_trips_001": ["S9", "H8", "DK", "CK", "SK"],
         "hand_trips_002": ["S9", "H8", "DK", "CK", "SK"],
         "hand_trips_003": ["S9", "H8", "DK", "CK", "SK"],
+        "hand_trips_short_001": ["S9", "DK", "CK", "SK"],
+        "hand_trips_short_002": ["DK", "CK", "SK"],
         "hand_two_pair_001": ["ST", "H7", "D9", "C9", "S7"],
         "hand_two_pair_002": ["ST", "H7", "D9", "C9", "S7"],
         "hand_two_pair_003": ["ST", "H7", "D9", "C9", "S7"],
         "hand_two_pair_004": ["H7", "D9", "C9", "S7", "C6"],
+        "hand_two_pair_short_001": ["H7", "D9", "C9", "S7"],
         "hand_pair_001": ["ST", "H7", "D8", "D7", "CA"],
         "hand_pair_002": ["ST", "H7", "D8", "D7", "CA"],
         "hand_pair_003": ["ST", "H7", "D8", "D7", "CA"],
+        "hand_pair_short_001": ["ST", "H7", "D7", "CA"],
+        "hand_pair_short_002": ["H7", "D7", "CA"],
+        "hand_pair_short_003": ["H7", "D7"],
         "hand_high_card_001": ["S6", "D4", "H8", "H9", "CJ"],
         "hand_high_card_002": ["S6", "D4", "H8", "H9", "CJ"],
         "hand_high_card_003": ["S6", "D4", "H8", "H9", "CJ"],
+        "hand_high_card_short_001": ["S6", "H8", "H9", "CJ"],
+        "hand_high_card_short_002": ["H8", "H9", "CJ"],
+        "hand_high_card_short_003": ["H9", "CJ"],
+        "hand_high_card_short_004": ["CJ"],
         "straight_flush_multi_A": ["HA", "HJ", "HQ", "HT", "HK"],
         "straight_flush_multi_B": ["DK", "DT", "DJ", "D9", "DQ"],
         "straight_flush_multi_C": ["C9", "CT", "C6", "C8", "C7"],
@@ -319,7 +333,126 @@ def get_hand(hand_name):
         "nine_hands_mixed_F": ["DT", "ST", "SA", "S2", "HT"],
         "nine_hands_mixed_G": ["H9", "C2", "D2", "D9", "DJ"],
         "nine_hands_mixed_H": ["DT", "CT", "CJ", "H3", "D7"],
-        "nine_hands_mixed_I": ["HK", "SQ", "C4", "C6", "H9"]
+        "nine_hands_mixed_I": ["HK", "SQ", "C4", "C6", "H9"],
+        "board_quads_001": ["HQ", "DQ", "D8"],
+        "draws_quads_001": ["SQ", "HJ"],
+        "hole_cards_tb_quads_001": ["DQ", "HQ"],
+        "hole_cards_tb_quads_002": ["D8", "H8"],
+        "hole_cards_tb_quads_003": ["D7", "H7"],
+        "hole_cards_tb_quads_004": ["DJ", "H8"],
+        "hole_cards_tb_quads_005": ["DA", "H2"],
+        "hole_cards_tb_quads_006": ["DT", "H7"],
+        "hole_cards_tb_quads_007": ["D5", "H8"],
+        "hole_cards_tb_quads_008": ["ST", "H2"],
+        "hole_cards_tb_quads_009": ["DT", "H7"],
+        "hole_cards_tb_quads_010": ["CT", "H8"],
+        "hole_cards_tb_quads_011": ["ST", "H2"],
+        "hole_cards_tb_flush_001_a": ["HA", "HK"],
+        "hole_cards_tb_flush_001_b": ["HJ", "HT"],
+        "hole_cards_tb_flush_001_c": ["H9", "H8"],
+        "hole_cards_tb_flush_002_a": ["SA", "HJ"],
+        "hole_cards_tb_flush_002_b": ["HQ", "HT"],
+        "hole_cards_tb_flush_002_c": ["CK", "H8"],
+        "hole_cards_tb_flush_003_a": ["SA", "H9"],
+        "hole_cards_tb_flush_003_b": ["DQ", "H5"],
+        "hole_cards_tb_flush_003_c": ["CK", "HT"],
+        "hole_cards_tb_flush_004_a": ["SA", "HT"],
+        "hole_cards_tb_flush_004_b": ["DQ", "H5"],
+        "hole_cards_tb_flush_004_c": ["CK", "H8"],
+        "hole_cards_tb_flush_005_a": ["SA", "HT"],
+        "hole_cards_tb_flush_005_b": ["DQ", "HK"],
+        "hole_cards_tb_flush_005_c": ["CK", "H8"],
+        "hole_cards_tb_flush_006_a": ["SA", "H8"],
+        "hole_cards_tb_flush_006_b": ["DQ", "H5"],
+        "hole_cards_tb_flush_006_c": ["CK", "H9"],
+        "hole_cards_tb_flush_007_a": ["SA", "H8"],
+        "hole_cards_tb_flush_007_b": ["DQ", "H5"],
+        "hole_cards_tb_flush_007_c": ["CK", "H4"],
+        "hole_cards_tb_flush_008_a": ["SA", "H3"],
+        "hole_cards_tb_flush_008_b": ["DQ", "H6"],
+        "hole_cards_tb_flush_008_c": ["CK", "H4"],
+        "hole_cards_tb_flush_009_a": ["SA", "H3"],
+        "hole_cards_tb_flush_009_b": ["DQ", "H6"],
+        "hole_cards_tb_flush_009_c": ["CK", "H4"],
+        "hole_cards_tb_trips_001_a": ["S5", "C9"],
+        "hole_cards_tb_trips_001_b": ["DK", "C6"],
+        "hole_cards_tb_trips_001_c": ["SJ", "H6"],
+        "hole_cards_tb_trips_002_a": ["S5", "C9"],
+        "hole_cards_tb_trips_002_b": ["DK", "C6"],
+        "hole_cards_tb_trips_002_c": ["SJ", "H6"],
+        "hole_cards_tb_trips_003_a": ["ST", "CJ"],
+        "hole_cards_tb_trips_003_b": ["DK", "C6"],
+        "hole_cards_tb_trips_003_c": ["SK", "H8"],
+        "hole_cards_tb_trips_004_a": ["SQ", "CJ"],
+        "hole_cards_tb_trips_004_b": ["DK", "C6"],
+        "hole_cards_tb_trips_004_c": ["ST", "H8"],
+        "hole_cards_tb_trips_005_a": ["CQ", "CJ"],
+        "hole_cards_tb_trips_005_b": ["DA", "C6"],
+        "hole_cards_tb_trips_005_c": ["SQ", "H8"],
+        "hole_cards_tb_two_pair_001_a": ["S6", "H9"],
+        "hole_cards_tb_two_pair_001_b": ["SJ", "C9"],
+        "hole_cards_tb_two_pair_001_c": ["SQ", "D9"],
+        "hole_cards_tb_two_pair_002_a": ["S6", "H9"],
+        "hole_cards_tb_two_pair_002_b": ["SK", "C9"],
+        "hole_cards_tb_two_pair_002_c": ["DK", "D9"],
+        "hole_cards_tb_two_pair_003_a": ["S6", "H9"],
+        "hole_cards_tb_two_pair_003_b": ["SQ", "C9"],
+        "hole_cards_tb_two_pair_003_c": ["DK", "D9"],
+        "hole_cards_tb_pair_001_a": ["S8", "H7"],
+        "hole_cards_tb_pair_001_b": ["D8", "CT"],
+        "hole_cards_tb_pair_001_c": ["H8", "D9"],
+        "hole_cards_tb_high_card_001_a": ["S2", "H8"],
+        "hole_cards_tb_high_card_001_b": ["D2", "C7"],
+        "board_tb_quads_001": ["CQ", "C8", "D2"],
+        "board_tb_quads_002": ["CQ", "SQ", "DQ"],
+        "board_tb_flush_001": ["H6", "H3", "C9", "SK"],
+        "board_tb_flush_002": ["H6", "H3", "H7", "SK"],
+        "board_tb_flush_003": ["H6", "H3", "H7", "SK"],
+        "board_tb_flush_004": ["H6", "H3", "H7", "HQ"],
+        "board_tb_flush_005": ["H6", "H3", "HA", "CQ"],
+        "board_tb_flush_006": ["H6", "HK", "HA", "CQ"],
+        "board_tb_flush_007": ["H9", "HK", "HA", "CQ"],
+        "board_tb_flush_008": ["H9", "HK", "HA", "H2"],
+        "board_tb_flush_009": ["H9", "HK", "HA", "H7"],
+        "board_tb_trips_001": ["H7", "C7", "H2", "C3"],
+        "board_tb_trips_002": ["H7", "C7", "H2", "C3"],
+        "board_tb_trips_003": ["H7", "C7", "H2", "C3"],
+        "board_tb_trips_004": ["H7", "C7", "H2", "C3"],
+        "board_tb_trips_005": ["H7", "C7", "H2", "CK"],
+        "board_tb_two_pair_001": ["H7", "C7", "H2", "CT"],
+        "board_tb_two_pair_002": ["H7", "C7", "H2", "CT"],
+        "board_tb_two_pair_003": ["H7", "C7", "HA", "CT"],
+        "board_tb_pair_001": ["H2", "C3", "D6", "C5"],
+        "board_tb_pair_002": ["HQ", "C3", "D6", "C5"],
+        "board_tb_pair_003": ["HQ", "CK", "D6", "C5"],
+        "board_tb_pair_004": ["HQ", "CK", "DJ", "C5"],
+        "board_tb_high_card_001": ["H6", "C3", "D7", "C5"],
+        "board_tb_high_card_002": ["H6", "CK", "D7", "C5"],
+        "board_tb_high_card_003": ["H6", "CK", "D7", "CJ"],
+        "board_tb_high_card_004": ["HT", "CK", "D7", "CJ"],
+        "board_tb_high_card_005": ["HT", "CK", "D9", "CJ"],
+        "draws_tb_quads_001": ["SQ", "S8"],
+        "draws_tb_quads_002": ["HQ", "S4"],
+        "draws_tb_quads_003": ["HQ", "HA"],
+        "draws_tb_flush_001": ["H2"],
+        "draws_tb_flush_002": ["H2"],
+        "draws_tb_flush_003": ["H2"],
+        "draws_tb_flush_004": ["H2"],
+        "draws_tb_flush_005": ["H2"],
+        "draws_tb_flush_006": ["H2"],
+        "draws_tb_flush_007": ["H2"],
+        "draws_tb_flush_008": ["H8"],
+        "draws_tb_flush_009": ["H9"],
+        "draws_tb_trips_001": ["S7"],
+        "draws_tb_trips_002": ["S7"],
+        "draws_tb_trips_003": ["S7"],
+        "draws_tb_trips_004": ["S7"],
+        "draws_tb_trips_005": ["S7"],
+        "draws_tb_two_pair_001": ["ST"],
+        "draws_tb_two_pair_002": ["ST"],
+        "draws_tb_two_pair_003": ["ST"],
+        "draws_tb_pair_001": ["C8"],
+        "draws_tb_high_card_001": ["CA"]
     }[hand_name]
 
     return [get_card(card_id) for card_id in cards]
@@ -355,13 +488,49 @@ def get_hand_sets(hand_name):
             ['DK', 'CQ', 'HT', 'S8', 'S3'], ['DK', 'CQ', 'HT', 'D7', 'S3'], ['DK', 'CQ', 'HT', 'D7', 'S2'],
             ['DK', 'S8', 'D7', 'S3', 'S2']
         ],
+        "hand_set_straight_flush_001": [
+            ["C6", "CT", "C9", "C8", "C7"], ["DK", "DT", "D9", "DQ", "DJ"], ["DK", "DT", "DA", "DQ", "DJ"],
+            ["SK", "ST", "S9", "SQ", "SJ"], ["C6", "CT", "C9", "C8", "C7"]
+        ],
+        "hand_set_quads_001": [
+            ["C7", "D7", "S7", "H7", "HK"], ["C7", "D7", "S7", "H7", "C6"], ["D6", "C6", "S6", "H6", "DJ"],
+            ["D6", "C6", "S6", "H6", "CJ"], ["C9", "D9", "S9", "H9", "C7"]
+        ],
+        "hand_set_full_house_001": [
+            ["C7", "D7", "S7", "H6", "C6"], ["C7", "D7", "S7", "H8", "C8"], ["D7", "C7", "S7", "C6", "D6"],
+            ["DK", "CK", "SK", "HA", "CA"]
+        ],
+        "hand_set_flush_001": [
+            ["CA", "CT", "C7", "C6", "C2"], ["DA", "DK", "D7", "D6", "D2"], ["HA", "HK", "HT", "H6", "H2"],
+            ["DA", "DK", "DT", "D9", "D2"], ["SA", "SK", "ST", "S9", "S2"], ["DA", "DK", "DT", "D9", "D7"]
+        ],
+        "hand_set_straight_001": [
+            ["C6", "D7", "DT", "S8", "H9"], ["SJ", "C7", "CT", "S8", "H9"],
+            ["CQ", "DJ", "DT", "S8", "H9"], ["CJ", "D7", "DT", "S8", "H9"]
+        ],
+        "hand_set_trips_001": [
+            ["C7", "D7", "S7", "H5", "C6"], ["C7", "D7", "S7", "H8", "C6"], ["D7", "C7", "S7", "C6", "D5"],
+            ["DK", "CK", "SK", "HA", "C2"]
+        ],
+        "hand_set_two_pair_001": [
+            ["C7", "D7", "S4", "H6", "C6"], ["C7", "D7", "C4", "H6", "C6"], ["D7", "C7", "S9", "C6", "D6"],
+            ["DK", "CK", "ST", "HA", "CA"]
+        ],
+        "hand_set_pair_001": [
+            ["C7", "D7", "S4", "H6", "C8"], ["C7", "D7", "C4", "H7", "C8"], ["D7", "C7", "S4", "C7", "DK"],
+            ["DK", "CK", "ST", "HA", "C9"], ["D7", "C7", "C4", "H7", "CK"]
+        ],
+        "hand_set_high_card_001": [
+            ["C2", "DQ", "DT", "S8", "H5"], ["CA", "DQ", "DT", "S8", "H5"], ["CA", "DQ", "DT", "S8", "HK"],
+            ["SA", "SQ", "HT", "C8", "CK"], ["SA", "SQ", "HT", "C9", "CK"],
+        ]
     }[hand_name]
 
     return [[get_card(descriptors) for descriptors in cards] for cards in hand_sets]
 
 
-def get_rank_dictionary(rank_dict_name):
-    return {
+def get_rank_dictionary(rank_dict_name, build_cards=False):
+    dict_val = {
         "straight_flush_multi": {
             1: {PLAYERS: ["player_a"], HAND_DESC: 'Straight Flush (Ace to Ten)'},
             2: {PLAYERS: ["player_b"], HAND_DESC: 'Straight Flush (King to Nine)'},
@@ -561,8 +730,58 @@ def get_rank_dictionary(rank_dict_name):
             7: {PLAYERS: ["player_g"], HAND_DESC: "Two Pair (Nines and Twos with kicker Jack)"},
             8: {PLAYERS: ["player_h"], HAND_DESC: "Pair (Tens with kickers Jack, Seven, Three)"},
             9: {PLAYERS: ["player_i"], HAND_DESC: "High Card (King, Queen, Nine, Six, Four)"},
+        },
+        "rank_dict_straight_flush_001": {
+            1: [["DK", "DT", "DA", "DQ", "DJ"]],
+            2: [["DK", "DT", "D9", "DQ", "DJ"], ["SK", "ST", "S9", "SQ", "SJ"]],
+            3: [["C6", "CT", "C9", "C8", "C7"], ["C6", "CT", "C9", "C8", "C7"]]
+        },
+        "rank_dict_quads_001": {
+            1: [["C9", "D9", "S9", "H9", "C7"]],
+            2: [["C7", "D7", "S7", "H7", "HK"]],
+            3: [["C7", "D7", "S7", "H7", "C6"]],
+            4: [["D6", "C6", "S6", "H6", "DJ"], ["D6", "C6", "S6", "H6", "CJ"]]
+        },
+        "rank_dict_full_house_001": {
+            1: [["DK", "CK", "SK", "HA", "CA"]], 2: [["C7", "D7", "S7", "H8", "C8"]],
+            3: [["C7", "D7", "S7", "H6", "C6"], ["D7", "C7", "S7", "C6", "D6"]]
+        },
+        "rank_dict_flush_001": {
+            1: [["DA", "DK", "DT", "D9", "D7"]],
+            2: [["DA", "DK", "DT", "D9", "D2"], ["SA", "SK", "ST", "S9", "S2"]],
+            3: [["HA", "HK", "HT", "H6", "H2"]], 4: [["DA", "DK", "D7", "D6", "D2"]],
+            5: [["CA", "CT", "C7", "C6", "C2"]]
+        },
+        "rank_dict_straight_001": {
+            1: [["CQ", "DJ", "DT", "S8", "H9"]], 2: [["SJ", "C7", "CT", "S8", "H9"], ["CJ", "D7", "DT", "S8", "H9"]],
+            3: [["C6", "D7", "DT", "S8", "H9"]]
+        },
+        "rank_dict_trips_001": {
+            1: [["DK", "CK", "SK", "HA", "C2"]], 2: [["C7", "D7", "S7", "H8", "C6"]],
+            3: [["C7", "D7", "S7", "H5", "C6"], ["D7", "C7", "S7", "C6", "D5"]]
+        },
+        "rank_dict_two_pair_001": {
+            1: [["DK", "CK", "ST", "HA", "CA"]], 2: [["D7", "C7", "S9", "C6", "D6"]],
+            3: [["C7", "D7", "S4", "H6", "C6"], ["C7", "D7", "C4", "H6", "C6"]]
+        },
+        "rank_dict_pair_001": {
+            1: [["DK", "CK", "ST", "HA", "C9"]], 2: [["D7", "C7", "S4", "C7", "DK"], ["D7", "C7", "C4", "H7", "CK"]],
+            3: [["C7", "D7", "C4", "H7", "C8"]], 4: [["C7", "D7", "S4", "H6", "C8"]]
+        },
+        "rank_dict_high_card_001": {
+            1: [["SA", "SQ", "HT", "C9", "CK"]], 2: [["CA", "DQ", "DT", "S8", "HK"], ["SA", "SQ", "HT", "C8", "CK"]],
+            3: [["CA", "DQ", "DT", "S8", "H5"]], 4: [["C2", "DQ", "DT", "S8", "H5"]]
         }
     }[rank_dict_name]
+
+    if build_cards:
+        for rank, rank_hands in dict_val.items():
+            rank_hands = [[get_card(descriptors) for descriptors in hand] for hand in rank_hands]
+            rank_hands = [sorted(hand, reverse=True) for hand in rank_hands]
+            rank_hands.sort(reverse=True)
+            dict_val[rank] = rank_hands
+
+    return dict_val
 
 
 def get_player_hands_dict(scenario):
@@ -748,5 +967,127 @@ def get_player_hands_dict(scenario):
             "player_e": get_hand("nine_hands_mixed_E"), "player_f": get_hand("nine_hands_mixed_F"),
             "player_g": get_hand("nine_hands_mixed_G"), "player_h": get_hand("nine_hands_mixed_H"),
             "player_i": get_hand("nine_hands_mixed_I")
+        },
+        "hole_tb_quads_001": {
+            "player_a": get_hand("hole_cards_tb_quads_001"), "player_b": get_hand("hole_cards_tb_quads_002")
+        },
+        "hole_tb_quads_002": {
+            "player_a": get_hand("hole_cards_tb_quads_003"), "player_b": get_hand("hole_cards_tb_quads_004"),
+            "player_c": get_hand("hole_cards_tb_quads_005")
+        },
+        "hole_tb_quads_003": {
+            "player_a": get_hand("hole_cards_tb_quads_006"), "player_b": get_hand("hole_cards_tb_quads_007"),
+            "player_c": get_hand("hole_cards_tb_quads_008")
+        },
+        "hole_tb_quads_004": {
+            "player_a": get_hand("hole_cards_tb_quads_009"), "player_b": get_hand("hole_cards_tb_quads_010"),
+            "player_c": get_hand("hole_cards_tb_quads_011")
+        },
+        "hole_tb_flush_001": {
+            "player_a": get_hand("hole_cards_tb_flush_001_a"), "player_b": get_hand("hole_cards_tb_flush_001_b"),
+            "player_c": get_hand("hole_cards_tb_flush_001_c")
+        },
+        "hole_tb_flush_002": {
+            "player_a": get_hand("hole_cards_tb_flush_002_a"), "player_b": get_hand("hole_cards_tb_flush_002_b"),
+            "player_c": get_hand("hole_cards_tb_flush_002_c")
+        },
+        "hole_tb_flush_003": {
+            "player_a": get_hand("hole_cards_tb_flush_003_a"), "player_b": get_hand("hole_cards_tb_flush_003_b"),
+            "player_c": get_hand("hole_cards_tb_flush_003_c")
+        },
+        "hole_tb_flush_004": {
+            "player_a": get_hand("hole_cards_tb_flush_004_a"), "player_b": get_hand("hole_cards_tb_flush_004_b"),
+            "player_c": get_hand("hole_cards_tb_flush_004_c")
+        },
+        "hole_tb_flush_005": {
+            "player_a": get_hand("hole_cards_tb_flush_005_a"), "player_b": get_hand("hole_cards_tb_flush_005_b"),
+            "player_c": get_hand("hole_cards_tb_flush_005_c")
+        },
+        "hole_tb_flush_006": {
+            "player_a": get_hand("hole_cards_tb_flush_006_a"), "player_b": get_hand("hole_cards_tb_flush_006_b"),
+            "player_c": get_hand("hole_cards_tb_flush_006_c")
+        },
+        "hole_tb_flush_007": {
+            "player_a": get_hand("hole_cards_tb_flush_007_a"), "player_b": get_hand("hole_cards_tb_flush_007_b"),
+            "player_c": get_hand("hole_cards_tb_flush_007_c")
+        },
+        "hole_tb_flush_008": {
+            "player_a": get_hand("hole_cards_tb_flush_008_a"), "player_b": get_hand("hole_cards_tb_flush_008_b"),
+            "player_c": get_hand("hole_cards_tb_flush_008_c")
+        },
+        "hole_tb_flush_009": {
+            "player_a": get_hand("hole_cards_tb_flush_009_a"), "player_b": get_hand("hole_cards_tb_flush_009_b"),
+            "player_c": get_hand("hole_cards_tb_flush_009_c")
+        },
+        "hole_tb_trips_001": {
+            "player_a": get_hand("hole_cards_tb_trips_001_a"), "player_b": get_hand("hole_cards_tb_trips_001_b"),
+            "player_c": get_hand("hole_cards_tb_trips_001_c")
+        },
+        "hole_tb_trips_002": {
+            "player_a": get_hand("hole_cards_tb_trips_002_a"), "player_b": get_hand("hole_cards_tb_trips_002_b"),
+            "player_c": get_hand("hole_cards_tb_trips_002_c")
+        },
+        "hole_tb_trips_003": {
+            "player_a": get_hand("hole_cards_tb_trips_003_a"), "player_b": get_hand("hole_cards_tb_trips_003_b"),
+            "player_c": get_hand("hole_cards_tb_trips_003_c")
+        },
+        "hole_tb_trips_004": {
+            "player_a": get_hand("hole_cards_tb_trips_004_a"), "player_b": get_hand("hole_cards_tb_trips_004_b"),
+            "player_c": get_hand("hole_cards_tb_trips_004_c")
+        },
+        "hole_tb_trips_005": {
+            "player_a": get_hand("hole_cards_tb_trips_005_a"), "player_b": get_hand("hole_cards_tb_trips_005_b"),
+            "player_c": get_hand("hole_cards_tb_trips_005_c")
+        },
+        "hole_tb_two_pair_001": {
+            "player_a": get_hand("hole_cards_tb_two_pair_001_a"), "player_b": get_hand("hole_cards_tb_two_pair_001_b"),
+            "player_c": get_hand("hole_cards_tb_two_pair_001_c")
+        },
+        "hole_tb_two_pair_002": {
+            "player_a": get_hand("hole_cards_tb_two_pair_002_a"), "player_b": get_hand("hole_cards_tb_two_pair_002_b"),
+            "player_c": get_hand("hole_cards_tb_two_pair_002_c")
+        },
+        "hole_tb_two_pair_003": {
+            "player_a": get_hand("hole_cards_tb_two_pair_003_a"), "player_b": get_hand("hole_cards_tb_two_pair_003_b"),
+            "player_c": get_hand("hole_cards_tb_two_pair_003_c")
+        },
+        "hole_tb_pair_001": {
+            "player_a": get_hand("hole_cards_tb_pair_001_a"), "player_b": get_hand("hole_cards_tb_pair_001_b"),
+            "player_c": get_hand("hole_cards_tb_pair_001_c")
+        },
+        "hole_tb_high_card_001": {
+            "player_a": get_hand("hole_cards_tb_high_card_001_a"), "player_b": get_hand("hole_cards_tb_high_card_001_b"),
         }
         }[scenario]
+
+
+def get_tiebreaker_dict(name):
+    """
+    Test Helper method to build tiebreaker dictionary objects used when testing.
+    """
+    return {
+        "tb_dict_straight_flush_001": {"player_a": 9, "player_b": 12, "player_c": 10},
+        "tb_dict_straight_flush_002": {"player_a": 11, "player_b": 7, "player_c": 11},
+        "tb_dict_straight_flush_003": {"player_a": 9, "player_b": 9, "player_c": 8, "player_d": 9},
+        "tb_dict_straight_flush_004": {"player_a": 7, "player_b": 7, "player_c": 7, "player_d": 7},
+        "tb_dict_quads_001": {"player_a": 12, "player_b": 8},
+        "tb_dict_quads_002": {"player_a": 12, "player_b": 12, "player_c": 12},
+        "tb_dict_full_house_001": {"player_a": (7, 13), "player_b": (12, 7), "player_c": (7, 12)},
+        "tb_dict_full_house_002": {"player_a": (7, 9), "player_b": (6, 14), "player_c": (7, 10)},
+        "tb_dict_full_house_003": {"player_a": (7, 9), "player_b": (7, 9), "player_c": (4, 11)},
+        "tb_dict_flush_001": {"player_a": "Hearts", "player_b": "Hearts", "player_c": "Hearts"},
+        "tb_dict_straight_001": {"player_a": 12, "player_b": 11, "player_c": 11},
+        "tb_dict_straight_002": {"player_a": 12, "player_b": 11, "player_c": 12},
+        "tb_dict_straight_003": {"player_a": 7, "player_b": 7, "player_c": 7},
+        "tb_dict_trips_001": {"player_a": 7, "player_b": 6, "player_c": 6},
+        "tb_dict_trips_002": {"player_a": 7, "player_b": 7, "player_c": 7},
+        "tb_dict_trips_003": {"player_a": 7, "player_b": 6, "player_c": 7},
+        "tb_dict_two_pair_001": {"player_a": (13, 10), "player_b": (10, 7), "player_c": (10, 7)},
+        "tb_dict_two_pair_002": {"player_a": (10, 7), "player_b": (10, 8), "player_c": (10, 7)},
+        "tb_dict_two_pair_003": {"player_a": (10, 7), "player_b": (10, 7), "player_c": (10, 7)},
+        "tb_dict_two_pair_004": {"player_a": (10, 7), "player_b": (10, 7), "player_c": (10, 6)},
+        "tb_dict_pair_001": {"player_a": 8, "player_b": 7, "player_c": 7},
+        "tb_dict_pair_002": {"player_a": 8, "player_b": 8, "player_c": 8},
+        "tb_dict_pair_003": {"player_a": 8, "player_b": 7, "player_c": 8},
+        "tb_dict_high_card_001": {"player_a": 14, "player_b": 14}
+    }[name]
