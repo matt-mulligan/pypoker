@@ -1,6 +1,6 @@
 from pytest import fixture, mark
 
-from fixtures.cards import get_hand, get_rank_dictionary, get_player_hands_dict
+from fixtures.cards import get_hand, get_rank_dictionary, get_player_hands_dict, get_cards
 from pypoker.engine.logic.texas_holdem import TexasHoldemHandSolver
 
 
@@ -153,3 +153,14 @@ def test_when_rank_hands_then_correct_dictionary_returned(test_case, solver_inst
     for rank, rank_info in rank_dict.items():
         assert rank_info["players"] == expected_rank_dict[rank]["players"]
         assert rank_info["hand_description"] == expected_rank_dict[rank]["hand_description"]
+
+
+@mark.parametrize("hole_cards, board_cards, expected", [
+    ("hole_2p_001_tt_v_ak", ["C4", "D8", "H5", "CQ"], {"player_a": 86.36, "player_b": 13.64})
+])
+def test_when_find_odds_and_one_draw_remaining_then_correct_odds_returned(hole_cards, board_cards, expected, solver_instance):
+    hole_cards = get_player_hands_dict(hole_cards)
+    board_cards = get_cards(board_cards)
+    actual = solver_instance.find_odds(hole_cards, board_cards)
+
+    assert actual == expected

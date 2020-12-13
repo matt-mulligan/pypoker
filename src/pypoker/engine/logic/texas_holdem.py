@@ -188,9 +188,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
             player: self.find_best_hand(hole_cards, board_cards)
             for player, hole_cards in player_hole_cards.items()
         }
-        current_best_hand_rank = max(
+        current_best_hand_rank = min(
             [best_hand[HAND_RANK] for best_hand in player_current_hand.values()]
         )
+
+        current_ranked_hands = self.rank_hands({player: hand_info[BEST_HAND] for player, hand_info in player_current_hand.items()})
 
         ranked_player_outs = {}
         for hand_info in self._hand_rankings:
@@ -322,8 +324,18 @@ class TexasHoldemHandSolver(BaseHandSolver):
             draw_combo_num *= cards_available
         draw_combo_num /= cards_to_draw
 
+        # give all unassigned wins to current leader
+        current_winner = current_ranked_hands[1]["players"][0] if len(current_ranked_hands[1]["players"]) == 1 else f"TIE({','.join(current_ranked_hands[1]['players'])})"
+        assigned_draws_count = sum([win_count for win_count in wins.values()])
+        bricked_draws_count = draw_combo_num - assigned_draws_count
+
+        if current_winner not in wins.keys():
+            wins[current_winner] = bricked_draws_count
+        else:
+            wins[current_winner] += bricked_draws_count
+
         odds = {
-            player: win_count / draw_combo_num for player, win_count in wins.items()
+            player: round(win_count / draw_combo_num * 100, 2) for player, win_count in wins.items()
         }
         return odds
 

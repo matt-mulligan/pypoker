@@ -1,3 +1,5 @@
+from typing import List
+
 from pypoker.deck import Card
 
 PLAYERS = "players"
@@ -16,6 +18,20 @@ def get_card(card_id: str):
     """
 
     return Card(card_id)
+
+
+def get_cards(card_ids: List[str]):
+    """
+    test helper method to return a list of cards
+
+    :param card_id: Str describing which card you want.
+        First character of the descriptor represents the suit of the card (H, S, D, C)
+        Second characters describe the value (A, K, Q, J, T, 9, 8, 7, 6, 5, 4, 3, 2)
+
+    :return: Card object
+    """
+
+    return [Card(card_id) for card_id in card_ids]
 
 
 def get_hand(hand_name):
@@ -1057,6 +1073,9 @@ def get_player_hands_dict(scenario):
         },
         "hole_tb_high_card_001": {
             "player_a": get_hand("hole_cards_tb_high_card_001_a"), "player_b": get_hand("hole_cards_tb_high_card_001_b"),
+        },
+        "hole_2p_001_tt_v_ak": {
+            "player_a": get_cards(["ST", "HT"]), "player_b": get_cards(["SA", "SK"])
         }
         }[scenario]
 
