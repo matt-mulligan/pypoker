@@ -2,8 +2,8 @@ from itertools import groupby
 from typing import List, Dict
 
 from pypoker.deck import Card, Deck
-from pypoker.engine.hand_logic.base import BaseHandSolver
-from pypoker.engine.hand_logic.constants import (
+from pypoker.engine.logic.base import BaseHandSolver
+from pypoker.engine.logic.constants import (
     HAND_TITLE,
     HAND_RANK,
     BEST_HAND,
@@ -24,17 +24,17 @@ from pypoker.engine.hand_logic.constants import (
     TB_DRAWS_KWARGS_ALL,
     TB_DRAWS_KWARGS_TIEBREAKER,
 )
-from pypoker.engine.hand_logic.functions import (
+from pypoker.engine.logic.functions import (
     hand_test,
     rank_hand_type,
     describe_hand,
     find_outs_scenarios,
 )
-from pypoker.engine.hand_logic.functions.outs import (
+from pypoker.engine.logic.functions.outs import (
     claim_out_string,
     tiebreak_outs_draw,
 )
-from pypoker.engine.hand_logic.utils import get_all_combinations
+from pypoker.engine.logic.utils import get_all_combinations
 
 
 class TexasHoldemHandSolver(BaseHandSolver):
