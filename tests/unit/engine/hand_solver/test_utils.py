@@ -1,7 +1,7 @@
 from pytest import mark
 
 from fixtures.cards import get_hand, get_hand_sets
-from pypoker.engine.hand_solver.utils import hand_all_same_suit, hand_values_continuous, hand_highest_value_tuple, \
+from pypoker.engine.hand_logic.utils import hand_all_same_suit, hand_values_continuous, hand_highest_value_tuple, \
     hand_is_ace_low_straight, order_hands_highest_card, hands_have_same_card_values, get_all_combinations
 
 

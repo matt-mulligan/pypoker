@@ -6,7 +6,7 @@ this module contains the implementation of all hand ranking logic for hands of t
 from typing import List, Dict
 
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.constants import (
+from pypoker.engine.hand_logic.constants import (
     GAME_TYPE_TEXAS_HOLDEM,
     HAND_TYPE_STRAIGHT_FLUSH,
     HAND_TYPE_QUADS,
@@ -18,12 +18,12 @@ from pypoker.engine.hand_solver.constants import (
     HAND_TYPE_PAIR,
     HAND_TYPE_HIGH_CARD,
 )
-from pypoker.engine.hand_solver.functions.shared import (
+from pypoker.engine.hand_logic.functions.shared import (
     _check_game_type,
     _check_hand_type,
     _check_kwargs,
 )
-from pypoker.engine.hand_solver.utils import (
+from pypoker.engine.hand_logic.utils import (
     hand_is_ace_low_straight,
     order_hands_highest_card,
     hands_have_same_card_values,

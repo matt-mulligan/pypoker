@@ -4,7 +4,7 @@ from pytest import fixture, mark
 
 from fixtures.cards import get_hand, get_hand_sets
 from pypoker.deck import Card
-from pypoker.engine.hand_solver.base import BaseHandSolver
+from pypoker.engine.hand_logic.base import BaseHandSolver
 
 
 @fixture
