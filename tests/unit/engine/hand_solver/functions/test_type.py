@@ -91,3 +91,77 @@ def test_when_hand_test_and_too_many_kwargs_passed_then_raise_error(game_type, h
 def test_when_hand_test_then_correct_response_returned(game_type, hand_type, hand_name, expected):
     actual = hand_test(game_type, hand_type, hand=get_hand(hand_name))
     assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_straight_flush_001", True), ("hand_straight_flush_008", True), ("hand_straight_004", False),
+    ("hand_flush_004", False),
+])
+def test_when_hand_test_and_texas_holdem_and_straight_flush_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Straight Flush", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_quads_001", True), ("hand_trips_002", False), ("hand_two_pair_002", False), ("hand_full_house_003", False),
+])
+def test_when_hand_test_and_texas_holdem_and_quads_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Quads", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_full_house_002", True), ("hand_two_pair_001", False), ("hand_trips_003", False),
+])
+def test_when_hand_test_and_texas_holdem_and_full_house_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Full House", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_straight_flush_001", True), ("hand_flush_001", True), ("hand_straight_001", False),
+])
+def test_when_hand_test_and_texas_holdem_and_flush_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Flush", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_straight_001", True), ("hand_straight_flush_002", True), ("hand_pair_001", False),
+])
+def test_when_hand_test_and_texas_holdem_and_straight_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Straight", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_trips_002", True), ("hand_full_house_002", True), ("hand_pair_002", False), ("hand_two_pair_001", False),
+])
+def test_when_hand_test_and_texas_holdem_and_trips_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Trips", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_two_pair_001", True), ("hand_trips_001", False), ("hand_pair_001", False),
+])
+def test_when_hand_test_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Two Pair", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_pair_001", True), ("hand_two_pair_003", True), ("hand_trips_003", True), ("hand_high_card_001", False),
+])
+def test_when_hand_test_and_texas_holdem_and_pair_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "Pair", hand=get_hand(hand_name))
+    assert actual == expected
+
+
+@mark.parametrize("hand_name, expected", [
+    ("hand_high_card_001", True),
+])
+def test_when_hand_test_and_texas_holdem_and_high_card_then_correct_response_returned(hand_name, expected):
+    actual = hand_test("Texas Holdem", "High Card", hand=get_hand(hand_name))
+    assert actual == expected
+

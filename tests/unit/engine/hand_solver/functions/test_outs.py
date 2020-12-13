@@ -1126,7 +1126,7 @@ def test_when_tiebreak_outs_draw_and_texas_holdem_and_pair_then_correct_winner_r
     ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_004", "draws_tb_high_card_001", "player_a"),  # win on fifth kicker
     ("tb_dict_high_card_001", "hole_tb_high_card_001", "board_tb_high_card_005", "draws_tb_high_card_001", "TIE(player_a,player_b)")  # tie
 ])
-def test_when_tiebreak_outs_draw_and_texas_holdem_and_pair_then_correct_winner_returned(
+def test_when_tiebreak_outs_draw_and_texas_holdem_and_high_card_then_correct_winner_returned(
         tiebreakers, hole_cards, board_cards, drawn_cards, expected):
     tiebreakers = get_tiebreaker_dict(tiebreakers)
     hole_cards = get_player_hands_dict(hole_cards)
