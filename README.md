@@ -28,12 +28,16 @@ I have a number of goals/milestones I wish to add to PyPoker. Below I have liste
  - Add a much more advanced player using machine learning
 
 ## Version/Product Information 
+Version number is maintained within the **pyproject.toml** file
+
 Version information is maintained within the docs/version_history.md file of the repository
+
 
 
 ## Development Info:
 Below is useful information to how I have structured the project
  - Minimum Python Version = 3.8
+ - Versioning Model = [Symantic Versioning](https://semver.org/)
  - Branching Model = [GitFlow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
  - Environment/Package Management = [Poetry](https://python-poetry.org/) - configuration within the pyproject.toml file
  - Testing Framework = [PyTest](https://docs.pytest.org/en/stable/) & [PyTest-BDD](https://pytest-bdd.readthedocs.io/en/latest/)
