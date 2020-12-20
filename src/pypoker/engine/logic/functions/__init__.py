@@ -13,6 +13,6 @@ with their private implementation methods
 """
 
 from pypoker.engine.logic.functions.type import hand_test
-from pypoker.engine.logic.functions.rank import rank_hand_type
 from pypoker.engine.logic.functions.describe import describe_hand
 from pypoker.engine.logic.functions.outs import find_outs_scenarios
+from pypoker.engine.logic.functions.tiebreak import tiebreak_hands

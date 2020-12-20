@@ -539,7 +539,88 @@ def get_hand_sets(hand_name):
         "hand_set_high_card_001": [
             ["C2", "DQ", "DT", "S8", "H5"], ["CA", "DQ", "DT", "S8", "H5"], ["CA", "DQ", "DT", "S8", "HK"],
             ["SA", "SQ", "HT", "C8", "CK"], ["SA", "SQ", "HT", "C9", "CK"],
-        ]
+        ],
+        "tiebreak_straight_flush_001": [["S8", "ST", "SJ", "S7", "S9"]],
+        "tiebreak_straight_flush_002": [["CA", "C4", "C5", "C2", "C3"]],
+        "tiebreak_straight_flush_003": [
+            ["CA", "C4", "C5", "C2", "C3"], ["D9", "DQ", "DT", "D8", "DJ"], ["SA", "SQ", "ST", "SK", "SJ"],
+            ["H9", "H8", "HJ", "HQ", "HT"]
+        ],
+        "tiebreak_quads_001": [["S5", "C7", "C5", "H5", "D5"]],
+        "tiebreak_quads_002": [
+            ["S5", "C7", "C5", "H5", "D5"], ["S7", "C7", "CJ", "H7", "D7"], ["S7", "C7", "C4", "H7", "D7"],
+            ["S7", "C7", "D4", "H7", "D7"], ["S7", "C7", "D3", "H7", "D7"], ["ST", "CT", "D2", "HT", "DT"]
+        ],
+        "tiebreak_quads_003": [["S5", "C5", "H5", "D5"]],
+        "tiebreak_quads_004": [
+            ["S5", "C5", "H5", "D5"], ["SA", "CA", "HA", "DA"], ["SQ", "CQ", "HQ", "DQ"], ["HQ", "SQ", "CQ", "DQ"]
+        ],
+        "tiebreak_full_house_001": [["S8", "ST", "C8", "D8", "DT"]],
+        "tiebreak_full_house_002": [
+            ["S8", "ST", "C8", "D8", "DT"], ["S7", "C7", "C8", "D8", "H8"], ["S2", "CQ", "C2", "DQ", "HQ"],
+            ["C4", "H4", "D4", "DA", "HA"], ["D8", "H8", "C7", "H7", "C8"], ["CA", "D4", "C4", "SA", "HA"]
+        ],
+        "tiebreak_flush_001": [["D4", "D8", "DQ", "DA", "D2"]],
+        "tiebreak_flush_002": [
+            ["D4", "D6", "D9", "DK", "D2"], ["S4", "S6", "S2", "S3", "S7"], ["D4", "D6", "D9", "DK", "D7"],
+            ["DJ", "DQ", "D9", "DK", "D7"], ["H6", "H9", "H7", "HJ", "HK"], ["CA", "C4", "C7", "CJ", "C2"],
+            ["DJ", "D6", "D9", "DK", "D7"]
+        ],
+        "tiebreak_straight_001": [["S4", "S7", "D5", "C6", "S8"]],
+        "tiebreak_straight_002": [
+            ["S4", "S7", "D5", "C6", "S8"], ["D9", "CT", "DJ", "S8", "D7"], ["D5", "SA", "C4", "C3", "S2"],
+            ["DQ", "DJ", "ST", "CA", "CK"], ["CJ", "D8", "D9", "CT", "S7"]
+        ],
+        "tiebreak_trips_001": [["S7", "D7", "D3", "HA", "H7"]],
+        "tiebreak_trips_002": [
+            ["S7", "D7", "D3", "HA", "H7"], ["S7", "DA", "D8", "HA", "CA"], ["S7", "C7", "SK", "HA", "H7"],
+            ["S7", "C3", "C7", "SA", "H7"], ["S7", "C7", "SJ", "HQ", "H7"],
+        ],
+        "tiebreak_trips_003": [
+            ["C8", "D8", "DJ", "H8"], ["S8", "C8", "DK", "H8"], ["C8", "S6", "D8", "S8"], ["SJ", "C8", "S8", "H8"],
+            ["CJ", "D8", "S8", "H8"], ["DA", "HA", "SK", "SA"], ["S4", "C9", "D4", "H4"]
+        ],
+        "tiebreak_trips_004": [["S4", "C4", "D4"], ["D7", "S7", "H7"], ["S7", "H7", "C7"], ["HA", "SA", "HA"]],
+        "tiebreak_two_pair_001": [["S4", "D4", "C6", "C9", "S9"]],
+        "tiebreak_two_pair_002": [
+            ["S4", "D4", "C6", "C9", "S9"], ["C4", "H4", "CK", "D9", "C9"], ["C4", "H4", "C7", "D9", "C9"],
+            ["H4", "D4", "D7", "S9", "C9"], ["D9", "S9", "C2", "D7", "C7"], ["DK", "SK", "H3", "D2", "C2"],
+            ["H5", "C5", "D4", "CA", "S4"]
+        ],
+        "tiebreak_two_pair_003": [
+            ["DQ", "ST", "DT", "HQ"], ["DQ", "S6", "SQ", "H6"], ["DA", "SA", "H2", "D2"], ["H5", "D5", "D4", "C4"],
+            ["S6", "D6", "SQ", "HQ"]
+        ],
+        "tiebreak_pair_001": [["DA", "H4", "C2", "H3", "HA"]],
+        "tiebreak_pair_002": [
+            ["DA", "H4", "C2", "H3", "HA"], ["H2", "DA", "CK", "C2", "CQ"], ["D7", "C7", "CQ", "D9", "C6"],
+            ["D7", "C7", "CQ", "D9", "DT"], ["D7", "C7", "CQ", "DK", "DT"], ["D7", "C7", "CQ", "DK", "CJ"],
+            ["D7", "S7", "SQ", "CK", "CT"], ["D7", "S7", "SA", "C2", "S3"],
+        ],
+        "tiebreak_pair_003": [
+            ["D9", "D4", "C9", "H5"], ["H2", "C2", "DK", "CA"], ["D9", "DQ", "C9", "H8"], ["D9", "DQ", "C9", "HT"],
+            ["SA", "HA", "D2", "C3"], ["D9", "DA", "C9", "H2"], ["C9", "HQ", "S9", "S8"],
+        ],
+        "tiebreak_pair_004": [
+            ["HA", "D2", "CA"], ["D2", "H2", "DA"], ["C6", "HK", "S6"], ["C6", "C2", "S6"], ["D6", "S6", "SK"]
+        ],
+        "tiebreak_pair_005": [["HA", "DA"], ["C2", "D2"], ["H7", "S7"], ["S7", "C7"], ["D8", "H8"], ["H2", "C2"]],
+        "tiebreak_high_card_001": [["SA", "H4", "CT", "CQ", "S8"]],
+        "tiebreak_high_card_002": [
+            ["D7", "CK", "C3", "SQ", "D2"], ["C3", "DJ", "SQ", "D2", "CK"], ["D7", "C3", "D2", "SQ", "C8"],
+            ["DJ", "S8", "CT", "SQ", "CK"], ["D2", "D7", "SA", "C5", "C3"], ["CT", "C3", "CK", "DJ", "SQ"],
+            ["C3", "SQ", "CK", "D2", "D7"], ["C3", "SQ", "CK", "D2", "D7"]
+        ],
+        "tiebreak_high_card_003": [
+            ["DK", "S5", "C4", "D2"], ["DK", "S5", "C4", "DJ"], ["DK", "S5", "ST", "DJ"], ["DK", "SQ", "ST", "DJ"],
+            ["D4", "S3", "SA", "D5"],
+        ],
+        "tiebreak_high_card_004": [
+            ["SQ", "DT", "C9"], ["SQ", "DT", "H2"], ["SQ", "C4", "H2"], ["S6", "C4", "H2"], ["DA", "C2", "S3"],
+            ["S4", "CQ", "D2"]
+        ],
+        "tiebreak_high_card_005": [["DK", "ST"], ["DK", "C4"], ["S7", "D4"], ["SA", "D2"], ["H4", "D7"]],
+        "tiebreak_high_card_006": [["D5"], ["C5"], ["HA"], ["S3"]]
     }[hand_name]
 
     return [[get_card(descriptors) for descriptors in cards] for cards in hand_sets]
@@ -1076,37 +1157,188 @@ def get_player_hands_dict(scenario):
         },
         "hole_2p_001_tt_v_ak": {
             "player_a": get_cards(["ST", "HT"]), "player_b": get_cards(["SA", "SK"])
-        }
+        },
+        "hole_2p_002_88_TKs": {"player_a": get_cards(["D8", "S8"]), "player_b": get_cards(["ST", "SK"])},
+        "hole_2p_003_AQo_TKs": {"player_a": get_cards(["DA", "CQ"]), "player_b": get_cards(["ST", "SK"])}
         }[scenario]
 
 
-def get_tiebreaker_dict(name):
+def get_tiebreaker_dicts(name):
     """
     Test Helper method to build tiebreaker dictionary objects used when testing.
     """
-    return {
-        "tb_dict_straight_flush_001": {"player_a": 9, "player_b": 12, "player_c": 10},
-        "tb_dict_straight_flush_002": {"player_a": 11, "player_b": 7, "player_c": 11},
-        "tb_dict_straight_flush_003": {"player_a": 9, "player_b": 9, "player_c": 8, "player_d": 9},
-        "tb_dict_straight_flush_004": {"player_a": 7, "player_b": 7, "player_c": 7, "player_d": 7},
-        "tb_dict_quads_001": {"player_a": 12, "player_b": 8},
-        "tb_dict_quads_002": {"player_a": 12, "player_b": 12, "player_c": 12},
-        "tb_dict_full_house_001": {"player_a": (7, 13), "player_b": (12, 7), "player_c": (7, 12)},
-        "tb_dict_full_house_002": {"player_a": (7, 9), "player_b": (6, 14), "player_c": (7, 10)},
-        "tb_dict_full_house_003": {"player_a": (7, 9), "player_b": (7, 9), "player_c": (4, 11)},
-        "tb_dict_flush_001": {"player_a": "Hearts", "player_b": "Hearts", "player_c": "Hearts"},
-        "tb_dict_straight_001": {"player_a": 12, "player_b": 11, "player_c": 11},
-        "tb_dict_straight_002": {"player_a": 12, "player_b": 11, "player_c": 12},
-        "tb_dict_straight_003": {"player_a": 7, "player_b": 7, "player_c": 7},
-        "tb_dict_trips_001": {"player_a": 7, "player_b": 6, "player_c": 6},
-        "tb_dict_trips_002": {"player_a": 7, "player_b": 7, "player_c": 7},
-        "tb_dict_trips_003": {"player_a": 7, "player_b": 6, "player_c": 7},
-        "tb_dict_two_pair_001": {"player_a": (13, 10), "player_b": (10, 7), "player_c": (10, 7)},
-        "tb_dict_two_pair_002": {"player_a": (10, 7), "player_b": (10, 8), "player_c": (10, 7)},
-        "tb_dict_two_pair_003": {"player_a": (10, 7), "player_b": (10, 7), "player_c": (10, 7)},
-        "tb_dict_two_pair_004": {"player_a": (10, 7), "player_b": (10, 7), "player_c": (10, 6)},
-        "tb_dict_pair_001": {"player_a": 8, "player_b": 7, "player_c": 7},
-        "tb_dict_pair_002": {"player_a": 8, "player_b": 8, "player_c": 8},
-        "tb_dict_pair_003": {"player_a": 8, "player_b": 7, "player_c": 8},
-        "tb_dict_high_card_001": {"player_a": 14, "player_b": 14}
+    tb_dicts = {
+        "tiebreak_straight_flush_001": [
+            {"rank": 1, "hands": [["S8", "ST", "SJ", "S7", "S9"]], "tb_primary": 11, "tb_secondary": None}
+        ],
+        "tiebreak_straight_flush_002": [
+            {"rank": 1, "hands": [["CA", "C4", "C5", "C2", "C3"]], "tb_primary": 5, "tb_secondary": None}
+        ],
+        "tiebreak_straight_flush_003": [
+            {"rank": 1, "hands": [["SA", "SQ", "ST", "SK", "SJ"]], "tb_primary": 14, "tb_secondary": None},
+            {"rank": 2, "hands": [["D9", "DQ", "DT", "D8", "DJ"], ["H9", "H8", "HJ", "HQ", "HT"]], "tb_primary": 12, "tb_secondary": None},
+            {"rank": 3, "hands": [["CA", "C4", "C5", "C2", "C3"]], "tb_primary": 5, "tb_secondary": None},
+        ],
+        "tiebreak_quads_001": [
+            {"rank": 1, "hands": [["S5", "C7", "C5", "H5", "D5"]], "tb_primary": 5, "tb_secondary": 7},
+        ],
+        "tiebreak_quads_002": [
+            {"rank": 1, "hands": [["ST", "CT", "D2", "HT", "DT"]], "tb_primary": 10, "tb_secondary": 2},
+            {"rank": 2, "hands": [["S7", "C7", "CJ", "H7", "D7"]], "tb_primary": 7, "tb_secondary": 11},
+            {"rank": 3, "hands": [["S7", "C7", "C4", "H7", "D7"], ["S7", "C7", "D4", "H7", "D7"]], "tb_primary": 7, "tb_secondary": 4},
+            {"rank": 4, "hands": [["S7", "C7", "D3", "H7", "D7"]], "tb_primary": 7, "tb_secondary": 3},
+            {"rank": 5, "hands": [["S5", "C7", "C5", "H5", "D5"]], "tb_primary": 5, "tb_secondary": 7},
+        ],
+        "tiebreak_quads_003": [
+            {"rank": 1, "hands": [["S5", "C5", "H5", "D5"]], "tb_primary": 5, "tb_secondary": None},
+        ],
+        "tiebreak_quads_004": [
+            {"rank": 1, "hands": [["SA", "CA", "HA", "DA"]], "tb_primary": 14, "tb_secondary": None},
+            {"rank": 2, "hands": [["SQ", "CQ", "HQ", "DQ"], ["HQ", "SQ", "CQ", "DQ"]], "tb_primary": 12, "tb_secondary": None},
+            {"rank": 3, "hands": [["S5", "C5", "H5", "D5"]], "tb_primary": 5, "tb_secondary": None}
+        ],
+        "tiebreak_full_house_001": [
+            {"rank": 1, "hands": [["S8", "ST", "C8", "D8", "DT"]], "tb_primary": (8, 10), "tb_secondary": None},
+        ],
+        "tiebreak_full_house_002": [
+            {"rank": 1, "hands": [["CA", "D4", "C4", "SA", "HA"]], "tb_primary": (14, 4), "tb_secondary": None},
+            {"rank": 2, "hands": [["S2", "CQ", "C2", "DQ", "HQ"]], "tb_primary": (12, 2), "tb_secondary": None},
+            {"rank": 3, "hands": [["S8", "ST", "C8", "D8", "DT"]], "tb_primary": (8, 10), "tb_secondary": None},
+            {"rank": 4, "hands": [["S7", "C7", "C8", "D8", "H8"], ["D8", "H8", "C7", "H7", "C8"]], "tb_primary": (8, 7), "tb_secondary": None},
+            {"rank": 5, "hands": [["C4", "H4", "D4", "DA", "HA"]], "tb_primary": (4, 14), "tb_secondary": None}
+        ],
+        "tiebreak_flush_001": [
+            {"rank": 1, "hands": [["D4", "D8", "DQ", "DA", "D2"]], "tb_primary": [14, 12, 8, 4, 2], "tb_secondary": None}
+        ],
+        "tiebreak_flush_002": [
+            {"rank": 1, "hands": [["CA", "C4", "C7", "CJ", "C2"]], "tb_primary": [14, 11, 7, 4, 2], "tb_secondary": None},
+            {"rank": 2, "hands": [["DJ", "DQ", "D9", "DK", "D7"]], "tb_primary": [13, 12, 11, 9, 7], "tb_secondary": None},
+            {"rank": 3, "hands": [["H6", "H9", "H7", "HJ", "HK"], ["DJ", "D6", "D9", "DK", "D7"]], "tb_primary": [13, 11, 9, 7, 6], "tb_secondary": None},
+            {"rank": 4, "hands": [["D4", "D6", "D9", "DK", "D7"]], "tb_primary": [13, 9, 7, 6, 4], "tb_secondary": None},
+            {"rank": 5, "hands": [["D4", "D6", "D9", "DK", "D2"]], "tb_primary": [13, 9, 6, 4, 2], "tb_secondary": None},
+            {"rank": 6, "hands": [["S4", "S6", "S2", "S3", "S7"]], "tb_primary": [7, 6, 4, 3, 2], "tb_secondary": None}
+        ],
+        "tiebreak_straight_001": [
+            {"rank": 1, "hands": [["S4", "S7", "D5", "C6", "S8"]], "tb_primary": 8, "tb_secondary": None}
+        ],
+        "tiebreak_straight_002": [
+            {"rank": 1, "hands": [["DQ", "DJ", "ST", "CA", "CK"]], "tb_primary": 14, "tb_secondary": None},
+            {"rank": 2, "hands": [["D9", "CT", "DJ", "S8", "D7"], ["CJ", "D8", "D9", "CT", "S7"]], "tb_primary": 11, "tb_secondary": None},
+            {"rank": 3, "hands": [["S4", "S7", "D5", "C6", "S8"]], "tb_primary": 8, "tb_secondary": None},
+            {"rank": 4, "hands": [["D5", "SA", "C4", "C3", "S2"]], "tb_primary": 5, "tb_secondary": None},
+        ],
+        "tiebreak_trips_001": [
+            {"rank": 1, "hands": [["S7", "D7", "D3", "HA", "H7"]], "tb_primary": 7, "tb_secondary": [14, 3]},
+        ],
+        "tiebreak_trips_002": [
+            {"rank": 1, "hands": [["S7", "DA", "D8", "HA", "CA"]], "tb_primary": 14, "tb_secondary": [8, 7]},
+            {"rank": 2, "hands": [["S7", "C7", "SK", "HA", "H7"]], "tb_primary": 7, "tb_secondary": [14, 13]},
+            {"rank": 3, "hands": [["S7", "D7", "D3", "HA", "H7"], ["S7", "C3", "C7", "SA", "H7"]], "tb_primary": 7, "tb_secondary": [14, 3]},
+            {"rank": 4, "hands": [["S7", "C7", "SJ", "HQ", "H7"]], "tb_primary": 7, "tb_secondary": [12, 11]},
+        ],
+        "tiebreak_trips_003": [
+            {"rank": 1, "hands": [["DA", "HA", "SK", "SA"]], "tb_primary": 14, "tb_secondary": [13]},
+            {"rank": 2, "hands": [["S8", "C8", "DK", "H8"]], "tb_primary": 8, "tb_secondary": [13]},
+            {"rank": 3, "hands": [["C8", "D8", "DJ", "H8"], ["SJ", "C8", "S8", "H8"], ["CJ", "D8", "S8", "H8"]], "tb_primary": 8, "tb_secondary": [11]},
+            {"rank": 4, "hands": [["C8", "S6", "D8", "S8"]], "tb_primary": 8, "tb_secondary": [6]},
+            {"rank": 5, "hands": [["S4", "C9", "D4", "H4"]], "tb_primary": 4, "tb_secondary": [9]},
+        ],
+        "tiebreak_trips_004": [
+            {"rank": 1, "hands": [["HA", "SA", "HA"]], "tb_primary": 14, "tb_secondary": []},
+            {"rank": 2, "hands": [["D7", "S7", "H7"], ["S7", "H7", "C7"]], "tb_primary": 7, "tb_secondary": []},
+            {"rank": 3, "hands": [["S4", "C4", "D4"]], "tb_primary": 4, "tb_secondary": []}
+        ],
+        "tiebreak_two_pair_001": [
+            {"rank": 1, "hands": [["S4", "D4", "C6", "C9", "S9"]], "tb_primary": [9, 4], "tb_secondary": 6},
+        ],
+        "tiebreak_two_pair_002": [
+            {"rank": 1, "hands": [["DK", "SK", "H3", "D2", "C2"]], "tb_primary": [13, 2], "tb_secondary": 3},
+            {"rank": 2, "hands": [["D9", "S9", "C2", "D7", "C7"]], "tb_primary": [9, 7], "tb_secondary": 2},
+            {"rank": 3, "hands": [["C4", "H4", "CK", "D9", "C9"]], "tb_primary": [9, 4], "tb_secondary": 13},
+            {"rank": 4, "hands": [["C4", "H4", "C7", "D9", "C9"], ["H4", "D4", "D7", "S9", "C9"]], "tb_primary": [9, 4], "tb_secondary": 7},
+            {"rank": 5, "hands": [["S4", "D4", "C6", "C9", "S9"]], "tb_primary": [9, 4], "tb_secondary": 6},
+            {"rank": 6, "hands": [["H5", "C5", "D4", "CA", "S4"]], "tb_primary": [5, 4], "tb_secondary": 14},
+        ],
+        "tiebreak_two_pair_003": [
+            {"rank": 1, "hands": [["DA", "SA", "H2", "D2"]], "tb_primary": [14, 2], "tb_secondary": None},
+            {"rank": 2, "hands": [["DQ", "ST", "DT", "HQ"]], "tb_primary": [12, 10], "tb_secondary": None},
+            {"rank": 3, "hands": [["DQ", "S6", "SQ", "H6"], ["S6", "D6", "SQ", "HQ"]], "tb_primary": [12, 6], "tb_secondary": None},
+            {"rank": 4, "hands": [["H5", "D5", "D4", "C4"]], "tb_primary": [5, 4], "tb_secondary": None}
+        ],
+        "tiebreak_pair_001": [
+            {"rank": 1, "hands": [["DA", "H4", "C2", "H3", "HA"]], "tb_primary": 14, "tb_secondary": [4, 3, 2]},
+        ],
+        "tiebreak_pair_002": [
+            {"rank": 1, "hands": [["DA", "H4", "C2", "H3", "HA"]], "tb_primary": 14, "tb_secondary": [4, 3, 2]},
+            {"rank": 2, "hands": [["D7", "S7", "SA", "C2", "S3"]], "tb_primary": 7, "tb_secondary": [14, 3, 2]},
+            {"rank": 3, "hands": [["D7", "C7", "CQ", "DK", "CJ"]], "tb_primary": 7, "tb_secondary": [13, 12, 11]},
+            {"rank": 4, "hands": [["D7", "C7", "CQ", "DK", "DT"], ["D7", "S7", "SQ", "CK", "CT"]], "tb_primary": 7, "tb_secondary": [13, 12, 10]},
+            {"rank": 5, "hands": [["D7", "C7", "CQ", "D9", "DT"]], "tb_primary": 7, "tb_secondary": [12, 10, 9]},
+            {"rank": 6, "hands": [["D7", "C7", "CQ", "D9", "C6"]], "tb_primary": 7, "tb_secondary": [12, 9, 6]},
+            {"rank": 7, "hands": [["H2", "DA", "CK", "C2", "CQ"]], "tb_primary": 2, "tb_secondary": [14, 13, 12]},
+        ],
+        "tiebreak_pair_003": [
+            {"rank": 1, "hands": [["SA", "HA", "D2", "C3"]], "tb_primary": 14, "tb_secondary": [3, 2]},
+            {"rank": 2, "hands": [["D9", "DA", "C9", "H2"]], "tb_primary": 9, "tb_secondary": [14, 2]},
+            {"rank": 3, "hands": [["D9", "DQ", "C9", "HT"]], "tb_primary": 9, "tb_secondary": [12, 10]},
+            {"rank": 4, "hands": [["D9", "DQ", "C9", "H8"], ["C9", "HQ", "S9", "S8"]], "tb_primary": 9, "tb_secondary": [12, 8]},
+            {"rank": 5, "hands": [["D9", "D4", "C9", "H5"]], "tb_primary": 9, "tb_secondary": [5, 4]},
+            {"rank": 6, "hands": [["H2", "C2", "DK", "CA"]], "tb_primary": 2, "tb_secondary": [14, 13]},
+        ],
+        "tiebreak_pair_004": [
+            {"rank": 1, "hands": [["HA", "D2", "CA"]], "tb_primary": 14, "tb_secondary": [2]},
+            {"rank": 2, "hands": [["C6", "HK", "S6"], ["D6", "S6", "SK"]], "tb_primary": 6, "tb_secondary": [13]},
+            {"rank": 3, "hands": [["C6", "C2", "S6"]], "tb_primary": 6, "tb_secondary": [2]},
+            {"rank": 4, "hands": [["D2", "H2", "DA"]], "tb_primary": 2, "tb_secondary": [14]},
+        ],
+        "tiebreak_pair_005": [
+            {"rank": 1, "hands": [["HA", "DA"]], "tb_primary": 14, "tb_secondary": []},
+            {"rank": 2, "hands": [["D8", "H8"]], "tb_primary": 8, "tb_secondary": []},
+            {"rank": 3, "hands": [["H7", "S7"], ["S7", "C7"]], "tb_primary": 7, "tb_secondary": []},
+            {"rank": 4, "hands": [["C2", "D2"], ["H2", "C2"]], "tb_primary": 2, "tb_secondary": []},
+        ],
+        "tiebreak_high_card_001": [
+            {"rank": 1, "hands": [["SA", "H4", "CT", "CQ", "S8"]], "tb_primary": [14, 12, 10, 8, 4], "tb_secondary": None},
+        ],
+        "tiebreak_high_card_002": [
+            {"rank": 1, "hands": [["D2", "D7", "SA", "C5", "C3"]], "tb_primary": [14, 7, 5, 3, 2], "tb_secondary": None},
+            {"rank": 2, "hands": [["DJ", "S8", "CT", "SQ", "CK"]], "tb_primary": [13, 12, 11, 10, 8], "tb_secondary": None},
+            {"rank": 3, "hands": [["CT", "C3", "CK", "DJ", "SQ"]], "tb_primary": [13, 12, 11, 10, 3], "tb_secondary": None},
+            {"rank": 4, "hands": [["C3", "DJ", "SQ", "D2", "CK"]], "tb_primary": [13, 12, 11, 3, 2], "tb_secondary": None},
+            {"rank": 5, "hands": [["C3", "SQ", "CK", "D2", "D7"], ["C3", "SQ", "CK", "D2", "D7"], ["D7", "CK", "C3", "SQ", "D2"]], "tb_primary": [13, 12, 7, 3, 2], "tb_secondary": None},
+            {"rank": 6, "hands": [["D7", "C3", "D2", "SQ", "C8"]], "tb_primary": [12, 8, 7, 3, 2], "tb_secondary": None}
+        ],
+        "tiebreak_high_card_003": [
+            {"rank": 1, "hands": [["D4", "S3", "SA", "D5"]], "tb_primary": [14, 5, 4, 3], "tb_secondary": None},
+            {"rank": 2, "hands": [["DK", "SQ", "ST", "DJ"]], "tb_primary": [13, 12, 11, 10], "tb_secondary": None},
+            {"rank": 3, "hands": [["DK", "S5", "ST", "DJ"]], "tb_primary": [13, 11, 10, 5], "tb_secondary": None},
+            {"rank": 4, "hands": [["DK", "S5", "C4", "DJ"]], "tb_primary": [13, 11, 5, 4], "tb_secondary": None},
+            {"rank": 5, "hands": [["DK", "S5", "C4", "D2"]], "tb_primary": [13, 5, 4, 2], "tb_secondary": None},
+        ],
+        "tiebreak_high_card_004": [
+            {"rank": 1, "hands": [["DA", "C2", "S3"]], "tb_primary": [14, 3, 2], "tb_secondary": None},
+            {"rank": 2, "hands": [["SQ", "DT", "C9"]], "tb_primary": [12, 10, 9], "tb_secondary": None},
+            {"rank": 3, "hands": [["SQ", "DT", "H2"]], "tb_primary": [12, 10, 2], "tb_secondary": None},
+            {"rank": 4, "hands": [["SQ", "C4", "H2"], ["S4", "CQ", "D2"]], "tb_primary": [12, 4, 2], "tb_secondary": None},
+            {"rank": 5, "hands": [["S6", "C4", "H2"]], "tb_primary": [6, 4, 2], "tb_secondary": None},
+        ],
+        "tiebreak_high_card_005": [
+            {"rank": 1, "hands": [["SA", "D2"]], "tb_primary": [14, 2], "tb_secondary": None},
+            {"rank": 2, "hands": [["DK", "ST"]], "tb_primary": [13, 10], "tb_secondary": None},
+            {"rank": 3, "hands": [["DK", "C4"]], "tb_primary": [13, 4], "tb_secondary": None},
+            {"rank": 4, "hands": [["S7", "D4"], ["H4", "D7"]], "tb_primary": [7, 4], "tb_secondary": None},
+        ],
+        "tiebreak_high_card_006": [
+            {"rank": 1, "hands": [["HA"]], "tb_primary": [14], "tb_secondary": None},
+            {"rank": 2, "hands": [["D5"], ["C5"]], "tb_primary": [5], "tb_secondary": None},
+            {"rank": 3, "hands": [["S3"]], "tb_primary": [3], "tb_secondary": None},
+        ]
     }[name]
+
+    for tb_dict in tb_dicts:
+        hands = []
+        for hand in tb_dict["hands"]:
+            hands.append(sorted([Card(card) for card in hand], reverse=True))
+        tb_dict["hands"] = hands
+
+    return tb_dicts

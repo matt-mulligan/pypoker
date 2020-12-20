@@ -156,11 +156,15 @@ def test_when_rank_hands_then_correct_dictionary_returned(test_case, solver_inst
 
 
 @mark.parametrize("hole_cards, board_cards, expected", [
-    ("hole_2p_001_tt_v_ak", ["C4", "D8", "H5", "CQ"], {"player_a": 86.36, "player_b": 13.64})
+    ("hole_2p_001_tt_v_ak", ["C4", "D8", "H5", "CQ"], {"player_a": 86.36, "player_b": 13.64}),  # pair v high cards - outs to over pairs
+    ("hole_2p_001_tt_v_ak", ["S4", "S8", "H5", "CQ"], {"player_a": 68.18, "player_b": 31.82}),  # pair v high cards - outs to over pairs + flush
+    ("hole_2p_001_tt_v_ak", ["S4", "S6", "HJ", "CQ"], {"player_a": 63.64, "player_b": 36.36}),  # pair v high cards - outs to over pairs + flush + single straight
+    ("hole_2p_002_88_TKs", ["S4", "S6", "HJ", "CQ"], {"player_a": 54.55, "player_b": 45.45}),  # pair v high cards - outs to over pairs + flush + open straight
+    ("hole_2p_003_AQo_TKs", ["HJ", "HK", "S7", "S4"], {"player_a": 11.36, "player_b": 88.64}),
 ])
 def test_when_find_odds_and_one_draw_remaining_then_correct_odds_returned(hole_cards, board_cards, expected, solver_instance):
     hole_cards = get_player_hands_dict(hole_cards)
     board_cards = get_cards(board_cards)
-    actual = solver_instance.find_odds(hole_cards, board_cards)
+    actual = solver_instance.find_odds(hole_cards, board_cards, True)
 
     assert actual == expected

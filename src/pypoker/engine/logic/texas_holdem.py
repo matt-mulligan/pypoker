@@ -26,14 +26,11 @@ from pypoker.engine.logic.constants import (
 )
 from pypoker.engine.logic.functions import (
     hand_test,
-    rank_hand_type,
+    tiebreak_hands,
     describe_hand,
     find_outs_scenarios,
 )
-from pypoker.engine.logic.functions.outs import (
-    claim_out_string,
-    tiebreak_outs_draw,
-)
+from pypoker.engine.logic.functions.outs import get_all_combinations_for_out_string
 from pypoker.engine.logic.utils import get_all_combinations
 
 
@@ -109,11 +106,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
             ]
 
             if matched_hands:
-                best_hand = rank_hand_type(
+                best_hand = tiebreak_hands(
                     GAME_TYPE_TEXAS_HOLDEM,
                     hand_ranking[HAND_TITLE],
                     hands=matched_hands,
-                )[1][0]
+                )[0]["hands"][0]
                 return {
                     BEST_HAND: best_hand,
                     HAND_TITLE: hand_ranking[HAND_TITLE],
@@ -149,7 +146,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         for rank in ranks:
             hands = list(player_hands_by_rank[rank].values())
-            subranked_hands = rank_hand_type(
+            subranked_hands = tiebreak_hands(
                 GAME_TYPE_TEXAS_HOLDEM,
                 self._hand_rankings[rank - 1][HAND_TITLE],
                 hands=hands,
@@ -172,171 +169,216 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         return ranked_player_hands
 
-    def find_odds(
-        self, player_hole_cards: Dict[str, List[Card]], board_cards: List[Card]
-    ):
+    def find_odds(self, player_hole_cards: Dict[str, List[Card]], board_cards: List[Card], debug=False):
         """
-        Abstract method to implement to find the odds of all players winning from the current situation.
+        Method to find the odds for each player in a given situation.
 
-        :param player_hole_cards: Dictionary, of player names and their hole cards
-        :param board_cards: List of cards representing the current board cards
-        :return: Dictionary of player names and their likelyhood of winning from this situation.
+        :param player_hole_cards:
+        :param board_cards:
+        :param debug:
+        :return:
         """
 
+        # Setup important variables
+        claimed_outs = {player: [] for player in player_hole_cards.keys()}
         drawable_cards = self._determine_unused_cards(player_hole_cards, board_cards)
-        player_current_hand = {
-            player: self.find_best_hand(hole_cards, board_cards)
-            for player, hole_cards in player_hole_cards.items()
-        }
-        current_best_hand_rank = min(
-            [best_hand[HAND_RANK] for best_hand in player_current_hand.values()]
-        )
 
-        current_ranked_hands = self.rank_hands({player: hand_info[BEST_HAND] for player, hand_info in player_current_hand.items()})
+        # determine current best hand
+        current_hands = {player: self.find_best_hand(hole_cards, board_cards) for player, hole_cards in player_hole_cards.items()}
+        current_ranked_hands = self.rank_hands({player: hand_info[BEST_HAND] for player, hand_info in current_hands.items()})
+        current_winners = current_ranked_hands[1]["players"]
+        current_winner_rank = current_hands[current_winners[0]]["hand_rank"]
 
+        # Find all player out strings
         ranked_player_outs = {}
-        for hand_info in self._hand_rankings:
-            for player, current_hand in player_current_hand.items():
-                if (
-                    current_hand[HAND_RANK]
-                    >= hand_info[HAND_RANK]
-                    <= current_best_hand_rank
-                ):
-                    player_outs = find_outs_scenarios(
-                        GAME_TYPE_TEXAS_HOLDEM,
-                        hand_info[HAND_TITLE],
-                        hole_cards=player_hole_cards[player],
-                        board_cards=board_cards,
-                        available_cards=drawable_cards,
-                    )
-                    if hand_info[HAND_RANK] not in ranked_player_outs.keys():
-                        ranked_player_outs[hand_info[HAND_RANK]] = {player: player_outs}
-                    else:
-                        ranked_player_outs[hand_info[HAND_RANK]][player] = player_outs
-
-        utilised_outs = []
-        wins = {player: 0 for player in player_hole_cards.keys()}
-
-        for rank, player_out_scenarios in ranked_player_outs.items():
-            print(f"Assigning wins for rank {rank} outs")
-            players_with_outs = [
-                player
-                for player, out_scenarios in player_out_scenarios.items()
-                if out_scenarios
-            ]
-            if not players_with_outs:
-                print("No players with outs for this rank")
+        for hand_type in self._hand_rankings:
+            if hand_type[HAND_RANK] > current_winner_rank:
                 continue
-            elif len(players_with_outs) == 1:
-                player_name = players_with_outs[0]
-                print(
-                    f"Only player {player_name} has outs for this rank.  Assigning wins"
-                )
-                potential_outs = [
-                    scenario[OUT_STRING]
-                    for scenario in player_out_scenarios[player_name]
-                ]
-                claimed_outs = [
-                    claim_out_string(utilised_outs, out_string, drawable_cards)
-                    for out_string in potential_outs
-                ]
-                claimed_outs = [item for sublist in claimed_outs for item in sublist]
 
-                wins[player_name] += len(claimed_outs)
-                utilised_outs.extend(claimed_outs)
-            else:
-                print(
-                    f"Multiple players found to have outs at this rank: {players_with_outs}.  Tiebreaking outs."
-                )
-                combined_outs = {player: [] for player in players_with_outs}
-                for player, out_scenarios in player_out_scenarios.items():
-                    if not out_scenarios:
-                        continue
-                    for scenario in out_scenarios:
-                        scenario["OUTS"] = claim_out_string(
-                            utilised_outs, scenario[OUT_STRING], drawable_cards
-                        )
-                        combined_outs[player].extend(scenario["OUTS"])
+            rank_out_strings = {}
+            for player, hole_cards in player_hole_cards.items():
+                kwargs = dict(hole_cards=hole_cards, board_cards=board_cards, available_cards=drawable_cards)
+                out_scenarios = find_outs_scenarios(GAME_TYPE_TEXAS_HOLDEM, hand_type[HAND_TITLE], **kwargs)
+                out_strings = [out_dict[OUT_STRING] for out_dict in out_scenarios]
+                rank_out_strings[player] = out_strings
+            ranked_player_outs[hand_type[HAND_RANK]] = rank_out_strings
 
-                for player, out_scenarios in player_out_scenarios.items():
-                    if not out_scenarios:
-                        continue
-                    combined_outs[player].sort()
-                    my_outs = list(combo for combo, _ in groupby(combined_outs[player]))
-                    my_outs = [out for out in my_outs if out not in utilised_outs]
-                    their_outs = [
-                        outs
-                        for player_name, outs in combined_outs.items()
-                        if player_name != player
+        # assigned wins
+        for rank, player_out_strings in ranked_player_outs.items():
+            players_with_outs = [player for player, out_strings in player_out_strings.items() if out_strings]
+            if not players_with_outs:
+                print(f"No player has outs at rank {rank}")
+                continue
+
+            if rank == current_winner_rank:
+                print(f"Testing/Assigning wins for current highest hand rank of {rank}.")
+
+                # Get list of already claimed outs
+                utilised_outs = [outs for outs in claimed_outs.values()]
+                utilised_outs = [item for sublist in utilised_outs for item in sublist]
+
+                # Find each players potential outs
+                player_potential_outs = dict()
+                for player in players_with_outs:
+                    potential_outs = [
+                        get_all_combinations_for_out_string(utilised_outs, out_string, drawable_cards)
+                        for out_string in player_out_strings[player]
                     ]
+                    potential_outs = [item for sublist in potential_outs for item in sublist]
+                    potential_outs = list(set(potential_outs))
+                    player_potential_outs[player] = potential_outs
+
+                # Tiebreak all possible outs as current leader needs to be assessed against each out possibility.
+                all_outs = [outs for outs in player_potential_outs.values()]
+                all_outs = [item for sublist in all_outs for item in sublist]
+                all_outs = list(set(all_outs))
+
+                # tiebreak "conflicted" outs
+                for out in all_outs:
+                    # find players with this out + add current winners
+                    eligable_players = [test_player for test_player, possible_outs in player_potential_outs.items()
+                                        if out in possible_outs]
+                    eligable_players.extend(current_winners)
+                    eligable_players = list(set(eligable_players))
+
+                    # if only one player has this out then award win and move on
+                    if len(eligable_players) == 1:
+                        claimed_outs[eligable_players[0]].append(out)
+                        continue
+
+                    # build board object for this out string
+                    drawn_cards = [Card(card_id) for card_id in out.split("-")]
+                    new_board = board_cards.copy()
+                    new_board.extend(drawn_cards)
+
+                    # find hands for each player (look to optimise via use of private methods, not searching thru all ranks)
+                    tb_hands = {
+                        tb_player: self.find_best_hand(player_hole_cards[tb_player], new_board)[BEST_HAND]
+                        for tb_player in eligable_players
+                    }
+
+                    # Rank the players hands
+                    hand_title = [hand_info[HAND_TITLE] for hand_info in self._hand_rankings if hand_info[HAND_RANK] == rank][0]
+                    tb_ranks = tiebreak_hands(GAME_TYPE_TEXAS_HOLDEM, hand_title, list(tb_hands.values()))
+
+                    # Find winners and award wins
+                    winners = sorted([tb_player for tb_player, hand in tb_hands.items() if hand in tb_ranks[0]["hands"]])
+                    winners = winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+                    if winners in claimed_outs.keys():
+                        claimed_outs[winners].append(out)
+                    else:
+                        claimed_outs[winners] = [out]
+
+            elif len(players_with_outs) == 1:
+                print(f"Only player '{players_with_outs[0]}' has outs for rank {rank}.  Assigning Wins.")
+
+                # Get list of already claimed outs
+                utilised_outs = [outs for outs in claimed_outs.values()]
+                utilised_outs = [item for sublist in utilised_outs for item in sublist]
+
+                # get all possible combinations for player's out strings
+                potential_outs = [
+                    get_all_combinations_for_out_string(utilised_outs, out_string, drawable_cards)
+                    for out_string in player_out_strings[players_with_outs[0]]
+                ]
+                potential_outs = [item for sublist in potential_outs for item in sublist]
+
+                # deduplicate and award all outs to player
+                awarded_outs = list(set(potential_outs))
+                claimed_outs[players_with_outs[0]].extend(awarded_outs)
+
+            elif len(players_with_outs) > 1:
+                print(f"Multiple players '{players_with_outs}' have outs for rank {rank}. Tiebreaking Outs.")
+
+                # Get list of already claimed outs
+                utilised_outs = [outs for outs in claimed_outs.values()]
+                utilised_outs = [item for sublist in utilised_outs for item in sublist]
+
+                # Find each players potential outs
+                player_potential_outs = dict()
+                for player in players_with_outs:
+                    potential_outs = [
+                        get_all_combinations_for_out_string(utilised_outs, out_string, drawable_cards)
+                        for out_string in player_out_strings[player]
+                    ]
+                    potential_outs = [item for sublist in potential_outs for item in sublist]
+                    potential_outs = list(set(potential_outs))
+                    player_potential_outs[player] = potential_outs
+
+                # Award wins for uncontested outs, tiebreak conflict outs
+                for player, potential_outs in player_potential_outs.items():
+                    # Get list of already claimed outs - must be updated for each new player
+                    utilised_outs = [outs for outs in claimed_outs.values()]
+                    utilised_outs = [item for sublist in utilised_outs for item in sublist]
+
+                    # find current player and opposition possible outs
+                    my_outs = [out for out in potential_outs if out not in utilised_outs]
+                    their_outs = [outs for other_player, outs in player_potential_outs.items() if other_player != player]
                     their_outs = [item for sublist in their_outs for item in sublist]
-                    their_outs.sort()
-                    their_outs = list(combo for combo, _ in groupby(their_outs))
-                    their_outs = [out for out in their_outs if out not in utilised_outs]
 
-                    unique_outs = [out for out in my_outs if out not in their_outs]
-                    conflicted_outs = [out for out in my_outs if out not in unique_outs]
+                    # define conflicted and uncontested outs
+                    uncontested_outs = [out for out in my_outs if out not in their_outs]
+                    conflicted_outs = [out for out in my_outs if out not in uncontested_outs]
 
-                    wins[player] += len(unique_outs)
-                    utilised_outs.extend(unique_outs)
+                    # claim uncontested outs
+                    claimed_outs[player].extend(uncontested_outs)
 
-                    for out_ids in conflicted_outs:
-                        valid_players = [
-                            player_name
-                            for player_name, outs in combined_outs.items()
-                            if out_ids in outs
-                        ]
+                    # tiebreak conflicted outs
+                    for out in conflicted_outs:
+                        # find players with this out
+                        eligable_players = [test_player for test_player, possible_outs in player_potential_outs.items() if out in possible_outs]
 
-                        tiebreakers = {}
-                        hole_cards = {}
-                        for player in valid_players:
-                            tiebreakers[player] = [
-                                scenario[TIEBREAKER]
-                                for scenario in player_out_scenarios[player]
-                                if out_ids in scenario["OUTS"]
-                            ][0]
-                            hole_cards[player] = player_hole_cards[player]
+                        # build board object for this out string
+                        drawn_cards = [Card(card_id) for card_id in out.split("-")]
+                        new_board = board_cards.copy()
+                        new_board.extend(drawn_cards)
 
-                        drawn_cards = [Card(card_id) for card_id in out_ids]
-                        kwarg_set = TB_DRAWS_KWAGRS[self._hand_rankings[HAND_TITLE]]
-                        kwargs = {
-                            TB_DRAWS_KWARGS_ALL: {
-                                "tiebreakers": tiebreakers,
-                                "hole_cards": hole_cards,
-                                "board_cards": board_cards,
-                                "drawn_cards": drawn_cards,
-                            },
-                            TB_DRAWS_KWARGS_TIEBREAKER: {"tiebreakers": tiebreakers},
-                        }[kwarg_set]
-                        winner = tiebreak_outs_draw(
-                            GAME_TYPE_TEXAS_HOLDEM, hand_info[HAND_TITLE], **kwargs
-                        )
-                        if winner not in wins.keys():
-                            wins[winner] = 1
+                        # find hands for each player (look to optimise via use of private methods, not searching thru all ranks)
+                        tb_hands = {
+                            tb_player: self.find_best_hand(player_hole_cards[tb_player], new_board)[BEST_HAND]
+                            for tb_player in eligable_players
+                        }
+
+                        # Rank the players hands
+                        hand_title = [hand_info[HAND_TITLE] for hand_info in self._hand_rankings if hand_info[HAND_RANK] == rank][0]
+                        tb_ranks = tiebreak_hands(GAME_TYPE_TEXAS_HOLDEM, hand_title, list(tb_hands.values()))
+
+                        # Find winners and award wins
+                        winners = sorted([tb_player for tb_player, hand in tb_hands.items() if hand in tb_ranks[0]["hands"]])
+                        winners = winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
+                        if winners in claimed_outs.keys():
+                            claimed_outs[winners].append(out)
                         else:
-                            wins[winner] += 1
-                        utilised_outs.append(out_ids)
+                            claimed_outs[winners] = [out]
 
-        draw_combo_num = 1
+        # find total number of draws evaluating for
+        total_draw_combinations = 1
         cards_to_draw = 5 - len(board_cards)
         for draw in range(cards_to_draw):
             cards_available = len(drawable_cards) - draw
-            draw_combo_num *= cards_available
-        draw_combo_num /= cards_to_draw
+            total_draw_combinations *= cards_available
+        total_draw_combinations /= cards_to_draw
 
         # give all unassigned wins to current leader
-        current_winner = current_ranked_hands[1]["players"][0] if len(current_ranked_hands[1]["players"]) == 1 else f"TIE({','.join(current_ranked_hands[1]['players'])})"
-        assigned_draws_count = sum([win_count for win_count in wins.values()])
-        bricked_draws_count = draw_combo_num - assigned_draws_count
+        win_counts = {player: len(outs) for player, outs in claimed_outs.items()}
+        claimed_outs_count = sum([outs for outs in win_counts.values()])
+        bricked_draws_count = total_draw_combinations - claimed_outs_count
 
-        if current_winner not in wins.keys():
-            wins[current_winner] = bricked_draws_count
+        current_winners = current_winners[0] if len(current_winners) == 1 else f"TIE({','.join(current_winners)})"
+        if current_winners not in win_counts.keys():
+            win_counts[current_winners] = bricked_draws_count
         else:
-            wins[current_winner] += bricked_draws_count
+            win_counts[current_winners] += bricked_draws_count
 
         odds = {
-            player: round(win_count / draw_combo_num * 100, 2) for player, win_count in wins.items()
+            player: round(win_count / total_draw_combinations * 100, 2) for player, win_count in win_counts.items()
         }
+
+        if debug:
+            print("FINAL CLAIMED OUTS:")
+            for player, outs in claimed_outs.items():
+                print(f"\t{player}: {outs}")
+
         return odds
 
     #########################
@@ -375,16 +417,16 @@ class TexasHoldemHandSolver(BaseHandSolver):
             hand.sort(key=lambda card: card.value, reverse=True)
 
         linked_subrank_players = dict()
-        for subrank, subrank_hands in subranked_hands.items():
-            for hand in subrank_hands:
+        for subrank_info in subranked_hands:
+            for hand in subrank_info["hands"]:
                 hand.sort(key=lambda card: card.value, reverse=True)
 
             matched_players = [
                 player
                 for player, player_hand in players_hands.items()
-                if player_hand in subrank_hands
+                if player_hand in subrank_info["hands"]
             ]
-            linked_subrank_players[subrank] = matched_players
+            linked_subrank_players[subrank_info["rank"]] = matched_players
 
         return linked_subrank_players
 
