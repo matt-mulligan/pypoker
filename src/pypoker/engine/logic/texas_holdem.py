@@ -222,13 +222,13 @@ class TexasHoldemHandSolver(BaseHandSolver):
                         for out_string in player_out_strings[player]
                     ]
                     potential_outs = [item for sublist in potential_outs for item in sublist]
-                    potential_outs = list(set(potential_outs))
+                    potential_outs = set(potential_outs)
                     player_potential_outs[player] = potential_outs
 
                 # Tiebreak all possible outs as current leader needs to be assessed against each out possibility.
                 all_outs = [outs for outs in player_potential_outs.values()]
                 all_outs = [item for sublist in all_outs for item in sublist]
-                all_outs = list(set(all_outs))
+                all_outs = set(all_outs)
 
                 # tiebreak "conflicted" outs
                 for out in all_outs:
@@ -308,7 +308,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
                     # define conflicted and uncontested outs
                     uncontested_outs = set([out for out in my_outs if out not in their_outs])
-                    conflicted_outs = [out for out in my_outs if out not in uncontested_outs]
+                    conflicted_outs = set([out for out in my_outs if out not in uncontested_outs])
 
                     # claim uncontested outs
                     player_claimed_outs[player].update(uncontested_outs)

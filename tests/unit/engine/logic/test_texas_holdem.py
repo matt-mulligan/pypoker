@@ -265,4 +265,4 @@ def test_when_find_odds_and_one_draw_remaining_then_correct_odds_returned(hole_c
 # RESULTS
 # desc of change,                                       T1 time,    T2 time,        T3 time,    T4 time,    T5 time
 # Base module (eed4304decbe587989b8),                   >900s,      >900s,          24.253824,  00.793782,  00.025991
-# Convert Lists to Sets for comparison improvements,    >900s,      04:24.983775    20.025112,  00.799731,  00.027881
+# Convert Lists to Sets for comparison improvements,    >900s,      03:43.710390    18.750863,  00.783751,  00.025993
