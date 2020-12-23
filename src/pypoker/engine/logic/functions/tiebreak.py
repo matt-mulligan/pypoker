@@ -9,8 +9,9 @@ from typing import List, Dict
 from pypoker.deck import Card
 from pypoker.engine.logic.constants import GAME_TYPE_TEXAS_HOLDEM, HAND_TYPE_STRAIGHT_FLUSH, HAND_TYPE_QUADS, \
     HAND_TYPE_FULL_HOUSE, HAND_TYPE_FLUSH, HAND_TYPE_STRAIGHT, HAND_TYPE_TRIPS, HAND_TYPE_TWO_PAIR, HAND_TYPE_PAIR, \
-    HAND_TYPE_HIGH_CARD
-from pypoker.engine.logic.functions.shared import _check_game_type, _check_hand_type
+    HAND_TYPE_HIGH_CARD, OUT_STRING
+from pypoker.engine.logic.functions.outs import get_all_combinations_for_out_string
+from pypoker.engine.logic.functions.shared import _check_game_type, _check_hand_type, _check_kwargs
 
 
 ####################
@@ -46,9 +47,67 @@ def tiebreak_hands(game_type: str, hand_type: str, hands: List[List[Card]]) -> L
     return tb_method(hands)
 
 
-####################################
-#  PRIVATE IMPLEMENTATION METHODS  #
-####################################
+def tiebreak_out_scenarios(game_type: str, hand_type: str, **kwargs) -> List[Dict]:
+    """
+    This public method is used to tiebreak out scenarios for a specific hand type.
+
+    :param game_type: the type of poker game that is being played
+    :param hand_type: the type of hand that we are tiebreaking
+    :param kwargs: set of kwargs required for the specific tiebreak method
+    :return: List of dictionaries representing each ranking found. dictionaries will be in the format of:
+        {"rank": rank_num, "hands": list_of_hands, "tb_primary": primary_tb_info, "tb"secondary": secondary_tb_info}
+    """
+
+    _check_game_type(game_type)
+    _check_hand_type(game_type, hand_type)
+    tb_key = f"{game_type}-{hand_type}"
+
+    kwargs_required_tb, tb_scenario_method = {
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT_FLUSH}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_straight_flush,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_QUADS}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_quads,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FULL_HOUSE}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_full_house,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_FLUSH}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_flush,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_STRAIGHT}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_straight,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TRIPS}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_trips,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_TWO_PAIR}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_two_pair,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_PAIR}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_pair,
+        ),
+        f"{GAME_TYPE_TEXAS_HOLDEM}-{HAND_TYPE_HIGH_CARD}": (
+            ["player_out_scenarios", "drawable_cards", "assigned_draws"],
+            _tb_out_scenarios_high_flush,
+        ),
+    }[tb_key]
+
+    _check_kwargs(kwargs, kwargs_required_tb)
+    return tb_scenario_method(**kwargs)
+
+
+#####################################################
+#  PRIVATE IMPLEMENTATION METHODS - TIEBREAK HANDS  #
+#####################################################
 def _tiebreak_texas_holdem_straight(hands: List[List[Card]]) -> List[Dict]:
     """
     private method to tiebreak texas holdem straight flush hands
@@ -103,7 +162,6 @@ def _tiebreak_texas_holdem_quads(hands: List[List[Card]]) -> List[Dict]:
     ]
 
     sorted_tiebreakers = sorted(list(set([(tb[1], *tb[2]) for tb in tiebreakers])), reverse=True)
-    print("YEET")
 
     rank = 1
     ranked_hands = []
@@ -296,3 +354,85 @@ def _tiebreak_texas_holdem_pair(hands: List[List[Card]]) -> List[Dict]:
         rank += 1
 
     return ranked_hands
+
+
+#####################################################
+#  PRIVATE IMPLEMENTATION METHODS - TIEBREAK HANDS  #
+#####################################################
+def _tb_out_scenarios_straight_flush(player_out_scenarios, drawable_cards, assigned_draws):
+    """
+    private method to tiebreak straight flush out scenarios and award draws to players
+
+    :param player_out_scenarios: Dict of each players out scenarios in the structure
+        {
+            "PLAYER_A": [
+                {"out_string": ...}, {"out_string": ...}
+            ],
+            "PLAYER_B": [
+                {"out_string": ...}, {"out_string": ...}
+            ],
+        }
+    :param drawable_cards: List of card objects still available
+    :param assigned_draws: List of draw strings that have already been assigned
+    :return: Dict of players and their assigned wins for these outs
+    """
+
+    # dictionary for all new outs for each player
+    player_assigned_draws = {player: [] for player in player_out_scenarios.keys()}
+
+    for tb_high_card in [14, 13, 12, 11, 10, 9, 8, 7, 6, 5]:
+        players_out_strings = {
+            player: [
+                scenario[OUT_STRING] for scenario in out_scenarios
+                if scenario["TB_STRAIGHT_HIGH_CARD"] == tb_high_card
+            ] for player, out_scenarios in player_out_scenarios.items()
+        }
+
+        players_with_outs = [player for player, out_strings in players_out_strings.items() if out_strings]
+
+        if not players_with_outs:
+            continue
+
+        if len(players_with_outs) == 1:
+            player = players_with_outs[0]
+            out_draws = [
+                get_all_combinations_for_out_string(assigned_draws, out_string, drawable_cards)
+                for out_string in players_out_strings[player]
+            ]
+            out_draws = [item for sublist in out_draws for item in sublist]
+            out_draws = list(set(out_draws))
+
+            player_assigned_draws[player].extend(out_draws)
+            assigned_draws.extend(out_draws)
+        else:
+            player_out_draws = dict()
+            for player in players_with_outs:
+                out_draws = [
+                    get_all_combinations_for_out_string(assigned_draws, out_string, drawable_cards)
+                    for out_string in players_out_strings[player]
+                ]
+                out_draws = [item for sublist in out_draws for item in sublist]
+                out_draws = list(set(out_draws))
+                player_out_draws[player] = out_draws
+
+            for player, out_draws in player_out_draws.items():
+                my_draws = [draw for draw in out_draws if draw not in assigned_draws]
+                their_draws = [out_draw for other_player, out_draw in player_out_draws.items() if other_player != player]
+                their_draws = [item for sublist in their_draws for item in sublist]
+
+                unique_draws = [draw for draw in my_draws if draw not in their_draws]
+                shared_draws = [draw for draw in my_draws if draw not in unique_draws]
+
+                player_assigned_draws[player].extend(unique_draws)
+                assigned_draws.extend(out_draws)
+
+                for draw in shared_draws:
+                    shared_draw_players = [player for player, draws in player_out_draws.items() if draw in draws]
+                    name = f"TIE({','.join(shared_draw_players)})"
+                    if name in player_assigned_draws.keys():
+                        player_assigned_draws[name].append(draw)
+                    else:
+                        player_assigned_draws[name] = [draw]
+                    assigned_draws.append(draw)
+
+    return player_assigned_draws

@@ -168,3 +168,101 @@ def test_when_find_odds_and_one_draw_remaining_then_correct_odds_returned(hole_c
     actual = solver_instance.find_odds(hole_cards, board_cards, True)
 
     assert actual == expected
+
+
+
+
+
+##########################################
+# PERFORMANCE TESTING FIND_OUTS
+#
+# Trying to test how performant my find_outs method is when using different strategies
+# Im sure there are much better ways to store this but for now it will live here
+#
+# TESTS TYPES / CODE
+# 1) Pre Flop:
+# import datetime
+# from pypoker.deck import Card
+# from pypoker.engine.logic.texas_holdem import TexasHoldemHandSolver
+# solver = TexasHoldemHandSolver()
+# hole_cards = {"player_a": [Card("DT"), Card("ST")], "player_b": [Card("HA"), Card("HK")]}
+# board_cards = []
+#
+#
+# start = datetime.datetime.now()
+# outs = solver.find_odds(hole_cards, board_cards)
+# end = datetime.datetime.now()
+# duration = end - start
+# print(f"DURATION OF PRE-FLOP ODDS CALCULATION IS {duration}")
+#
+#
+# 2) 1 Card flop
+# import datetime
+# from pypoker.deck import Card
+# from pypoker.engine.logic.texas_holdem import TexasHoldemHandSolver
+# solver = TexasHoldemHandSolver()
+# hole_cards = {"player_a": [Card("DT"), Card("ST")], "player_b": [Card("HA"), Card("HK")]}
+# board_cards = [Card("H3")]
+#
+#
+# start = datetime.datetime.now()
+# outs = solver.find_odds(hole_cards, board_cards)
+# end = datetime.datetime.now()
+# duration = end - start
+# print(f"DURATION OF ONE CARD FLOP ODDS CALCULATION IS {duration}")
+#
+#
+# 3) 2 Card flop
+# import datetime
+# from pypoker.deck import Card
+# from pypoker.engine.logic.texas_holdem import TexasHoldemHandSolver
+# solver = TexasHoldemHandSolver()
+# hole_cards = {"player_a": [Card("DT"), Card("ST")], "player_b": [Card("HA"), Card("HK")]}
+# board_cards = [Card("H3"), Card("SQ")]
+#
+#
+# start = datetime.datetime.now()
+# outs = solver.find_odds(hole_cards, board_cards)
+# end = datetime.datetime.now()
+# duration = end - start
+# print(f"DURATION OF TWO CARD FLOP ODDS CALCULATION IS {duration}")
+#
+#
+# 4) post-flop
+# import datetime
+# from pypoker.deck import Card
+# from pypoker.engine.logic.texas_holdem import TexasHoldemHandSolver
+# solver = TexasHoldemHandSolver()
+# hole_cards = {"player_a": [Card("DT"), Card("ST")], "player_b": [Card("HA"), Card("HK")]}
+# board_cards = [Card("H3"), Card("SQ"), Card("H5")]
+#
+#
+# start = datetime.datetime.now()
+# outs = solver.find_odds(hole_cards, board_cards)
+# end = datetime.datetime.now()
+# duration = end - start
+# print(f"DURATION OF POST-FLOP ODDS CALCULATION IS {duration}")
+#
+#
+# 5) Turn
+# import datetime
+# from pypoker.deck import Card
+# from pypoker.engine.logic.texas_holdem import TexasHoldemHandSolver
+# solver = TexasHoldemHandSolver()
+# hole_cards = {"player_a": [Card("DT"), Card("ST")], "player_b": [Card("HA"), Card("HK")]}
+# board_cards = [Card("H3"), Card("SQ"), Card("H5"), Card("CJ")]
+#
+#
+# start = datetime.datetime.now()
+# outs = solver.find_odds(hole_cards, board_cards)
+# end = datetime.datetime.now()
+# duration = end - start
+# print(f"DURATION OF POST-TURN ODDS CALCULATION IS {duration}")
+#
+#
+#
+#
+# RESULTS
+# desc of change,                                       T1 time,    T2 time,        T3 time,    T4 time,    T5 time
+# Base module (eed4304decbe587989b8),                   >900s,      >900s,          24.253824,  00.793782,  00.025991
+# Convert Lists to Sets for comparison improvements,    >900s,      04:24.983775    20.025112,  00.799731,  00.027881

@@ -180,12 +180,12 @@ def build_out_string(
 
 
 def get_all_combinations_for_out_string(
-    utilised_outs: List[str], out_string: str, drawable_cards: List[Card]
+    utilised_outs: set, out_string: str, drawable_cards: List[Card]
 ) -> List[str]:
     """
     Public method to claim all possible out combinations for the cards given
 
-    :param utilised_outs: List of out strings that have already been claimed
+    :param utilised_outs: set of out strings that have already been claimed
     :param out_string: out string that we want to assess for claiming
     :param drawable_cards: List of card objects representing all of the cards yet to be drawn
     """
@@ -313,7 +313,7 @@ def _outs_straight_flush(
                     draw_scenarios.append(
                         {
                             OUT_STRING: build_out_string(suits, values, draws),
-                            TIEBREAKER: straight_vals[1],
+                            "TB_STRAIGHT_HIGH_CARD": straight_vals[1],
                         }
                     )
 

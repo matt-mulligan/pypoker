@@ -180,7 +180,8 @@ class TexasHoldemHandSolver(BaseHandSolver):
         """
 
         # Setup important variables
-        claimed_outs = {player: [] for player in player_hole_cards.keys()}
+        player_claimed_outs = {player: set() for player in player_hole_cards.keys()}
+        all_claimed_outs = set()
         drawable_cards = self._determine_unused_cards(player_hole_cards, board_cards)
 
         # determine current best hand
@@ -203,7 +204,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
                 rank_out_strings[player] = out_strings
             ranked_player_outs[hand_type[HAND_RANK]] = rank_out_strings
 
-        # assigned wins
+        # Assigned wins
         for rank, player_out_strings in ranked_player_outs.items():
             players_with_outs = [player for player, out_strings in player_out_strings.items() if out_strings]
             if not players_with_outs:
@@ -213,15 +214,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
             if rank == current_winner_rank:
                 print(f"Testing/Assigning wins for current highest hand rank of {rank}.")
 
-                # Get list of already claimed outs
-                utilised_outs = [outs for outs in claimed_outs.values()]
-                utilised_outs = [item for sublist in utilised_outs for item in sublist]
-
                 # Find each players potential outs
                 player_potential_outs = dict()
                 for player in players_with_outs:
                     potential_outs = [
-                        get_all_combinations_for_out_string(utilised_outs, out_string, drawable_cards)
+                        get_all_combinations_for_out_string(all_claimed_outs, out_string, drawable_cards)
                         for out_string in player_out_strings[player]
                     ]
                     potential_outs = [item for sublist in potential_outs for item in sublist]
@@ -243,7 +240,8 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
                     # if only one player has this out then award win and move on
                     if len(eligable_players) == 1:
-                        claimed_outs[eligable_players[0]].append(out)
+                        player_claimed_outs[eligable_players[0]].add(out)
+                        all_claimed_outs.add(out)
                         continue
 
                     # build board object for this out string
@@ -264,64 +262,57 @@ class TexasHoldemHandSolver(BaseHandSolver):
                     # Find winners and award wins
                     winners = sorted([tb_player for tb_player, hand in tb_hands.items() if hand in tb_ranks[0]["hands"]])
                     winners = winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
-                    if winners in claimed_outs.keys():
-                        claimed_outs[winners].append(out)
+                    if winners in player_claimed_outs.keys():
+                        player_claimed_outs[winners].add(out)
                     else:
-                        claimed_outs[winners] = [out]
+                        player_claimed_outs[winners] = {out}
+                    all_claimed_outs.add(out)
 
             elif len(players_with_outs) == 1:
                 print(f"Only player '{players_with_outs[0]}' has outs for rank {rank}.  Assigning Wins.")
 
-                # Get list of already claimed outs
-                utilised_outs = [outs for outs in claimed_outs.values()]
-                utilised_outs = [item for sublist in utilised_outs for item in sublist]
-
                 # get all possible combinations for player's out strings
                 potential_outs = [
-                    get_all_combinations_for_out_string(utilised_outs, out_string, drawable_cards)
+                    get_all_combinations_for_out_string(all_claimed_outs, out_string, drawable_cards)
                     for out_string in player_out_strings[players_with_outs[0]]
                 ]
                 potential_outs = [item for sublist in potential_outs for item in sublist]
 
                 # deduplicate and award all outs to player
-                awarded_outs = list(set(potential_outs))
-                claimed_outs[players_with_outs[0]].extend(awarded_outs)
+                awarded_outs = set(potential_outs)
+                player_claimed_outs[players_with_outs[0]].update(awarded_outs)
+                all_claimed_outs.update(awarded_outs)
 
             elif len(players_with_outs) > 1:
                 print(f"Multiple players '{players_with_outs}' have outs for rank {rank}. Tiebreaking Outs.")
-
-                # Get list of already claimed outs
-                utilised_outs = [outs for outs in claimed_outs.values()]
-                utilised_outs = [item for sublist in utilised_outs for item in sublist]
 
                 # Find each players potential outs
                 player_potential_outs = dict()
                 for player in players_with_outs:
                     potential_outs = [
-                        get_all_combinations_for_out_string(utilised_outs, out_string, drawable_cards)
+                        get_all_combinations_for_out_string(all_claimed_outs, out_string, drawable_cards)
                         for out_string in player_out_strings[player]
                     ]
                     potential_outs = [item for sublist in potential_outs for item in sublist]
-                    potential_outs = list(set(potential_outs))
+                    potential_outs = set(potential_outs)
                     player_potential_outs[player] = potential_outs
 
                 # Award wins for uncontested outs, tiebreak conflict outs
                 for player, potential_outs in player_potential_outs.items():
                     # Get list of already claimed outs - must be updated for each new player
-                    utilised_outs = [outs for outs in claimed_outs.values()]
-                    utilised_outs = [item for sublist in utilised_outs for item in sublist]
 
                     # find current player and opposition possible outs
-                    my_outs = [out for out in potential_outs if out not in utilised_outs]
+                    my_outs = [out for out in potential_outs if out not in all_claimed_outs]
                     their_outs = [outs for other_player, outs in player_potential_outs.items() if other_player != player]
-                    their_outs = [item for sublist in their_outs for item in sublist]
+                    their_outs = set([item for sublist in their_outs for item in sublist])
 
                     # define conflicted and uncontested outs
-                    uncontested_outs = [out for out in my_outs if out not in their_outs]
+                    uncontested_outs = set([out for out in my_outs if out not in their_outs])
                     conflicted_outs = [out for out in my_outs if out not in uncontested_outs]
 
                     # claim uncontested outs
-                    claimed_outs[player].extend(uncontested_outs)
+                    player_claimed_outs[player].update(uncontested_outs)
+                    all_claimed_outs.update(uncontested_outs)
 
                     # tiebreak conflicted outs
                     for out in conflicted_outs:
@@ -346,10 +337,11 @@ class TexasHoldemHandSolver(BaseHandSolver):
                         # Find winners and award wins
                         winners = sorted([tb_player for tb_player, hand in tb_hands.items() if hand in tb_ranks[0]["hands"]])
                         winners = winners[0] if len(winners) == 1 else f"TIE({','.join(winners)})"
-                        if winners in claimed_outs.keys():
-                            claimed_outs[winners].append(out)
+                        if winners in player_claimed_outs.keys():
+                            player_claimed_outs[winners].add(out)
                         else:
-                            claimed_outs[winners] = [out]
+                            player_claimed_outs[winners] = {out}
+                        all_claimed_outs.add(out)
 
         # find total number of draws evaluating for
         total_draw_combinations = 1
@@ -360,7 +352,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
         total_draw_combinations /= cards_to_draw
 
         # give all unassigned wins to current leader
-        win_counts = {player: len(outs) for player, outs in claimed_outs.items()}
+        win_counts = {player: len(outs) for player, outs in player_claimed_outs.items()}
         claimed_outs_count = sum([outs for outs in win_counts.values()])
         bricked_draws_count = total_draw_combinations - claimed_outs_count
 
@@ -376,7 +368,7 @@ class TexasHoldemHandSolver(BaseHandSolver):
 
         if debug:
             print("FINAL CLAIMED OUTS:")
-            for player, outs in claimed_outs.items():
+            for player, outs in player_claimed_outs.items():
                 print(f"\t{player}: {outs}")
 
         return odds
