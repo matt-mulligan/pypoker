@@ -1,3 +1,10 @@
+"""
+PyPoker.Player Package
+----------------------
+
+Holds all logic and structures to represent the player classes in pypoker.
+"""
+
 from abc import ABCMeta
 from typing import List
 

@@ -1,6 +1,8 @@
 """
-Deck of cards class.
-produces a deck of cards object to be used by the game class
+pypoker.deck module
+---------------------
+
+Basic Dataclasses containing logic to represent a deck of cards as well as individual card objects
 """
 
 import random
