@@ -7,8 +7,12 @@ Basic Dataclasses containing logic to represent a deck of cards as well as indiv
 
 import random
 from dataclasses import dataclass, InitVar, field
-from typing import Union, List
+from typing import List
 
+CARD_SUITS = ["Clubs", "Diamonds", "Hearts", "Spades"]
+CARD_RANKS = [
+    "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King", "Ace"
+]
 
 CARD_ID_SUITS = {"C": "Clubs", "D": "Diamonds", "H": "Hearts", "S": "Spades"}
 CARD_ID_RANKS = {
