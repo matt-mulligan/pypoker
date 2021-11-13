@@ -5,7 +5,9 @@ from pypoker.player import BasePlayer
 
 
 def test_when_base_player_created_then_attr_correct():
-    player = BasePlayer("Matt", chips=12345, hole_cards=[Card("H2"), Card("D4")], table_pos=1)
+    player = BasePlayer(
+        "Matt", chips=12345, hole_cards=[Card("H2"), Card("D4")], table_pos=1
+    )
     assert player.name == "Matt"
     assert player.chips == 12345
     assert player.hole_cards == [Card("H2"), Card("D4")]
@@ -37,10 +39,13 @@ def test_when_base_player_and_bad_chips_then_raise_error(chips):
         good_player.chips = chips
 
 
-@mark.parametrize("cards, err_msg", [
-    ((Card("H2")), "hole cards must be a list object"),
-    ([Card("H2"), "D4"], "hole card objects must all be card objects")
-])
+@mark.parametrize(
+    "cards, err_msg",
+    [
+        ((Card("H2")), "hole cards must be a list object"),
+        ([Card("H2"), "D4"], "hole card objects must all be card objects"),
+    ],
+)
 def test_when_base_player_and_bad_hole_cards_then_raise_error(cards, err_msg):
     with raises(ValueError, match=err_msg):
         BasePlayer("Billy Sastard", hole_cards=cards)

@@ -42,8 +42,9 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         return {
             suit: list(group)
-            for suit, group
-            in groupby(sorted(cards, key=lambda card: card.suit), key=lambda card: card.suit)
+            for suit, group in groupby(
+                sorted(cards, key=lambda card: card.suit), key=lambda card: card.suit
+            )
         }
 
     @staticmethod
@@ -57,12 +58,13 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         return {
             value: list(group)
-            for value, group
-            in groupby(sorted(cards, key=lambda card: card.value), key=lambda card: card.value)
+            for value, group in groupby(
+                sorted(cards, key=lambda card: card.value), key=lambda card: card.value
+            )
         }
 
     def find_consecutive_value_cards(
-            self, cards: List[Card], treat_ace_low: bool = True, run_size: int = None
+        self, cards: List[Card], treat_ace_low: bool = True, run_size: int = None
     ) -> List[List[Card]]:
         """
         Shared utility method of BasePokerEngine to find consecutive runs of cards based on value.
@@ -94,7 +96,9 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         return card_runs
 
     @staticmethod
-    def find_all_unique_card_combos(cards: List[Card], combo_size: int) -> List[List[Card]]:
+    def find_all_unique_card_combos(
+        cards: List[Card], combo_size: int
+    ) -> List[List[Card]]:
         """
         Shared utility method of BasePokerEngine to find all unique combinations of the given cards for a given
         combination size.
@@ -132,14 +136,16 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         for index, still_consecutive in enumerate(is_consecutive):
             if not still_consecutive:
                 end_pos = index + 1
-                runs.append(numbers[start_pos: end_pos])
+                runs.append(numbers[start_pos:end_pos])
                 start_pos = end_pos
         runs.append(numbers[start_pos:])
 
         return runs
 
     @staticmethod
-    def _split_consecutive_runs_to_size(runs: List[List[int]], run_size: int) -> List[List[int]]:
+    def _split_consecutive_runs_to_size(
+        runs: List[List[int]], run_size: int
+    ) -> List[List[int]]:
         """
         given a list of lists of integers, with each sublist being consecutive integers, find all
         consecutive runs of numbers that match the given run_size
@@ -154,9 +160,7 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         # chunk the qualified runs into overlapping runs of the correct size
         sized_runs = [
-            [
-                run[start: end] for start, end in enumerate(range(run_size, len(run) + 1))
-            ]
+            [run[start:end] for start, end in enumerate(range(run_size, len(run) + 1))]
             for run in runs
         ]
 

@@ -5,6 +5,7 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
+from itertools import product
 from typing import List
 
 from pypoker.deck import Card, CARD_SUITS
@@ -32,7 +33,7 @@ TH_HANDS_ORDERED = [
     TH_HAND_TRIPS,
     TH_HAND_TWO_PAIR,
     TH_HAND_PAIR,
-    TH_HAND_HIGH_CARD
+    TH_HAND_HIGH_CARD,
 ]
 
 TH_HAND_STRENGTHS = {
@@ -44,7 +45,7 @@ TH_HAND_STRENGTHS = {
     TH_HAND_TRIPS: 4,
     TH_HAND_TWO_PAIR: 3,
     TH_HAND_PAIR: 2,
-    TH_HAND_HIGH_CARD: 1
+    TH_HAND_HIGH_CARD: 1,
 }
 
 
@@ -75,7 +76,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 TH_HAND_TRIPS: self.make_trips_hands,
                 TH_HAND_TWO_PAIR: self.make_two_pair_hands,
                 TH_HAND_PAIR: self.make_pair_hands,
-                TH_HAND_HIGH_CARD: self.make_high_card_hands
+                TH_HAND_HIGH_CARD: self.make_high_card_hands,
             }[hand_type](available_cards)
 
             if made_hands:
@@ -83,7 +84,9 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
     # Public "Hand Maker" methods
     # ---------------------------
-    def make_straight_flush_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+    def make_straight_flush_hands(
+        self, available_cards: List[Card]
+    ) -> List[List[Card]]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible straight flush hands with the given cards
@@ -119,7 +122,9 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return []
 
         value_grouped_cards = self.group_cards_by_value(available_cards)
-        eligible_values = [key for key, cards in value_grouped_cards.items() if len(cards) == 4]
+        eligible_values = [
+            key for key, cards in value_grouped_cards.items() if len(cards) == 4
+        ]
         if not eligible_values:
             return []
 
@@ -127,11 +132,53 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         for quad_value in eligible_values:
             quad_cards = value_grouped_cards[quad_value]
             other_cards = [card for card in available_cards if card.value != quad_value]
-            if not other_cards:  # manages for the usecase of only getting 4 cards of the same value and no kickers
+            if (
+                not other_cards
+            ):  # manages for the usecase of only getting 4 cards of the same value and no kickers
                 quad_hands.append(quad_cards)
             else:
-                quad_hands.extend([
-                    quad_cards + [card] for card in other_cards
-                ])
+                quad_hands.extend([quad_cards + [card] for card in other_cards])
 
         return quad_hands
+
+    def make_full_house_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible full house hands with the given cards
+
+        :param available_cards: List of card objects available to use.
+        :return: List of lists of card objects representing all of the full houses that could be made.
+        """
+
+        if len(available_cards) < 5:
+            return []
+
+        value_grouped_cards = self.group_cards_by_value(available_cards)
+        trips_values = [
+            key for key, cards in value_grouped_cards.items() if len(cards) >= 3
+        ]
+        pair_values = [
+            key for key, cards in value_grouped_cards.items() if len(cards) >= 2
+        ]
+
+        pair_combos = [
+            self.find_all_unique_card_combos(value_grouped_cards[value], 2)
+            for value in pair_values
+        ]
+        pair_combos = [val for sublist in pair_combos for val in sublist]
+
+        full_houses = []
+        for trip_value in trips_values:
+            trip_cards = value_grouped_cards[trip_value]
+            trip_combos = self.find_all_unique_card_combos(trip_cards, 3)
+            hands = [
+                [
+                    trip_combo + pair_combo
+                    for pair_combo in pair_combos
+                    if pair_combo[0].value != trip_value
+                ]
+                for trip_combo in trip_combos
+            ]
+            full_houses.extend([val for sublist in hands for val in sublist])
+
+        return full_houses
