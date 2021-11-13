@@ -10,7 +10,7 @@ the following tasks will be handled by the pypoker.engine classes:
     find odds of each player winning from current position
 """
 from abc import ABCMeta, abstractmethod
-from itertools import groupby, product
+from itertools import groupby, product, combinations
 from operator import itemgetter
 from typing import List, Dict
 
@@ -92,6 +92,20 @@ class BasePokerEngine(object, metaclass=ABCMeta):
             card_runs.extend([list(p) for p in product(*card_lists)])
 
         return card_runs
+
+    @staticmethod
+    def find_all_unique_card_combos(cards: List[Card], combo_size: int) -> List[List[Card]]:
+        """
+        Shared utility method of BasePokerEngine to find all unique combinations of the given cards for a given
+        combination size.
+
+        :param cards: List of card objects.
+        :param combo_size: integer indicating what size of combination you are looking for
+
+        :return: List of lists of card objects for each combination found.
+        """
+
+        return [list(value) for value in combinations(cards, combo_size)]
 
     # Private Method Implementations
     # ------------------------------

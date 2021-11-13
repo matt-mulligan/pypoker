@@ -137,3 +137,16 @@ def test_when_find_consecutive_value_cards_and_no_matches_long_enough_then_empty
 
     assert isinstance(result, list)
     assert len(result) == 0
+
+
+def test_when_find_all_unique_card_combos_then_correct_list_returned(base_engine, get_test_cards):
+    cards = get_test_cards("D4|C4|H4|S4")
+    result = base_engine.find_all_unique_card_combos(cards, 2)
+
+    assert isinstance(result, list)
+    assert [cards[0], cards[1]] in result
+    assert [cards[0], cards[2]] in result
+    assert [cards[0], cards[3]] in result
+    assert [cards[1], cards[2]] in result
+    assert [cards[1], cards[3]] in result
+    assert [cards[2], cards[3]] in result
