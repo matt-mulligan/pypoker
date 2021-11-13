@@ -10,9 +10,9 @@ the following tasks will be handled by the pypoker.engine classes:
     find odds of each player winning from current position
 """
 from abc import ABCMeta, abstractmethod
-from itertools import groupby
+from itertools import groupby, product
 from operator import itemgetter
-from typing import List
+from typing import List, Dict
 
 from pypoker.deck import Card
 from pypoker.player import BasePlayer
@@ -30,9 +30,42 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         """
 
     # Shared utility methods for all engine classes
-    def find_consecutive_cards(self, cards: List[Card], treat_ace_low: bool = True, run_size: int = None):
+    # ---------------------------------------------
+    @staticmethod
+    def group_cards_by_suit(cards: List[Card]) -> Dict[str, List[Card]]:
         """
-        utility method to find consecutive runs of cards based on value.
+        Shared utility method of BasePokerEngine class that will group the given cards by suit.
+
+        :param cards: List of pypoker.deck.Card objects
+        :return: Dictionary of lists of cards by suit "Clubs", "Diamonds", "Hearts", "Spades"
+        """
+
+        return {
+            suit: list(group)
+            for suit, group
+            in groupby(sorted(cards, key=lambda card: card.suit), key=lambda card: card.suit)
+        }
+
+    @staticmethod
+    def group_cards_by_value(cards: List[Card]) -> Dict[int, List[Card]]:
+        """
+        Shared utility method of BasePokerEngine class to group the given cards by value.
+
+        :param cards: List of pypoker.deck.Card objects
+        :return: Dictionary of lists of cards by card value (2-14)
+        """
+
+        return {
+            value: list(group)
+            for value, group
+            in groupby(sorted(cards, key=lambda card: card.value), key=lambda card: card.value)
+        }
+
+    def find_consecutive_value_cards(
+            self, cards: List[Card], treat_ace_low: bool = True, run_size: int = None
+    ) -> List[List[Card]]:
+        """
+        Shared utility method of BasePokerEngine to find consecutive runs of cards based on value.
 
         :param cards: List of card objects.
         :param treat_ace_low: boolean indicating if the ace should also be treated as a low card.
@@ -42,42 +75,76 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         :return: List of lists of card objects for each run of cards found
         """
 
-        # Add a value of one to the available list if we are to treat ace as low and an ace is present
-        card_values = [card.value for card in cards]
+        # group cards into lists of values and get a list of unique card values
+        cards_by_value = self.group_cards_by_value(cards)
+        card_values = list(cards_by_value)
         if treat_ace_low and 14 in card_values:
             card_values.append(1)
-        card_values.sort()
+            cards_by_value[1] = cards_by_value[14]
 
-        # find all consecutive runs (of any size)
-        runs = []
-        for k, g in groupby(enumerate(card_values), lambda ix: ix[0] - ix[1]):
-            runs.append((list(map(itemgetter(1), g))))
-
-        # If run_size is set, get all groups of that size (including splitting larger groups with overlapping values)
+        runs = self._find_consecutive_numbers(card_values)
         if run_size:
-            sized_runs = []
-            runs = [run for run in runs if len(run) >= run_size]
+            runs = self._split_consecutive_runs_to_size(runs, run_size)
 
-            for run in runs:
-                start = 0
-                end = run_size - 1
-                while not end > len(run):
-                    sized_runs.append(run[start:end])
-                    start += 1
-                    end += 1
+        card_runs = []
+        for run in runs:
+            card_lists = [cards_by_value[value] for value in run]
+            card_runs.extend([list(p) for p in product(*card_lists)])
 
-            runs = sized_runs
+        return card_runs
 
-        # remove any one values from list and replace with 14's before adding back cards
-        runs = [[14 if value == 1 else value for value in run] for run in runs]
+    # Private Method Implementations
+    # ------------------------------
+    @staticmethod
+    def _find_consecutive_numbers(numbers: List[int]) -> List[List[int]]:
+        """
+        Private method to split a list of sorted numbers into lists of consecutive runs.
 
-        # assign back cards based on values
-        return [
-            [
-                [card for card in cards if card.value == value][0] for value in run
-            ] for run in runs
+        :param numbers: list of integers
+        :return: list of list of integers that are consecutive
+        """
+
+        numbers.sort()
+        # create marker list showing breaks in consecutive values, skip first value of list as it has no comparitor
+        # output list will always be one item less than original
+        is_consecutive = [
+            True if value == numbers[index - 1] + 1 else False
+            for index, value in enumerate(numbers[1:], start=1)
         ]
 
+        # split card_values into list of runs
+        start_pos = 0
+        runs = []
+        for index, still_consecutive in enumerate(is_consecutive):
+            if not still_consecutive:
+                end_pos = index + 1
+                runs.append(numbers[start_pos: end_pos])
+                start_pos = end_pos
+        runs.append(numbers[start_pos:])
 
+        return runs
 
+    @staticmethod
+    def _split_consecutive_runs_to_size(runs: List[List[int]], run_size: int) -> List[List[int]]:
+        """
+        given a list of lists of integers, with each sublist being consecutive integers, find all
+        consecutive runs of numbers that match the given run_size
 
+        :param runs: list of list of integers that are consecutive
+        :param run_size: integer specify the size of run we are seeking
+        :return: List of lists of consecutive numbers that are of size run_size
+        """
+
+        # remove any runs that arent at least the run_size length
+        runs = [run for run in runs if len(run) >= run_size]
+
+        # chunk the qualified runs into overlapping runs of the correct size
+        sized_runs = [
+            [
+                run[start: end] for start, end in enumerate(range(run_size, len(run) + 1))
+            ]
+            for run in runs
+        ]
+
+        # flatten lists
+        return [val for sublist in sized_runs for val in sublist]
