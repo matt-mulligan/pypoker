@@ -5,7 +5,6 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-import itertools
 from typing import List
 
 from pypoker.deck import Card, CARD_SUITS
@@ -55,6 +54,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
     """
 
     # Concrete Implementation of public methods
+    # -----------------------------------------
     def find_player_best_hand(self, player: BasePlayer, board: List[Card], **kwargs):
         """
         Find a given players best possible hand with the current cards available.
@@ -68,63 +68,41 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         for hand_type in TH_HANDS_ORDERED:
             made_hands = {
                 TH_HAND_STRAIGHT_FLUSH: self.make_straight_flush_hands,
-                TH_HAND_QUADS: self._make_quads_hands,
-                TH_HAND_FULL_HOUSE: self._make_full_house_hands,
-                TH_HAND_FLUSH: self._make_flush_hands,
-                TH_HAND_STRAIGHT: self._make_make_straight_hands,
-                TH_HAND_TRIPS: self._make_trips_hands,
-                TH_HAND_TWO_PAIR: self._make_two_pair_hands,
-                TH_HAND_PAIR: self._make_pair_hands,
-                TH_HAND_HIGH_CARD: self._make_high_card_hands
+                TH_HAND_QUADS: self.make_quads_hands,
+                TH_HAND_FULL_HOUSE: self.make_full_house_hands,
+                TH_HAND_FLUSH: self.make_flush_hands,
+                TH_HAND_STRAIGHT: self.make_make_straight_hands,
+                TH_HAND_TRIPS: self.make_trips_hands,
+                TH_HAND_TWO_PAIR: self.make_two_pair_hands,
+                TH_HAND_PAIR: self.make_pair_hands,
+                TH_HAND_HIGH_CARD: self.make_high_card_hands
             }[hand_type](available_cards)
 
             if made_hands:
                 return made_hands[0]
 
-    # Public make_hands_of_type methods
-    def make_straight_flush_hands(self, available_cards: List[Card]):
+    # Public "Hand Maker" methods
+    # ---------------------------
+    def make_straight_flush_hands(self, available_cards: List[Card]) -> List[List[Card]]:
         """
-        Texas Holdem Poker Engine hand maker method
-        tests to see if any straight flush hands can be made from the given set of cards
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible straight flush hands with the given cards
+
+        :param available_cards: List of card objects available to use.
+        :return: List of lists of card objects representing all of the straight flushes that could be made.
         """
 
         if len(available_cards) < 5:
             return []
 
-        suits_grouped = {suit: [card for card in available_cards if card.suit == suit] for suit in CARD_SUITS}
+        suits_grouped = self.group_cards_by_suit(available_cards)
         eligible_suits = [cards for cards in suits_grouped.values() if len(cards) >= 5]
         if not eligible_suits:
             return []
 
-        for cards in eligible_suits:
-            cards = sorted(cards, key=lambda card: card.value)
-            runs = self.find_runs_of_cards(cards, treat_ace_low=True, run_size=5)
+        straight_flushes = [
+            self.find_consecutive_value_cards(cards, treat_ace_low=True, run_size=5)
+            for cards in eligible_suits
+        ]
+        return [val for sublist in straight_flushes for val in sublist]
 
-
-
-
-    # Public test_hand_is_type methods
-    @staticmethod
-    def hand_is_straight_flush(hand: List[Card]):
-        """
-        Texas Holdem Poker Engine hand tester method
-        tests to see if the given hand is a straight flush
-
-        :param hand: List of cards representing a players hand.
-        """
-
-        if len(hand) > 5:
-            raise InvalidHandError(
-                f"Texas Hold'em poker hands can have a maximum of 5 cards. Hand provided has {len(hand)}"
-            )
-
-        if len(hand) < 5:
-            return False
-
-        suits_grouped = {suit: [card for card in hand if card.suit == suit] for suit in CARD_SUITS}
-        eligible_suits = [cards.value for cards in suits_grouped.values() if len(cards) >= 5]
-        if not eligible_suits:
-            return False
-
-        for cards in eligible_suits:
-            return sorted(cards) == list(range(min(cards), max(cards) + 1))

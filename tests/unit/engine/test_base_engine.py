@@ -126,3 +126,14 @@ def test_when_find_consecutive_value_cards_and_multi_values_then_correct_lists_r
     assert result[3] == [cards[0], cards[3], cards[1]]
     assert result[4] == [cards[0], cards[3], cards[4]]
     assert result[5] == [cards[0], cards[3], cards[5]]
+
+
+def test_when_find_consecutive_value_cards_and_no_matches_long_enough_then_empty_list_returned(
+        base_engine, get_test_cards
+):
+    cards = get_test_cards("D4|C6|C5|D5|H6|S6")
+
+    result = base_engine.find_consecutive_value_cards(cards, treat_ace_low=True, run_size=5)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
