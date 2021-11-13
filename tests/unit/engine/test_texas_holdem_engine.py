@@ -54,3 +54,68 @@ def test_when_make_straight_flush_hands_and_overlapping_set_then_correct_values_
     assert result[0] == [cards[2], cards[4], cards[0], cards[3], cards[1]]
     assert result[1] == [cards[4], cards[0], cards[3], cards[1], cards[6]]
     assert result[2] == [cards[0], cards[3], cards[1], cards[6], cards[7]]
+
+
+def test_when_make_quads_hands_and_not_enough_cards_then_return_empty_list(engine, get_test_cards):
+    cards = get_test_cards("D4|H4|C4")
+    result = engine.make_quads_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_quads_hands_and_not_enough_cards_of_any_value_then_return_empty_list(engine, get_test_cards):
+    cards = get_test_cards("D4|D7|DK|H4|HK|H7|C4|S7|CK")
+    result = engine.make_quads_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_quads_hands_and_only_four_cards_then_correct_values_returned(engine, get_test_cards):
+    cards = get_test_cards("D4|C4|S4|H4")
+    result = engine.make_quads_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0] == [cards[0], cards[1], cards[2], cards[3]]
+
+
+def test_when_make_quads_hands_and_only_five_cards_then_correct_values_returned(engine, get_test_cards):
+    cards = get_test_cards("D4|C4|DA|S4|H4")
+    result = engine.make_quads_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0] == [cards[0], cards[1], cards[3], cards[4], cards[2]]
+
+
+def test_when_make_quads_hands_and_many_kickers_then_correct_values_returned(engine, get_test_cards):
+    cards = get_test_cards("CA|D4|S3|C4|DA|S4|H4")
+    result = engine.make_quads_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+    assert result[0] == [cards[1], cards[3], cards[5], cards[6], cards[0]]
+    assert result[1] == [cards[1], cards[3], cards[5], cards[6], cards[2]]
+    assert result[2] == [cards[1], cards[3], cards[5], cards[6], cards[4]]
+
+
+def test_when_make_quads_hands_and_multiple_quads_then_correct_values_returned(engine, get_test_cards):
+    cards = get_test_cards("CA|D4|SA|C4|DA|S4|H4|HA|S7")
+    result = engine.make_quads_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 10
+
+    assert [cards[0], cards[2], cards[4], cards[7], cards[1]] in result
+    assert [cards[0], cards[2], cards[4], cards[7], cards[3]] in result
+    assert [cards[0], cards[2], cards[4], cards[7], cards[5]] in result
+    assert [cards[0], cards[2], cards[4], cards[7], cards[6]] in result
+    assert [cards[0], cards[2], cards[4], cards[7], cards[8]] in result
+
+    assert [cards[1], cards[3], cards[5], cards[6], cards[0]] in result
+    assert [cards[1], cards[3], cards[5], cards[6], cards[2]] in result
+    assert [cards[1], cards[3], cards[5], cards[6], cards[4]] in result
+    assert [cards[1], cards[3], cards[5], cards[6], cards[7]] in result
+    assert [cards[1], cards[3], cards[5], cards[6], cards[8]] in result

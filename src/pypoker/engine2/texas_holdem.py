@@ -106,3 +106,32 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         ]
         return [val for sublist in straight_flushes for val in sublist]
 
+    def make_quads_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible quads hands with the given cards
+
+        :param available_cards: List of card objects available to use.
+        :return: List of lists of card objects representing all of the quads that could be made.
+        """
+
+        if len(available_cards) < 4:
+            return []
+
+        value_grouped_cards = self.group_cards_by_value(available_cards)
+        eligible_values = [key for key, cards in value_grouped_cards.items() if len(cards) == 4]
+        if not eligible_values:
+            return []
+
+        quad_hands = []
+        for quad_value in eligible_values:
+            quad_cards = value_grouped_cards[quad_value]
+            other_cards = [card for card in available_cards if card.value != quad_value]
+            if not other_cards:  # manages for the usecase of only getting 4 cards of the same value and no kickers
+                quad_hands.append(quad_cards)
+            else:
+                quad_hands.extend([
+                    quad_cards + [card] for card in other_cards
+                ])
+
+        return quad_hands
