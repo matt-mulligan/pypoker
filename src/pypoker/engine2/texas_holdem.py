@@ -72,7 +72,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 TH_HAND_QUADS: self.make_quads_hands,
                 TH_HAND_FULL_HOUSE: self.make_full_house_hands,
                 TH_HAND_FLUSH: self.make_flush_hands,
-                TH_HAND_STRAIGHT: self.make_make_straight_hands,
+                TH_HAND_STRAIGHT: self.make_straight_hands,
                 TH_HAND_TRIPS: self.make_trips_hands,
                 TH_HAND_TWO_PAIR: self.make_two_pair_hands,
                 TH_HAND_PAIR: self.make_pair_hands,
@@ -203,6 +203,16 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         flushes = [self.find_all_unique_card_combos(cards, 5) for cards in eligible_suits]
         return [val for sublist in flushes for val in sublist]
 
+    def make_straight_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible straight hands with the given cards
 
+        :param available_cards: List of card objects available to use.
+        :return: List of lists of card objects representing all of the straights that could be made.
+        """
 
+        if len(available_cards) < 5:
+            return []
 
+        return self.find_consecutive_value_cards(available_cards, treat_ace_low=True, run_size=5)

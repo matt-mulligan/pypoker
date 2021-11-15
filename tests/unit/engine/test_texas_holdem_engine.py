@@ -261,3 +261,60 @@ def test_when_make_flush_hands_and_multiple_flush_suits_then_return_correct_valu
     assert [cards[7], cards[9], cards[10], cards[11], cards[12]] in result
 
 
+def test_when_make_straight_hands_and_less_than_five_cards_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|DK|ST|CQ")
+    result = engine.make_straight_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_straight_hands_and_single_straight_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|SJ|DK|ST|CQ")
+    result = engine.make_straight_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert [cards[3], cards[1], cards[4], cards[2], cards[0]] in result
+
+
+def test_when_make_straight_hands_and_running_straights_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("D8|CA|SJ|DK|ST|D9|CQ")
+    result = engine.make_straight_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+    assert [cards[0], cards[5], cards[4], cards[2], cards[6]] in result
+    assert [cards[5], cards[4], cards[2], cards[6], cards[3]] in result
+    assert [cards[4], cards[2], cards[6], cards[3], cards[1]] in result
+
+
+def test_when_make_straight_hands_and_ace_low_straight_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("D5|CA|S3|D2|S6|D4")
+    result = engine.make_straight_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert [cards[1], cards[3], cards[2], cards[5], cards[0]] in result
+    assert [cards[3], cards[2], cards[5], cards[0], cards[4]] in result
+
+
+def test_when_make_straight_hands_and_disconnected_straights_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("D3|CA|SJ|DK|ST|D2|CQ|S4|S5")
+    result = engine.make_straight_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert [cards[1], cards[5], cards[0], cards[7], cards[8]] in result
+    assert [cards[4], cards[2], cards[6], cards[3], cards[1]] in result
+
