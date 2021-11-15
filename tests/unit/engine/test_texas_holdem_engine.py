@@ -194,3 +194,70 @@ def test_when_make_full_house_hands_and_many_options_then_return_correct_values(
     assert [cards[0], cards[5], cards[8], cards[1], cards[3]] in result
     assert [cards[0], cards[5], cards[8], cards[1], cards[7]] in result
     assert [cards[0], cards[5], cards[8], cards[3], cards[7]] in result
+
+
+def test_when_make_flush_hands_and_less_than_five_cards_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|C7|C2|C9")
+    result = engine.make_flush_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_flush_hands_and_no_suit_with_five_cards_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|D8|C7|DK|C2|DJ|C9|ST|S6|S4")
+    result = engine.make_flush_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_flush_hands_and_only_five_cards_of_flush_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|C7|C2|C9|CT|S4")
+    result = engine.make_flush_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0] == [cards[0], cards[1], cards[2], cards[3], cards[4]]
+
+
+def test_when_make_flush_hands_and_many_cards_of_flush_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|C7|C2|C9|CT|S4|C4|D9|SJ|DQ")
+    result = engine.make_flush_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 6
+    assert [cards[0], cards[1], cards[2], cards[3], cards[4]] in result
+    assert [cards[0], cards[1], cards[2], cards[3], cards[6]] in result
+    assert [cards[0], cards[1], cards[2], cards[4], cards[6]] in result
+    assert [cards[0], cards[1], cards[3], cards[4], cards[6]] in result
+    assert [cards[0], cards[2], cards[3], cards[4], cards[6]] in result
+    assert [cards[1], cards[2], cards[3], cards[4], cards[6]] in result
+
+
+def test_when_make_flush_hands_and_multiple_flush_suits_then_return_correct_values(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|C7|C2|C9|CT|S4|C4|D9|SJ|DQ|D4|D8|DT")
+    result = engine.make_flush_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 7
+    assert [cards[0], cards[1], cards[2], cards[3], cards[4]] in result
+    assert [cards[0], cards[1], cards[2], cards[3], cards[6]] in result
+    assert [cards[0], cards[1], cards[2], cards[4], cards[6]] in result
+    assert [cards[0], cards[1], cards[3], cards[4], cards[6]] in result
+    assert [cards[0], cards[2], cards[3], cards[4], cards[6]] in result
+    assert [cards[1], cards[2], cards[3], cards[4], cards[6]] in result
+
+    assert [cards[7], cards[9], cards[10], cards[11], cards[12]] in result
+
+

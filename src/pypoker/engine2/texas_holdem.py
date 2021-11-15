@@ -182,3 +182,27 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             full_houses.extend([val for sublist in hands for val in sublist])
 
         return full_houses
+
+    def make_flush_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible flush hands with the given cards
+
+        :param available_cards: List of card objects available to use.
+        :return: List of lists of card objects representing all of the full houses that could be made.
+        """
+
+        if len(available_cards) < 5:
+            return []
+
+        suits_grouped = self.group_cards_by_suit(available_cards)
+        eligible_suits = [cards for cards in suits_grouped.values() if len(cards) >= 5]
+        if not eligible_suits:
+            return []
+
+        flushes = [self.find_all_unique_card_combos(cards, 5) for cards in eligible_suits]
+        return [val for sublist in flushes for val in sublist]
+
+
+
+
