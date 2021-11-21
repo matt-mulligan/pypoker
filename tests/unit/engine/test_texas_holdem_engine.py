@@ -318,3 +318,82 @@ def test_when_make_straight_hands_and_disconnected_straights_then_return_correct
     assert [cards[1], cards[5], cards[0], cards[7], cards[8]] in result
     assert [cards[4], cards[2], cards[6], cards[3], cards[1]] in result
 
+
+def test_when_make_trips_hands_and_less_then_3_cards_then_return_empty_list(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ")
+    result = engine.make_trips_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_trips_hands_and_no_trips_then_return_empty_list(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|ST|C3|S5")
+    result = engine.make_trips_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_trips_hands_and_multiple_trips_not_kickers_then_return_hands(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|C9|CJ|DQ|C7|CQ")
+    result = engine.make_trips_hands(cards, include_kickers=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert [cards[0], cards[1], cards[4]] in result
+    assert [cards[0], cards[1], cards[6]] in result
+    assert [cards[0], cards[4], cards[6]] in result
+    assert [cards[1], cards[4], cards[6]] in result
+
+
+def test_when_make_trips_hands_and_multiple_trips_and_kcikers_then_return_hands(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|C9|CJ|DQ|C7|CQ")
+    result = engine.make_trips_hands(cards, include_kickers=True)
+
+    assert isinstance(result, list)
+    assert len(result) == 12
+
+    assert [cards[0], cards[1], cards[4], cards[5], cards[2]] in result
+    assert [cards[0], cards[1], cards[4], cards[5], cards[3]] in result
+    assert [cards[0], cards[1], cards[4], cards[2], cards[3]] in result
+
+    assert [cards[0], cards[1], cards[6], cards[5], cards[2]] in result
+    assert [cards[0], cards[1], cards[6], cards[5], cards[3]] in result
+    assert [cards[0], cards[1], cards[6], cards[2], cards[3]] in result
+
+    assert [cards[0], cards[4], cards[6], cards[5], cards[2]] in result
+    assert [cards[0], cards[4], cards[6], cards[5], cards[3]] in result
+    assert [cards[0], cards[4], cards[6], cards[2], cards[3]] in result
+
+    assert [cards[1], cards[4], cards[6], cards[5], cards[2]] in result
+    assert [cards[1], cards[4], cards[6], cards[5], cards[3]] in result
+    assert [cards[1], cards[4], cards[6], cards[2], cards[3]] in result
+
+
+def test_when_make_trips_hands_and_multiple_trip_values_and_kickers_then_return_hands(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|S9|CJ|DQ|D9|C9")
+    result = engine.make_trips_hands(cards, include_kickers=True)
+
+    assert isinstance(result, list)
+    assert len(result) == 6
+
+    assert [cards[2], cards[5], cards[6], cards[3], cards[0]] in result
+    assert [cards[2], cards[5], cards[6], cards[3], cards[1]] in result
+    assert [cards[2], cards[5], cards[6], cards[3], cards[4]] in result
+
+    assert [cards[0], cards[1], cards[4], cards[2], cards[3]] in result
+    assert [cards[0], cards[1], cards[4], cards[5], cards[3]] in result
+    assert [cards[0], cards[1], cards[4], cards[6], cards[3]] in result
+
+
+def test_when_make_trips_hands_and_multiple_trip_values_and_not_kickers_then_return_hands(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|S9|CJ|DQ|D9|C9")
+    result = engine.make_trips_hands(cards, include_kickers=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert [cards[2], cards[5], cards[6]] in result
+    assert [cards[0], cards[1], cards[4]] in result

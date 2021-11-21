@@ -216,3 +216,59 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return []
 
         return self.find_consecutive_value_cards(available_cards, treat_ace_low=True, run_size=5)
+
+    def make_trips_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible trips hands with the given cards.
+        Note that this method will build ONLY trips hands, and exclude any hands that feature three of a kind but
+        technically is a stronger hand. for example, if given three queens(QH-QS-QC), two aces(AH-AS) and a four(4S),
+        this method would return you only two possible trips hands, (QH-QS-QC-AH-4S) and (QH-QS-QC-AS-4S)
+        The other option for a full hand here would give a full house instead, which means it is excluded from
+        this method.
+
+        :param available_cards: List of card objects available to use.
+        :param include_kickers: Boolean indicating if the returned hands should include the kicker cards or
+            if the combinations should just be the cards required to make the trips.
+            Note that setting this to true will return many more hands as it builds all hands possible with kickers.
+        :return: List of lists of card objects representing all of the trips that could be made.
+        """
+
+        if len(available_cards) < 3:
+            return []
+
+        value_grouped_cards = self.group_cards_by_value(available_cards)
+        eligible_values = {
+            key: cards for key, cards in value_grouped_cards.items() if len(cards) >= 3
+        }
+
+        if not eligible_values:
+            return []
+
+        trip_hands = []
+        for trip_value, trip_cards in eligible_values.items():
+            trip_card_combos = self.find_all_unique_card_combos(trip_cards, 3)
+
+            if not include_kickers:
+                trip_hands.extend(trip_card_combos)
+            else:
+                kicker_cards = [cards for key, cards in value_grouped_cards.items() if key != trip_value]
+                kicker_cards = [val for sublist in kicker_cards for val in sublist]
+                kicker_cards_combos = self.find_all_unique_card_combos(kicker_cards, 2)
+
+                kicker_cards_combos = [
+                    card_combo for card_combo in kicker_cards_combos if card_combo[0].value != card_combo[1].value
+                ]
+
+                full_trip_hands = [
+                    [trip_combo + kicker_combo for trip_combo in trip_card_combos]
+                    for kicker_combo in kicker_cards_combos
+                ]
+
+                trip_hands.extend([val for sublist in full_trip_hands for val in sublist])
+
+        return trip_hands
+
+
+
+
