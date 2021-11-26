@@ -5,7 +5,7 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-from itertools import product
+from itertools import product, combinations
 from typing import List
 
 from pypoker.deck import Card, CARD_SUITS
@@ -269,6 +269,53 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return trip_hands
 
+    def make_two_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible two-pair hands with the given cards, optionally including kickers.
+        Note that this method will build ONLY two-pair hands, and exclude any hands that feature two-pairs but
+        technically is a stronger hand. for example, if given three queens(QH-QS-QC), two aces(AH-AS) and a four(4S),
+        this method would return you hands that do not feature all three queens as this would instead be trips or
+        full houses and they are stronger hands than two-pair
 
+        :param available_cards: List of card objects available to use.
+        :param include_kickers: Boolean indicating if the returned hands should include the kicker cards or
+            if the combinations should just be the cards required to make the two-pair.
+            Note that setting this to true will return many more hands as it builds all hands possible with kickers.
+        :return: List of lists of card objects representing all of the two-pairs that could be made.
+        """
 
+        if len(available_cards) < 4:
+            return []
 
+        value_grouped_cards = self.group_cards_by_value(available_cards)
+        eligible_values = {
+            key: cards for key, cards in value_grouped_cards.items() if len(cards) >= 2
+        }
+
+        if len(eligible_values) < 2:
+            return []
+
+        two_pair_values = list(eligible_values.keys())
+        two_pair_value_combos = [list(value) for value in combinations(two_pair_values, 2)]
+
+        two_pair_hands = []
+        for two_pair_value_list in two_pair_value_combos:
+            two_pair_value_a = two_pair_value_list[0]
+            two_pair_value_b = two_pair_value_list[1]
+
+            two_pairs_a = self.find_all_unique_card_combos(eligible_values[two_pair_value_a], 2)
+            two_pairs_b = self.find_all_unique_card_combos(eligible_values[two_pair_value_b], 2)
+            two_pair_sets = [a + b for a in two_pairs_a for b in two_pairs_b]
+
+            if not include_kickers:
+                two_pair_hands.extend(two_pair_sets)
+                continue
+
+            kicker_cards = [cards for value, cards in value_grouped_cards.items() if value not in two_pair_value_list]
+            kicker_cards = [val for sublist in kicker_cards for val in sublist]
+
+            for two_pair_cards in two_pair_sets:
+                two_pair_hands.extend([two_pair_cards + [kicker] for kicker in kicker_cards])
+
+        return two_pair_hands

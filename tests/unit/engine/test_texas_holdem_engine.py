@@ -397,3 +397,132 @@ def test_when_make_trips_hands_and_multiple_trip_values_and_not_kickers_then_ret
 
     assert [cards[2], cards[5], cards[6]] in result
     assert [cards[0], cards[1], cards[4]] in result
+
+
+def test_when_make_two_pair_hands_and_less_than_four_cards_then_return_empty_list(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4")
+
+    result = engine.make_two_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_two_pair_hands_and_not_two_values_with_pairs_then_return_empty_list(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4|H9|HK|SJ|S4")
+
+    result = engine.make_two_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_two_pair_hands_and_single_set_of_values_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4|H7|HK|SJ|SA")
+
+    result = engine.make_two_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+    assert [cards[0], cards[2], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[5]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[6]] in result
+
+
+def test_when_make_two_pair_hands_and_single_set_of_values_over_two_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4|H7|HK|SJ|SA|S4|C7")
+
+    result = engine.make_two_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 27
+    assert [cards[0], cards[2], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[5]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[6]] in result
+
+    assert [cards[0], cards[2], cards[1], cards[8], cards[4]] in result
+    assert [cards[0], cards[2], cards[1], cards[8], cards[5]] in result
+    assert [cards[0], cards[2], cards[1], cards[8], cards[6]] in result
+
+    assert [cards[0], cards[2], cards[3], cards[8], cards[4]] in result
+    assert [cards[0], cards[2], cards[3], cards[8], cards[5]] in result
+    assert [cards[0], cards[2], cards[3], cards[8], cards[6]] in result
+
+    assert [cards[0], cards[7], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[7], cards[1], cards[3], cards[5]] in result
+    assert [cards[0], cards[7], cards[1], cards[3], cards[6]] in result
+
+    assert [cards[0], cards[7], cards[1], cards[8], cards[4]] in result
+    assert [cards[0], cards[7], cards[1], cards[8], cards[5]] in result
+    assert [cards[0], cards[7], cards[1], cards[8], cards[6]] in result
+
+    assert [cards[0], cards[7], cards[3], cards[8], cards[4]] in result
+    assert [cards[0], cards[7], cards[3], cards[8], cards[5]] in result
+    assert [cards[0], cards[7], cards[3], cards[8], cards[6]] in result
+
+    assert [cards[2], cards[7], cards[1], cards[3], cards[4]] in result
+    assert [cards[2], cards[7], cards[1], cards[3], cards[5]] in result
+    assert [cards[2], cards[7], cards[1], cards[3], cards[6]] in result
+
+    assert [cards[2], cards[7], cards[1], cards[8], cards[4]] in result
+    assert [cards[2], cards[7], cards[1], cards[8], cards[5]] in result
+    assert [cards[2], cards[7], cards[1], cards[8], cards[6]] in result
+
+    assert [cards[2], cards[7], cards[3], cards[8], cards[4]] in result
+    assert [cards[2], cards[7], cards[3], cards[8], cards[5]] in result
+    assert [cards[2], cards[7], cards[3], cards[8], cards[6]] in result
+
+
+def test_when_make_two_pair_hands_and_multiple_sets_of_values_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4|H7|HA|SJ|SA|CA")
+
+    result = engine.make_two_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 22
+
+    assert [cards[0], cards[2], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[5]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[6]] in result
+    assert [cards[0], cards[2], cards[1], cards[3], cards[7]] in result
+
+    assert [cards[0], cards[2], cards[4], cards[6], cards[1]] in result
+    assert [cards[0], cards[2], cards[4], cards[6], cards[3]] in result
+    assert [cards[0], cards[2], cards[4], cards[6], cards[5]] in result
+
+    assert [cards[0], cards[2], cards[4], cards[7], cards[1]] in result
+    assert [cards[0], cards[2], cards[4], cards[7], cards[3]] in result
+    assert [cards[0], cards[2], cards[4], cards[7], cards[5]] in result
+
+    assert [cards[0], cards[2], cards[6], cards[7], cards[1]] in result
+    assert [cards[0], cards[2], cards[6], cards[7], cards[3]] in result
+    assert [cards[0], cards[2], cards[6], cards[7], cards[5]] in result
+
+    assert [cards[1], cards[3], cards[4], cards[6], cards[0]] in result
+    assert [cards[1], cards[3], cards[4], cards[6], cards[2]] in result
+    assert [cards[1], cards[3], cards[4], cards[6], cards[5]] in result
+
+    assert [cards[1], cards[3], cards[4], cards[7], cards[0]] in result
+    assert [cards[1], cards[3], cards[4], cards[7], cards[2]] in result
+    assert [cards[1], cards[3], cards[4], cards[7], cards[5]] in result
+
+    assert [cards[1], cards[3], cards[6], cards[7], cards[0]] in result
+    assert [cards[1], cards[3], cards[6], cards[7], cards[2]] in result
+    assert [cards[1], cards[3], cards[6], cards[7], cards[5]] in result
+
+
+def test_when_make_two_pair_hands_and_not_kickers_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4|H7|HA|SJ|SA|CA")
+
+    result = engine.make_two_pair_hands(cards, include_kickers=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 7
+
+    assert [cards[0], cards[2], cards[1], cards[3]] in result
+    assert [cards[0], cards[2], cards[4], cards[6]] in result
+    assert [cards[0], cards[2], cards[4], cards[7]] in result
+    assert [cards[0], cards[2], cards[6], cards[7]] in result
+    assert [cards[1], cards[3], cards[4], cards[6]] in result
+    assert [cards[1], cards[3], cards[4], cards[7]] in result
+    assert [cards[1], cards[3], cards[6], cards[7]] in result
