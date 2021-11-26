@@ -5,7 +5,7 @@ from pytest import mark, raises, fixture
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, \
     TH_HAND_FULL_HOUSE, TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR
 from pypoker.constructs import Card, Deck, Hand
-from pypoker.exceptions import InvalidGameError, InvalidHandError, InvalidHandTypeError
+from pypoker.exceptions import InvalidGameError, InvalidHandError, InvalidHandTypeError, GameMismatchError
 
 """
 Test Fixtures
@@ -502,3 +502,291 @@ def test_when_hand_then_correct_values_set(get_test_cards, game, hand_type, card
     assert hand.cards == cards
     assert hand.tiebreakers == tiebreakers
     assert hand.strength == strength
+
+
+def test_when_hand_equality_and_diff_games_then_raise_error(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+
+    hand_b.game = "diff_game"
+
+    with raises(GameMismatchError, match="Hand comparisons can only occur for hands of the same game type"):
+        equal = hand_a == hand_b
+
+
+def test_when_hand_equality_and_diff_strength_then_return_false(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
+
+    result = hand_a == hand_b
+    assert result is False
+
+
+def test_when_hand_equality_and_tiebreaker_top_level_diff_then_return_false(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
+
+    result = hand_a == hand_b
+    assert result is False
+
+
+def test_when_hand_equality_and_tiebreaker_lower_level_diff_then_return_false(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
+
+    result = hand_a == hand_b
+    assert result is False
+
+
+def test_when_hand_equality_and_tiebreaker_with_nones_dff_then_return_false(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
+
+    result = hand_a == hand_b
+    assert result is False
+
+
+def test_when_hand_equality_and_equal_then_return_true(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
+
+    result = hand_a == hand_b
+    assert result is True
+
+
+def test_when_hand_equality_and_equal_with_nones_then_return_true(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+
+    result = hand_a == hand_b
+    assert result is True
+
+
+def test_when_hand_greater_than_and_diff_games_then_raise_error(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+
+    hand_b.game = "diff_game"
+
+    with raises(GameMismatchError, match="Hand comparisons can only occur for hands of the same game type"):
+        equal = hand_a > hand_b
+
+    with raises(GameMismatchError, match="Hand comparisons can only occur for hands of the same game type"):
+        equal = hand_a >= hand_b
+
+
+def test_when_hand_greater_than_and_diff_strength_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
+
+    result = hand_a > hand_b
+    assert result is False
+
+    result = hand_b > hand_a
+    assert result is True
+
+    result = hand_a >= hand_b
+    assert result is False
+
+    result = hand_b >= hand_a
+    assert result is True
+
+
+def test_when_hand_greater_than_and_tiebreaker_top_level_diff_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
+
+    result = hand_a > hand_b
+    assert result is False
+
+    result = hand_b > hand_a
+    assert result is True
+
+    result = hand_a >= hand_b
+    assert result is False
+
+    result = hand_b >= hand_a
+    assert result is True
+
+
+def test_when_hand_greater_than_and_tiebreaker_lower_level_diff_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
+
+    result = hand_a > hand_b
+    assert result is False
+
+    result = hand_b > hand_a
+    assert result is True
+
+    result = hand_a >= hand_b
+    assert result is False
+
+    result = hand_b >= hand_a
+    assert result is True
+
+
+def test_when_hand_greater_than_and_tiebreaker_with_nones_dff_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
+
+    result = hand_a > hand_b
+    assert result is True
+
+    result = hand_b > hand_a
+    assert result is False
+
+    result = hand_a >= hand_b
+    assert result is True
+
+    result = hand_b >= hand_a
+    assert result is False
+
+
+def test_when_hand_greater_than_and_equal_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
+
+    result = hand_a > hand_b
+    assert result is False
+
+    result = hand_b > hand_a
+    assert result is False
+
+    result = hand_a >= hand_b
+    assert result is True
+
+    result = hand_b >= hand_a
+    assert result is True
+
+
+def test_when_hand_greater_than_and_equal_with_nones_then_return_true(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+
+    result = hand_a > hand_b
+    assert result is False
+
+    result = hand_b > hand_a
+    assert result is False
+
+    result = hand_a >= hand_b
+    assert result is True
+
+    result = hand_b >= hand_a
+    assert result is True
+
+
+def test_when_hand_less_than_and_diff_games_then_raise_error(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+
+    hand_b.game = "diff_game"
+
+    with raises(GameMismatchError, match="Hand comparisons can only occur for hands of the same game type"):
+        equal = hand_a < hand_b
+
+    with raises(GameMismatchError, match="Hand comparisons can only occur for hands of the same game type"):
+        equal = hand_a <= hand_b
+
+
+def test_when_hand_less_than_and_diff_strength_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
+
+    result = hand_a < hand_b
+    assert result is True
+
+    result = hand_b < hand_a
+    assert result is False
+
+    result = hand_a <= hand_b
+    assert result is True
+
+    result = hand_b <= hand_a
+    assert result is False
+
+
+def test_when_hand_less_than_and_tiebreaker_top_level_diff_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
+
+    result = hand_a < hand_b
+    assert result is True
+
+    result = hand_b < hand_a
+    assert result is False
+
+    result = hand_a <= hand_b
+    assert result is True
+
+    result = hand_b <= hand_a
+    assert result is False
+
+
+def test_when_hand_less_than_and_tiebreaker_lower_level_diff_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
+
+    result = hand_a < hand_b
+    assert result is True
+
+    result = hand_b < hand_a
+    assert result is False
+
+    result = hand_a <= hand_b
+    assert result is True
+
+    result = hand_b <= hand_a
+    assert result is False
+
+
+def test_when_hand_less_than_and_tiebreaker_with_nones_dff_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
+
+    result = hand_a < hand_b
+    assert result is False
+
+    result = hand_b < hand_a
+    assert result is True
+
+    result = hand_a <= hand_b
+    assert result is False
+
+    result = hand_b <= hand_a
+    assert result is True
+
+
+def test_when_hand_less_than_and_equal_then_correct_returns(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
+
+    result = hand_a < hand_b
+    assert result is False
+
+    result = hand_b < hand_a
+    assert result is False
+
+    result = hand_a <= hand_b
+    assert result is True
+
+    result = hand_b <= hand_a
+    assert result is True
+
+
+def test_when_hand_less_than_and_equal_with_nones_then_return_true(get_test_cards):
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+
+    result = hand_a < hand_b
+    assert result is False
+
+    result = hand_b < hand_a
+    assert result is False
+
+    result = hand_a <= hand_b
+    assert result is True
+
+    result = hand_b <= hand_a
+    assert result is True

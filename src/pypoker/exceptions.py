@@ -11,6 +11,12 @@ class InvalidGameError(PyPokerError):
     """
 
 
+class GameMismatchError(PyPokerError):
+    """
+    Error thrown when an unexpected value for game is given
+    """
+
+
 class InvalidHandTypeError(PyPokerError):
     """
     Error thrown when pypoker is given a hand type that isn't valid.

@@ -11,7 +11,7 @@ from typing import List
 
 from pypoker.constants import GAME_TYPES, GAME_HAND_TYPES, GAME_HAND_STRENGTHS, GAME_HAND_TIEBREAKERS_ARGS, \
     GAME_HAND_NUM_CARDS
-from pypoker.exceptions import InvalidGameError, InvalidHandTypeError
+from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
 CARD_SUITS = ["Clubs", "Diamonds", "Hearts", "Spades"]
 CARD_RANKS = [
@@ -277,6 +277,90 @@ class Hand(object):
         self.cards = self._validate_cards(game, hand_type, cards)
         self.tiebreakers = self._validate_tiebreakers(game, hand_type, tiebreakers)
         self.strength = self._get_hand_strength(game, hand_type)
+
+    def __eq__(self, other):
+        """
+        Tests equality of hands in terms of hand type, strength and tiebreakers.
+        equality check does not check that hand.cards are the same.
+        """
+        if self.game != other.game:
+            raise GameMismatchError("Hand comparisons can only occur for hands of the same game type.")
+
+        return self.strength == other.strength and self.tiebreakers == other.tiebreakers
+
+    def __gt__(self, other):
+        """
+        Tests equality of hands in terms of hand type, strength and tiebreakers.
+        equality check does not check that hand.cards are the same.
+        """
+        if self.game != other.game:
+            raise GameMismatchError("Hand comparisons can only occur for hands of the same game type.")
+
+        if self.strength > other.strength:
+            return True
+        if self.strength < other.strength:
+            return False
+
+        for self_value, other_value in zip(self.tiebreakers, other.tiebreakers):
+            if self_value is None and other_value is None:
+                continue
+            if self_value is None and other_value is not None:
+                return False
+            if other_value is None and self_value is not None:
+                return True
+            if self_value > other_value:
+                return True
+            if self_value < other_value:
+                return False
+
+        return False
+
+    def __lt__(self, other):
+        """
+        Tests equality of hands in terms of hand type, strength and tiebreakers.
+        equality check does not check that hand.cards are the same.
+        """
+        if self.game != other.game:
+            raise GameMismatchError("Hand comparisons can only occur for hands of the same game type.")
+
+        if self.strength > other.strength:
+            return False
+        if self.strength < other.strength:
+            return True
+
+        for self_value, other_value in zip(self.tiebreakers, other.tiebreakers):
+            if self_value is None and other_value is None:
+                continue
+            if self_value is None and other_value is not None:
+                return True
+            if other_value is None and self_value is not None:
+                return False
+            if self_value > other_value:
+                return False
+            if self_value < other_value:
+                return True
+
+        return False
+    
+    def __ge__(self, other):
+        """
+        Tests equality of hands in terms of hand type, strength and tiebreakers.
+        equality check does not check that hand.cards are the same.
+        """
+        if self.__eq__(other) or self.__gt__(other):
+            return True
+
+        return False
+
+    def __le__(self, other):
+        """
+        Tests equality of hands in terms of hand type, strength and tiebreakers.
+        equality check does not check that hand.cards are the same.
+        """
+        if self.__eq__(other) or self.__lt__(other):
+            return True
+
+        return False
 
     @staticmethod
     def _validate_game(game: str) -> str:
