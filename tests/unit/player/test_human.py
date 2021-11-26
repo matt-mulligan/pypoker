@@ -1,4 +1,4 @@
-from pypoker.deck import Card
+from pypoker.constructs import Card
 from pypoker.player.human import HumanPlayer
 
 

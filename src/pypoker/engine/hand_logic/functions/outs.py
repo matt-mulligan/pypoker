@@ -9,7 +9,7 @@ from collections import Counter
 from itertools import product, groupby, combinations
 from typing import List, Dict, Union
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 from pypoker.engine.hand_logic.constants import (
     GAME_TYPE_TEXAS_HOLDEM,
     HAND_TYPE_STRAIGHT_FLUSH,

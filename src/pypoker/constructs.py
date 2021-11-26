@@ -9,6 +9,10 @@ import random
 from dataclasses import dataclass, InitVar, field
 from typing import List
 
+from pypoker.constants import GAME_TYPES, GAME_HAND_TYPES, GAME_HAND_STRENGTHS, GAME_HAND_TIEBREAKERS_ARGS, \
+    GAME_HAND_NUM_CARDS
+from pypoker.exceptions import InvalidGameError, InvalidHandTypeError
+
 CARD_SUITS = ["Clubs", "Diamonds", "Hearts", "Spades"]
 CARD_RANKS = [
     "Two",
@@ -47,7 +51,7 @@ CARD_ID_RANKS = {
 @dataclass()
 class Card(object):
     """
-    Class representing a single playing card
+    Construct class used to represent a card within pypoker
     """
 
     card_id: InitVar[str]
@@ -155,6 +159,10 @@ class Card(object):
 
 
 class Deck(object):
+    """
+    Construct class used to represent a deck of cards within pypoker
+    """
+
     def __init__(self):
         self.cards_all: List[Card] = self._build_all_cards()
         self.cards_available: List[Card] = self.cards_all.copy()
@@ -256,3 +264,103 @@ class Deck(object):
             ordered_cards.extend(suited_cards)
 
         return ordered_cards
+
+
+class Hand(object):
+    """
+    Construct class used to represent a hand within pypoker.
+    """
+
+    def __init__(self, game: str, hand_type: str, cards: List[Card], tiebreakers: List[int]):
+        self.game = self._validate_game(game)
+        self.type = self._validate_type(game, hand_type)
+        self.cards = self._validate_cards(game, hand_type, cards)
+        self.tiebreakers = self._validate_tiebreakers(game, hand_type, tiebreakers)
+        self.strength = self._get_hand_strength(game, hand_type)
+
+    @staticmethod
+    def _validate_game(game: str) -> str:
+        """
+        private method to validate the game value.
+
+        :param game: value to validate
+
+        :return: validated game type
+        """
+
+        if game not in GAME_TYPES:
+            raise InvalidGameError(f"Game type '{game}' is invalid")
+
+        return game
+
+    @staticmethod
+    def _validate_type(game: str, hand_type: str) -> str:
+        """
+        private method to validate the hand type giv
+
+        :param game: type of game the hand is from
+        :param hand_type: the hand type to validate
+
+        :return: validated hand type
+        """
+
+        hand_types = GAME_HAND_TYPES[game]
+        if hand_type not in hand_types:
+            raise InvalidHandTypeError(f"Hand type '{hand_type}' is invalid")
+        
+        return hand_type
+
+    @staticmethod
+    def _validate_cards(game: str, hand_type: str, cards: List[Card]) -> List[Card]:
+        """
+        private method to validate card objects.
+
+        :param cards: value to validate
+
+        :return: validated cards object
+        """
+
+        if not all(isinstance(card, Card) for card in cards):
+            raise ValueError("Cards object passed to hand must be a list of Card objects")
+
+        min_cards, max_cards = GAME_HAND_NUM_CARDS[game][hand_type]
+        if not min_cards <= len(cards) <= max_cards:
+            raise ValueError(f"{game} {hand_type} hand required between {min_cards} and {max_cards} cards")
+
+        return cards
+
+    @staticmethod
+    def _get_hand_strength(game: str, hand_type: str) -> int:
+        """
+        private method to get the strength of the hand type for a specific game
+
+        :param game: the type of poker game
+        :param hand_type: the type of poker hand
+
+        :return: strength of the hand type for the specific game type
+        """
+
+        hand_strengths = GAME_HAND_STRENGTHS[game]
+        return hand_strengths[hand_type]
+
+    @staticmethod
+    def _validate_tiebreakers(game: str, hand_type: str, tiebreakers: List[int]) -> List[int]:
+        """
+        private method to check that the tiebreaker lists has the correct datatypes and number of args
+        based on the game and hand types
+
+        :param game: the type of poker game
+        :param hand_type: the type of hand
+        :param tiebreakers: value to validate
+
+        :return: validated list of tiebreakers
+        """
+
+        if not all(isinstance(arg, int) or arg is None for arg in tiebreakers):
+            raise ValueError("all arguments in tiebreakers must be integers or Nonetype")
+
+        arg_num = GAME_HAND_TIEBREAKERS_ARGS[game][hand_type]
+        if not len(tiebreakers) == arg_num:
+            raise ValueError(f"{game} {hand_type} hand requires {arg_num} tiebreakers")
+
+        return tiebreakers

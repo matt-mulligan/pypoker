@@ -14,7 +14,7 @@ from itertools import groupby, product, combinations
 from operator import itemgetter
 from typing import List, Dict
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 from pypoker.player import BasePlayer
 
 

@@ -1,7 +1,7 @@
 from itertools import groupby
 from typing import List, Dict
 
-from pypoker.deck import Card, Deck
+from pypoker.constructs import Card, Deck
 from pypoker.engine.hand_logic.base import BaseHandSolver
 from pypoker.engine.hand_logic.constants import (
     HAND_TITLE,

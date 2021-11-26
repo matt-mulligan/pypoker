@@ -5,48 +5,14 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-from itertools import product, combinations
+from itertools import combinations
 from typing import List
 
-from pypoker.deck import Card, CARD_SUITS
+from pypoker.constants import TH_HANDS_ORDERED, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
+    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD
+from pypoker.constructs import Card
 from pypoker.engine2 import BasePokerEngine
-from pypoker.exceptions import InvalidHandError
 from pypoker.player import BasePlayer
-
-
-TH_HAND_STRAIGHT_FLUSH = "Straight Flush"
-TH_HAND_QUADS = "Quads"
-TH_HAND_FULL_HOUSE = "Full House"
-TH_HAND_FLUSH = "Flush"
-TH_HAND_STRAIGHT = "Straight"
-TH_HAND_TRIPS = "Trips"
-TH_HAND_TWO_PAIR = "Two Pair"
-TH_HAND_PAIR = "Pair"
-TH_HAND_HIGH_CARD = "High Card"
-
-TH_HANDS_ORDERED = [
-    TH_HAND_STRAIGHT_FLUSH,
-    TH_HAND_QUADS,
-    TH_HAND_FULL_HOUSE,
-    TH_HAND_FLUSH,
-    TH_HAND_STRAIGHT,
-    TH_HAND_TRIPS,
-    TH_HAND_TWO_PAIR,
-    TH_HAND_PAIR,
-    TH_HAND_HIGH_CARD,
-]
-
-TH_HAND_STRENGTHS = {
-    TH_HAND_STRAIGHT_FLUSH: 9,
-    TH_HAND_QUADS: 8,
-    TH_HAND_FULL_HOUSE: 7,
-    TH_HAND_FLUSH: 6,
-    TH_HAND_STRAIGHT: 5,
-    TH_HAND_TRIPS: 4,
-    TH_HAND_TWO_PAIR: 3,
-    TH_HAND_PAIR: 2,
-    TH_HAND_HIGH_CARD: 1,
-}
 
 
 class TexasHoldemPokerEngine(BasePokerEngine):

@@ -9,7 +9,7 @@ import collections
 from itertools import combinations
 from typing import List
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 
 
 def hand_all_same_suit(hand):

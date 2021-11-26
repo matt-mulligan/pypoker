@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 from pytest import fixture
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 
 here = Path(__file__).absolute()
 tests_path = here.parent.parent

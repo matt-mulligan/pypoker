@@ -6,7 +6,7 @@ methods in this module test if the given hand is of the same type as the type sp
 """
 from typing import List
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 from pypoker.engine.hand_logic.functions.shared import (
     _check_game_type,
     _check_hand_type,

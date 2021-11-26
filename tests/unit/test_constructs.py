@@ -2,14 +2,14 @@ from unittest.mock import patch, call
 
 from pytest import mark, raises, fixture
 
-from pypoker.deck import Card, Deck
+from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, \
+    TH_HAND_FULL_HOUSE, TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR
+from pypoker.constructs import Card, Deck, Hand
+from pypoker.exceptions import InvalidGameError, InvalidHandError, InvalidHandTypeError
 
-
-###################
-#  TEST FIXTURES  #
-###################
-
-
+"""
+Test Fixtures
+"""
 @fixture
 def deck_card_names():
     return [
@@ -73,11 +73,9 @@ def cards_five():
     return [Card("D3"), Card("DA"), Card("CQ"), Card("H7"), Card("S9")]
 
 
-###########################
-#  CARD CLASS UNIT TESTS  #
-###########################
-
-
+"""
+Card Construct Tests
+"""
 @mark.parametrize(
     "card_val, card_rank, card_suit, card_name, card_id",
     [
@@ -207,11 +205,9 @@ def test_when_card_less_than_then_correct_result_returned(card_a, card_b, expect
     assert actual == expected
 
 
-###########################
-#  DECK CLASS UNIT TESTS  #
-###########################
-
-
+"""
+Deck Construct Tests
+"""
 def test_when_deck_init_then_cards_all_correct(deck_card_names):
     deck = Deck()
     card_names = []
@@ -240,7 +236,7 @@ def test_when_deck_init_then_cards_used_correct():
 def test_when_deck_shuffle_then_shuffle_command_used():
     deck = Deck()
 
-    with patch("pypoker.deck.random") as random_mock:
+    with patch("pypoker.constructs.random") as random_mock:
         deck.shuffle()
 
     random_mock.assert_has_calls([call.shuffle(deck.cards_available)])
@@ -393,3 +389,116 @@ def test_when_deck_order_cards_and_non_card_passed_then_raise_error():
         match="All objects within cards value must be an instance of the Cards Class",
     ):
         deck.order_cards(cards)
+
+
+"""
+Hand Construct Tests
+"""
+
+
+def test_when_hand_and_bad_game_type_then_raise_error(get_test_cards):
+    cards = get_test_cards("C9")
+
+    with raises(InvalidGameError, match="Game type 'DERP' is invalid"):
+        Hand("DERP", TH_HAND_HIGH_CARD, cards, [1])
+
+
+def test_when_hand_and_bad_hand_type_then_raise_error(get_test_cards):
+    cards = get_test_cards("C9")
+
+    with raises(InvalidHandTypeError, match="Hand type 'DERP' is invalid"):
+        Hand(GAME_TEXAS_HOLDEM, "DERP", cards, [1])
+
+
+def test_when_hand_and_cards_are_not_all_cards_then_raise_error(get_test_cards):
+    cards = get_test_cards("C9")
+    cards.append("D9")
+
+    with raises(ValueError, match="Cards object passed to hand must be a list of Card objects"):
+        Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, cards, [1])
+
+
+@mark.parametrize("game, hand_type, cards, min_cards, max_cards", [
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7|C8|C9", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4", 4, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA|SQ", 4, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA|CA", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ|CT", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7|C8|C9", 5, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4", 3, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ|DA", 3, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA", 4, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6|ST", 4, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4", 2, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9|H7", 2, 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D4|ST|HA|C9|H7", 1, 5),
+])
+def test_when_hand_and_incorrect_num_cards_then_raise_error(get_test_cards, game, hand_type, cards, min_cards, max_cards):
+    cards = get_test_cards(cards)
+
+    with raises(ValueError, match=f"{game} {hand_type} hand required between {min_cards} and {max_cards} cards"):
+        Hand(game, hand_type, cards, [1])
+
+
+def test_when_hand_and_tiebreakers_not_int_or_none_then_raise_error(get_test_cards):
+    cards = get_test_cards("C4|C5|C6|C7|C8")
+
+    with raises(ValueError, match="all arguments in tiebreakers must be integers or Nonetype"):
+        Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, cards, ["DERP"])
+
+
+@mark.parametrize("game, hand_type, cards, tiebreakers, tb", [
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7|C8", [8, 7], 1),
+    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA", [4], 2),
+    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA", [4, 14, 12], 2),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA", [14], 2),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA", [14, 4, 2], 2),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ", [3, 4, 5, 6], 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ", [3, 4, 5, 6, 8, 12], 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7|C8", [3, 5], 1),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ", [4, 7], 3),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ", [4, 7, 5, 3], 3),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6", [5], 3),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6", [5, 6, 9, 13], 3),
+    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9", [5, 7, 8], 4),
+    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9", [5, 7, 8, 3, 12], 4),
+    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D4|ST|HA|C9", [3, 7, 2, 5], 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D4|ST|HA|C9", [3, 7, 2, 5, 12, 14], 5),
+])
+def test_when_hand_and_incorrect_num_tiebreakers_then_raise_error(get_test_cards, game, hand_type, cards, tiebreakers, tb):
+    cards = get_test_cards(cards)
+
+    with raises(ValueError, match=f"{game} {hand_type} hand requires {tb} tiebreakers"):
+        Hand(game, hand_type, cards, tiebreakers)
+
+
+@mark.parametrize("game, hand_type, cards, tiebreakers, strength", [
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7|C8", [8], 9),
+    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA", [4, 14], 8),
+    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4", [4, None], 8),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA", [4, 14], 7),
+    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ", [14, 11, 8, 4, 2], 6),
+    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7|C8", [8], 5),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ", [4, 11, 8], 4),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8", [4, 8, None], 4),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6", [14, 4, 6], 3),
+    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA", [14, 4, None], 3),
+    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9", [4, 14, 10, 9], 2),
+    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4", [4, None, None, None], 2),
+    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D2|ST|HA|C9", [14, 10, 9, 4, 2], 1),
+    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "ST|HA|C9", [14, 10, 9, None, None], 1),
+])
+def test_when_hand_then_correct_values_set(get_test_cards, game, hand_type, cards, tiebreakers, strength):
+    cards = get_test_cards(cards)
+
+    hand = Hand(game, hand_type, cards, tiebreakers)
+
+    assert hand.game == game
+    assert hand.type == hand_type
+    assert hand.cards == cards
+    assert hand.tiebreakers == tiebreakers
+    assert hand.strength == strength

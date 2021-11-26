@@ -5,6 +5,18 @@ class PyPokerError(Exception):
     """
 
 
+class InvalidGameError(PyPokerError):
+    """
+    Error thrown when pypoker is given a game type that isn't supported.
+    """
+
+
+class InvalidHandTypeError(PyPokerError):
+    """
+    Error thrown when pypoker is given a hand type that isn't valid.
+    """
+
+
 class InvalidHandError(PyPokerError):
     """
     Error thrown when pypoker is expecting a list of cards representing a players hand but the hand isn't valid.

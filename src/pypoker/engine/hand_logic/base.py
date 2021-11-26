@@ -9,7 +9,7 @@ from itertools import combinations, product, groupby
 
 from typing import List, Dict, Any
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 
 
 class BaseHandSolver(metaclass=ABCMeta):

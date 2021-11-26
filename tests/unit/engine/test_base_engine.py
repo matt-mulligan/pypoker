@@ -2,7 +2,7 @@ from typing import List
 
 from pytest import fixture
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 from pypoker.engine2 import BasePokerEngine
 from pypoker.player import BasePlayer
 

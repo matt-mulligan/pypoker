@@ -1,6 +1,6 @@
 from pytest import mark, raises
 
-from pypoker.deck import Card
+from pypoker.constructs import Card
 from pypoker.player import BasePlayer
 
 
