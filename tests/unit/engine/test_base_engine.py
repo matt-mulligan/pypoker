@@ -169,3 +169,39 @@ def test_when_find_all_unique_card_combos_then_correct_list_returned(
     assert [cards[1], cards[2]] in result
     assert [cards[1], cards[3]] in result
     assert [cards[2], cards[3]] in result
+
+
+def test_when_check_all_card_values_unique_and_are_unique_then_true_returned(
+    base_engine, get_test_cards
+):
+    cards = get_test_cards("D4|C6|H7|SK")
+    result = base_engine.check_all_card_values_unique(cards)
+
+    assert result is True
+
+
+def test_when_check_all_card_values_unique_and_duplicates_then_false_returned(
+    base_engine, get_test_cards
+):
+    cards = get_test_cards("DK|C6|H7|SK")
+    result = base_engine.check_all_card_values_unique(cards)
+
+    assert result is False
+
+
+def test_when_check_all_card_suits_unique_and_are_unique_then_true_returned(
+    base_engine, get_test_cards
+):
+    cards = get_test_cards("D4|C6|H7|SK")
+    result = base_engine.check_all_card_suits_unique(cards)
+
+    assert result is True
+
+
+def test_when_check_all_card_suits_unique_and_duplicates_then_false_returned(
+    base_engine, get_test_cards
+):
+    cards = get_test_cards("DK|C6|D7|SK")
+    result = base_engine.check_all_card_suits_unique(cards)
+
+    assert result is False

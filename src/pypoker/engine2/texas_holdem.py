@@ -308,14 +308,68 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             two_pairs_b = self.find_all_unique_card_combos(eligible_values[two_pair_value_b], 2)
             two_pair_sets = [a + b for a in two_pairs_a for b in two_pairs_b]
 
-            if not include_kickers:
-                two_pair_hands.extend(two_pair_sets)
-                continue
-
             kicker_cards = [cards for value, cards in value_grouped_cards.items() if value not in two_pair_value_list]
             kicker_cards = [val for sublist in kicker_cards for val in sublist]
+
+            if not include_kickers or not kicker_cards:
+                two_pair_hands.extend(two_pair_sets)
+                continue
 
             for two_pair_cards in two_pair_sets:
                 two_pair_hands.extend([two_pair_cards + [kicker] for kicker in kicker_cards])
 
         return two_pair_hands
+
+    def make_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible pair hands with the given cards, optionally including kickers.
+        Note that this method will build ONLY pair hands, and exclude any hands that feature a pair but
+        technically is a stronger hand. for example, if given three queens(QH-QS-QC), two aces(AH-AS) and a four(4S),
+        this method would return you hands that do not feature a pair of aces and a pair of queens as this would
+        instead be a two-pair hand and they are stronger hands than pairs
+
+        :param available_cards: List of card objects available to use.
+        :param include_kickers: Boolean indicating if the returned hands should include the kicker cards or
+            if the combinations should just be the cards required to make the pair.
+            Note that setting this to true will return many more hands as it builds all hands possible with kickers.
+        :return: List of lists of card objects representing all of the pairs that could be made.
+        """
+
+        if len(available_cards) < 2:
+            return []
+
+        value_grouped_cards = self.group_cards_by_value(available_cards)
+        eligible_values = {
+            key: cards for key, cards in value_grouped_cards.items() if len(cards) >= 2
+        }
+
+        if not eligible_values:
+            return []
+
+        pair_hands = []
+        for pair_value, pair_cards in eligible_values.items():
+            pairs = self.find_all_unique_card_combos(pair_cards, 2)
+            kicker_cards = [card for card in available_cards if card.value != pair_value]
+
+            if not include_kickers or not kicker_cards:
+                pair_hands.extend(pairs)
+                continue
+
+            kicker_sets = self.find_all_unique_card_combos(kicker_cards, 3)
+            kicker_sets = [kicker_set for kicker_set in kicker_sets if self.check_all_card_values_unique(kicker_set)]
+
+            if kicker_sets:
+                pair_hands.extend([pair_set + kicker_set for pair_set in pairs for kicker_set in kicker_sets])
+                continue
+
+            kicker_sets = self.find_all_unique_card_combos(kicker_cards, 2)
+            kicker_sets = [kicker_set for kicker_set in kicker_sets if self.check_all_card_values_unique(kicker_set)]
+
+            if kicker_sets:
+                pair_hands.extend([pair_set + kicker_set for pair_set in pairs for kicker_set in kicker_sets])
+                continue
+
+            pair_hands.extend([pair_set + [card] for pair_set in pairs for card in kicker_cards])
+
+        return pair_hands

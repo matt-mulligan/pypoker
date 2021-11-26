@@ -526,3 +526,160 @@ def test_when_make_two_pair_hands_and_not_kickers_then_correct_list_returned(eng
     assert [cards[1], cards[3], cards[4], cards[6]] in result
     assert [cards[1], cards[3], cards[4], cards[7]] in result
     assert [cards[1], cards[3], cards[6], cards[7]] in result
+
+
+def test_when_make_two_pair_hands_and_no_kickers_available_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|S7|D4|H7|S4")
+
+    result = engine.make_two_pair_hands(cards, include_kickers=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+
+    assert [cards[0], cards[2], cards[1], cards[3]] in result
+    assert [cards[0], cards[4], cards[1], cards[3]] in result
+    assert [cards[2], cards[4], cards[1], cards[3]] in result
+
+
+def test_when_make_pair_hands_and_less_than_two_cards_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4")
+    
+    result = engine.make_pair_hands(cards)
+    
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_pair_hands_and_no_pairs_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|HA|S2")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_make_pair_hands_and_single_pair_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|HA|S2|H8|CQ|D4")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 10
+
+    assert [cards[0], cards[6], cards[1], cards[2], cards[3]] in result
+    assert [cards[0], cards[6], cards[1], cards[2], cards[4]] in result
+    assert [cards[0], cards[6], cards[1], cards[2], cards[5]] in result
+    assert [cards[0], cards[6], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[6], cards[1], cards[3], cards[5]] in result
+    assert [cards[0], cards[6], cards[1], cards[4], cards[5]] in result
+    assert [cards[0], cards[6], cards[2], cards[3], cards[4]] in result
+    assert [cards[0], cards[6], cards[2], cards[3], cards[5]] in result
+    assert [cards[0], cards[6], cards[2], cards[4], cards[5]] in result
+    assert [cards[0], cards[6], cards[3], cards[4], cards[5]] in result
+
+
+def test_when_make_pair_hands_and_single_overloaded_pair_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|HA|S2|H8|S4|D4")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 12
+
+    assert [cards[0], cards[5], cards[1], cards[2], cards[3]] in result
+    assert [cards[0], cards[5], cards[1], cards[2], cards[4]] in result
+    assert [cards[0], cards[5], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[5], cards[2], cards[3], cards[4]] in result
+    assert [cards[0], cards[6], cards[1], cards[2], cards[3]] in result
+    assert [cards[0], cards[6], cards[1], cards[2], cards[4]] in result
+    assert [cards[0], cards[6], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[6], cards[2], cards[3], cards[4]] in result
+    assert [cards[5], cards[6], cards[1], cards[2], cards[3]] in result
+    assert [cards[5], cards[6], cards[1], cards[2], cards[4]] in result
+    assert [cards[5], cards[6], cards[1], cards[3], cards[4]] in result
+    assert [cards[5], cards[6], cards[2], cards[3], cards[4]] in result
+
+
+def test_when_make_pair_hands_and_multiple_pairs_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|H7|S2|H8|S4|D4")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 9
+
+    assert [cards[0], cards[5], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[5], cards[2], cards[3], cards[4]] in result
+    assert [cards[0], cards[6], cards[1], cards[3], cards[4]] in result
+    assert [cards[0], cards[6], cards[2], cards[3], cards[4]] in result
+    assert [cards[5], cards[6], cards[1], cards[3], cards[4]] in result
+    assert [cards[5], cards[6], cards[2], cards[3], cards[4]] in result
+    assert [cards[1], cards[2], cards[0], cards[3], cards[4]] in result
+    assert [cards[1], cards[2], cards[3], cards[4], cards[5]] in result
+    assert [cards[1], cards[2], cards[3], cards[4], cards[6]] in result
+
+
+def test_when_make_pair_hands_and_no_kickers_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|H7|S2|H8|S4|D4")
+
+    result = engine.make_pair_hands(cards, include_kickers=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert [cards[0], cards[5]] in result
+    assert [cards[0], cards[6]] in result
+    assert [cards[5], cards[6]] in result
+    assert [cards[1], cards[2]] in result
+
+
+def test_when_make_pair_hands_and_only_two_kickers_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|H7|S2|S4|D4")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 9
+
+    assert [cards[0], cards[4], cards[1], cards[3]] in result
+    assert [cards[0], cards[4], cards[2], cards[3]] in result
+    assert [cards[0], cards[5], cards[1], cards[3]] in result
+    assert [cards[0], cards[5], cards[2], cards[3]] in result
+    assert [cards[4], cards[5], cards[1], cards[3]] in result
+    assert [cards[4], cards[5], cards[2], cards[3]] in result
+    assert [cards[1], cards[2], cards[0], cards[3]] in result
+    assert [cards[1], cards[2], cards[3], cards[4]] in result
+    assert [cards[1], cards[2], cards[3], cards[5]] in result
+
+
+def test_when_make_pair_hands_and_only_one_kicker_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|D7|H7|S4|D4")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 9
+
+    assert [cards[0], cards[3], cards[1]] in result
+    assert [cards[0], cards[3], cards[2]] in result
+    assert [cards[0], cards[4], cards[1]] in result
+    assert [cards[0], cards[4], cards[2]] in result
+    assert [cards[3], cards[4], cards[1]] in result
+    assert [cards[3], cards[4], cards[2]] in result
+    assert [cards[1], cards[2], cards[0]] in result
+    assert [cards[1], cards[2], cards[3]] in result
+    assert [cards[1], cards[2], cards[4]] in result
+
+
+def test_when_make_pair_hands_and_only_no_kicker_available_then_correct_list_returned(engine, get_test_cards):
+    cards = get_test_cards("C4|S4|D4")
+
+    result = engine.make_pair_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+
+    assert [cards[0], cards[1]] in result
+    assert [cards[0], cards[2]] in result
+    assert [cards[1], cards[2]] in result

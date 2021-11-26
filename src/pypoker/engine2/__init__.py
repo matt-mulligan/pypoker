@@ -111,6 +111,30 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         return [list(value) for value in combinations(cards, combo_size)]
 
+    @staticmethod
+    def check_all_card_values_unique(cards: List[Card]) -> bool:
+        """
+        Shared utility method to test if the given cards all have a unique value.
+
+        :param cards: List of Card objects to test
+        :returns: boolean of True if all card values are unique or False if there is at least one duplicate value
+        """
+
+        values = [card.value for card in cards]
+        return len(values) == len(set(values))
+
+    @staticmethod
+    def check_all_card_suits_unique(cards: List[Card]) -> bool:
+        """
+        Shared utility method to test if the given cards all have a unique suit.
+
+        :param cards: List of Card objects to test
+        :returns: boolean of True if all card values are unique or False if there is at least one duplicate suit
+        """
+
+        suits = [card.suit for card in cards]
+        return len(suits) == len(set(suits))
+
     # Private Method Implementations
     # ------------------------------
     @staticmethod
