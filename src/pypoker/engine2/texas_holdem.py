@@ -82,7 +82,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_quads_hands(self, available_cards: List[Card]) -> List[Hand]:
+    def make_quads_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible quads hands with the given cards
@@ -105,7 +105,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         for quad_value in eligible_values:
             quad_cards = value_grouped_cards[quad_value]
             other_cards = [card for card in available_cards if card.value != quad_value]
-            if not other_cards:  # manages for the usecase of only getting 4 cards of the same value and no kickers
+            if not include_kickers or not other_cards:  # manages for the usecase of only getting 4 cards of the same value and no kickers
                 quad_hands.append(
                     Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, quad_cards, [quad_value, None])
                 )
@@ -207,7 +207,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_trips_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
+    def make_trips_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible trips hands with the given cards.
@@ -221,7 +221,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         :param include_kickers: Boolean indicating if the returned hands should include the kicker cards or
             if the combinations should just be the cards required to make the trips.
             Note that setting this to true will return many more hands as it builds all hands possible with kickers.
-        :return: List of lists of card objects representing all of the trips that could be made.
+        :return: Ordered list of Hand objects that represent each trips hand possible.
         """
 
         if len(available_cards) < 3:
@@ -238,26 +238,44 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         trip_hands = []
         for trip_value, trip_cards in eligible_values.items():
             trip_card_combos = self.find_all_unique_card_combos(trip_cards, 3)
+            kicker_cards = [card for card in available_cards if card.value != trip_value]
 
-            if not include_kickers:
-                trip_hands.extend(trip_card_combos)
+            if not include_kickers or not kicker_cards:
+                trip_hands.extend([
+                    Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, trip_combo, [trip_combo[0].value, None, None])
+                    for trip_combo in trip_card_combos
+                ])
             else:
-                kicker_cards = [cards for key, cards in value_grouped_cards.items() if key != trip_value]
-                kicker_cards = [val for sublist in kicker_cards for val in sublist]
                 kicker_cards_combos = self.find_all_unique_card_combos(kicker_cards, 2)
-
                 kicker_cards_combos = [
-                    card_combo for card_combo in kicker_cards_combos if card_combo[0].value != card_combo[1].value
+                    sorted(combo, key=lambda card: card.value, reverse=True)
+                    for combo in kicker_cards_combos if combo[0].value != combo[1].value
                 ]
 
-                full_trip_hands = [
-                    [trip_combo + kicker_combo for trip_combo in trip_card_combos]
-                    for kicker_combo in kicker_cards_combos
-                ]
+                if not kicker_cards_combos:
+                    kicker_cards_combos = kicker_cards
+                    trip_hands.extend([
+                        Hand(
+                            GAME_TEXAS_HOLDEM,
+                            TH_HAND_TRIPS,
+                            trip_combo + [kicker_card],
+                            [trip_value, kicker_card.value, None]
+                        )
+                        for trip_combo in trip_card_combos for kicker_card in kicker_cards_combos
+                    ])
 
-                trip_hands.extend([val for sublist in full_trip_hands for val in sublist])
+                else:
+                    trip_hands.extend([
+                        Hand(
+                            GAME_TEXAS_HOLDEM,
+                            TH_HAND_TRIPS,
+                            trip_combo + kicker_combo,
+                            [trip_value, kicker_combo[0].value, kicker_combo[1].value]
+                        )
+                        for trip_combo in trip_card_combos for kicker_combo in kicker_cards_combos
+                    ])
 
-        return trip_hands
+        return sorted(trip_hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
     def make_two_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
         """

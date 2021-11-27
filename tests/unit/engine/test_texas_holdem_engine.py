@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
-    TH_HAND_FLUSH, TH_HAND_STRAIGHT
+    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS
 from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
@@ -169,6 +169,21 @@ def test_when_make_quads_hands_and_multiple_quads_then_correct_values_returned(
     assert result[8].cards == get_test_cards("D4|C4|S4|H4|HA")
     assert result[9] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|S7"), [4, 7])
     assert result[9].cards == get_test_cards("D4|C4|S4|H4|S7")
+
+
+def test_when_make_quads_hands_and_not_include_kickers_then_correct_values_returned(
+    engine, get_test_cards
+):
+    cards = get_test_cards("CA|D4|SA|C4|DA|S4|H4|HA|S7")
+    result = engine.make_quads_hands(cards, include_kickers=False)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("CA|SA|DA|HA"), [14, None])
+    assert result[0].cards == get_test_cards("CA|SA|DA|HA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4"), [4, None])
+    assert result[1].cards == get_test_cards("D4|C4|S4|H4")
 
 
 def test_when_make_full_house_hands_and_not_enough_cards_then_return_empty_list(
@@ -415,34 +430,47 @@ def test_when_make_trips_hands_and_multiple_trips_not_kickers_then_return_hands(
     assert isinstance(result, list)
     assert len(result) == 4
 
-    assert [cards[0], cards[1], cards[4]] in result
-    assert [cards[0], cards[1], cards[6]] in result
-    assert [cards[0], cards[4], cards[6]] in result
-    assert [cards[1], cards[4], cards[6]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ"), [12, None, None])
+    assert result[0].cards == get_test_cards("SQ|HQ|DQ")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|CQ"), [12, None, None])
+    assert result[1].cards == get_test_cards("SQ|HQ|CQ")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|DQ|CQ"), [12, None, None])
+    assert result[2].cards == get_test_cards("SQ|DQ|CQ")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("HQ|DQ|CQ"), [12, None, None])
+    assert result[3].cards == get_test_cards("HQ|DQ|CQ")
 
 
-def test_when_make_trips_hands_and_multiple_trips_and_kcikers_then_return_hands(engine, get_test_cards):
+def test_when_make_trips_hands_and_multiple_trips_and_kickers_then_return_hands(engine, get_test_cards):
     cards = get_test_cards("SQ|HQ|C9|CJ|DQ|C7|CQ")
     result = engine.make_trips_hands(cards, include_kickers=True)
 
     assert isinstance(result, list)
     assert len(result) == 12
 
-    assert [cards[0], cards[1], cards[4], cards[5], cards[2]] in result
-    assert [cards[0], cards[1], cards[4], cards[5], cards[3]] in result
-    assert [cards[0], cards[1], cards[4], cards[2], cards[3]] in result
-
-    assert [cards[0], cards[1], cards[6], cards[5], cards[2]] in result
-    assert [cards[0], cards[1], cards[6], cards[5], cards[3]] in result
-    assert [cards[0], cards[1], cards[6], cards[2], cards[3]] in result
-
-    assert [cards[0], cards[4], cards[6], cards[5], cards[2]] in result
-    assert [cards[0], cards[4], cards[6], cards[5], cards[3]] in result
-    assert [cards[0], cards[4], cards[6], cards[2], cards[3]] in result
-
-    assert [cards[1], cards[4], cards[6], cards[5], cards[2]] in result
-    assert [cards[1], cards[4], cards[6], cards[5], cards[3]] in result
-    assert [cards[1], cards[4], cards[6], cards[2], cards[3]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|CJ|C9"), [12, 11, 9])
+    assert result[0].cards == get_test_cards("SQ|HQ|DQ|CJ|C9")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|CQ|CJ|C9"), [12, 11, 9])
+    assert result[1].cards == get_test_cards("SQ|HQ|CQ|CJ|C9")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|DQ|CQ|CJ|C9"), [12, 11, 9])
+    assert result[2].cards == get_test_cards("SQ|DQ|CQ|CJ|C9")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("HQ|DQ|CQ|CJ|C9"), [12, 11, 9])
+    assert result[3].cards == get_test_cards("HQ|DQ|CQ|CJ|C9")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|CJ|C7"), [12, 11, 7])
+    assert result[4].cards == get_test_cards("SQ|HQ|DQ|CJ|C7")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|CQ|CJ|C7"), [12, 11, 7])
+    assert result[5].cards == get_test_cards("SQ|HQ|CQ|CJ|C7")
+    assert result[6] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|DQ|CQ|CJ|C7"), [12, 11, 7])
+    assert result[6].cards == get_test_cards("SQ|DQ|CQ|CJ|C7")
+    assert result[7] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("HQ|DQ|CQ|CJ|C7"), [12, 11, 7])
+    assert result[7].cards == get_test_cards("HQ|DQ|CQ|CJ|C7")
+    assert result[8] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|C9|C7"), [12, 9, 7])
+    assert result[8].cards == get_test_cards("SQ|HQ|DQ|C9|C7")
+    assert result[9] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|CQ|C9|C7"), [12, 9, 7])
+    assert result[9].cards == get_test_cards("SQ|HQ|CQ|C9|C7")
+    assert result[10] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|DQ|CQ|C9|C7"), [12, 9, 7])
+    assert result[10].cards == get_test_cards("SQ|DQ|CQ|C9|C7")
+    assert result[11] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("HQ|DQ|CQ|C9|C7"), [12, 9, 7])
+    assert result[11].cards == get_test_cards("HQ|DQ|CQ|C9|C7")
 
 
 def test_when_make_trips_hands_and_multiple_trip_values_and_kickers_then_return_hands(engine, get_test_cards):
@@ -452,13 +480,18 @@ def test_when_make_trips_hands_and_multiple_trip_values_and_kickers_then_return_
     assert isinstance(result, list)
     assert len(result) == 6
 
-    assert [cards[2], cards[5], cards[6], cards[3], cards[0]] in result
-    assert [cards[2], cards[5], cards[6], cards[3], cards[1]] in result
-    assert [cards[2], cards[5], cards[6], cards[3], cards[4]] in result
-
-    assert [cards[0], cards[1], cards[4], cards[2], cards[3]] in result
-    assert [cards[0], cards[1], cards[4], cards[5], cards[3]] in result
-    assert [cards[0], cards[1], cards[4], cards[6], cards[3]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|CJ|S9"), [12, 11, 9])
+    assert result[0].cards == get_test_cards("SQ|HQ|DQ|CJ|S9")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|CJ|D9"), [12, 11, 9])
+    assert result[1].cards == get_test_cards("SQ|HQ|DQ|CJ|D9")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|CJ|C9"), [12, 11, 9])
+    assert result[2].cards == get_test_cards("SQ|HQ|DQ|CJ|C9")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("S9|D9|C9|SQ|CJ"), [9, 12, 11])
+    assert result[3].cards == get_test_cards("S9|D9|C9|SQ|CJ")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("S9|D9|C9|HQ|CJ"), [9, 12, 11])
+    assert result[4].cards == get_test_cards("S9|D9|C9|HQ|CJ")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("S9|D9|C9|DQ|CJ"), [9, 12, 11])
+    assert result[5].cards == get_test_cards("S9|D9|C9|DQ|CJ")
 
 
 def test_when_make_trips_hands_and_multiple_trip_values_and_not_kickers_then_return_hands(engine, get_test_cards):
@@ -468,8 +501,40 @@ def test_when_make_trips_hands_and_multiple_trip_values_and_not_kickers_then_ret
     assert isinstance(result, list)
     assert len(result) == 2
 
-    assert [cards[2], cards[5], cards[6]] in result
-    assert [cards[0], cards[1], cards[4]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ"), [12, None, None])
+    assert result[0].cards == get_test_cards("SQ|HQ|DQ")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("S9|D9|C9"), [9, None, None])
+    assert result[1].cards == get_test_cards("S9|D9|C9")
+
+
+def test_when_make_trips_hands_and_only_one_kicker_then_return_hands(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|S9|DQ|D9")
+    result = engine.make_trips_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|S9"), [12, 9, None])
+    assert result[0].cards == get_test_cards("SQ|HQ|DQ|S9")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ|D9"), [12, 9, None])
+    assert result[1].cards == get_test_cards("SQ|HQ|DQ|D9")
+
+
+def test_when_make_trips_hands_and_no_kicker_then_return_hands(engine, get_test_cards):
+    cards = get_test_cards("SQ|HQ|CQ|DQ")
+    result = engine.make_trips_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|CQ"), [12, None, None])
+    assert result[0].cards == get_test_cards("SQ|HQ|CQ")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|HQ|DQ"), [12, None, None])
+    assert result[1].cards == get_test_cards("SQ|HQ|DQ")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("SQ|CQ|DQ"), [12, None, None])
+    assert result[2].cards == get_test_cards("SQ|CQ|DQ")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("HQ|CQ|DQ"), [12, None, None])
+    assert result[3].cards == get_test_cards("HQ|CQ|DQ")
 
 
 def test_when_make_two_pair_hands_and_less_than_four_cards_then_return_empty_list(engine, get_test_cards):
