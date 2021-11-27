@@ -428,3 +428,76 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             ])
 
         return sorted(pair_hands, key=lambda hand: hand.tiebreakers, reverse=True)
+
+    def make_high_card_hands(self, available_cards: List[Card]) -> List[Hand]:
+        """
+        Texas Holdem Poker Engine Hand Maker Method
+        method to make all possible high card hands with the given cards.
+        Note that this method will build ONLY high card hands, and exclude any hands that feature a technically
+        stronger hand
+
+        :param available_cards: List of card objects available to use.
+        :return: Ordered list of Hand objects that represent each high card hand possible.
+        """
+
+        card_combos = self.find_all_unique_card_combos(available_cards, 5)
+        card_combos = [
+            sorted(cards, key=lambda card: card.value, reverse=True)
+            for cards in card_combos
+            if self.check_all_card_values_unique(cards)
+               and not self.check_all_card_suits_match(cards)
+               and not self.check_cards_consecutive(cards)
+        ]
+
+        if card_combos:
+            return sorted([
+                Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, cards, sorted([card.value for card in cards], reverse=True))
+                for cards in card_combos
+            ], key=lambda hand: hand.tiebreakers, reverse=True)
+
+        card_combos = self.find_all_unique_card_combos(available_cards, 4)
+        card_combos = [
+            sorted(cards, key=lambda card: card.value, reverse=True)
+            for cards in card_combos if self.check_all_card_values_unique(cards)
+        ]
+
+        if card_combos:
+            return sorted([
+                Hand(
+                    GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, cards,
+                    sorted([card.value for card in cards], reverse=True) + [None])
+                for cards in card_combos
+            ], key=lambda hand: hand.tiebreakers, reverse=True)
+
+        card_combos = self.find_all_unique_card_combos(available_cards, 3)
+        card_combos = [
+            sorted(cards, key=lambda card: card.value, reverse=True)
+            for cards in card_combos if self.check_all_card_values_unique(cards)
+        ]
+
+        if card_combos:
+            return sorted([
+                Hand(
+                    GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, cards,
+                    sorted([card.value for card in cards], reverse=True) + [None, None])
+                for cards in card_combos
+            ], key=lambda hand: hand.tiebreakers, reverse=True)
+
+        card_combos = self.find_all_unique_card_combos(available_cards, 2)
+        card_combos = [
+            sorted(cards, key=lambda card: card.value, reverse=True)
+            for cards in card_combos if self.check_all_card_values_unique(cards)
+        ]
+
+        if card_combos:
+            return sorted([
+                Hand(
+                    GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, cards,
+                    sorted([card.value for card in cards], reverse=True) + [None, None, None])
+                for cards in card_combos
+            ], key=lambda hand: hand.tiebreakers, reverse=True)
+
+        return sorted([
+            Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, [card], [card.value, None, None, None, None])
+            for card in available_cards
+        ], key=lambda hand: hand.tiebreakers, reverse=True)

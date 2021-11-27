@@ -11,7 +11,6 @@ the following tasks will be handled by the pypoker.engine classes:
 """
 from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
-from operator import itemgetter
 from typing import List, Dict
 
 from pypoker.constructs import Card
@@ -124,6 +123,18 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         return len(values) == len(set(values))
 
     @staticmethod
+    def check_all_card_values_match(cards: List[Card]) -> bool:
+        """
+        Shared utility method to test if the given cards all have the same value.
+
+        :param cards: List of Card objects to test
+        :returns: boolean of True if all card values are the same or False if there is any different value cards
+        """
+
+        values = [card.value for card in cards]
+        return len(set(values)) == 1
+
+    @staticmethod
     def check_all_card_suits_unique(cards: List[Card]) -> bool:
         """
         Shared utility method to test if the given cards all have a unique suit.
@@ -134,6 +145,42 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         suits = [card.suit for card in cards]
         return len(suits) == len(set(suits))
+
+    @staticmethod
+    def check_all_card_suits_match(cards: List[Card]) -> bool:
+        """
+        Shared utility method to test if the given cards all have the same suit.
+
+        :param cards: List of Card objects to test
+        :returns: boolean of True if all card suits are the same or False if there is any different suited cards
+        """
+
+        suits = [card.suit for card in cards]
+        return len(set(suits)) == 1
+
+    @staticmethod
+    def check_cards_consecutive(cards: List[Card], treat_ace_low: bool = True) -> bool:
+        """
+        Shared utility method to test if a set of cards have consecutive values.
+        repeated values will cause this to evaluate false.
+        list of cards do not need to be ordered before passing to this method
+
+        :param cards: List of Card objects to test
+        :param treat_ace_low: indicates if Aces should also be treated as low cards(value 1)
+        :returns: boolean of True if cards are consecutive, False otherwise
+        """
+
+        card_vals = [card.value for card in cards]
+
+        consecutive = sorted(card_vals) == list(range(min(card_vals), max(card_vals) + 1))
+        consecutive_ace_low = False
+
+        if treat_ace_low and 14 in card_vals:
+            card_vals.append(1)
+            card_vals = [val for val in card_vals if val != 14]
+            consecutive_ace_low = sorted(card_vals) == list(range(min(card_vals), max(card_vals) + 1))
+
+        return consecutive or consecutive_ace_low
 
     # Private Method Implementations
     # ------------------------------

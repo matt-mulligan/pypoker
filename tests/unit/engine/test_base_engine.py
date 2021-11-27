@@ -1,6 +1,6 @@
 from typing import List
 
-from pytest import fixture
+from pytest import fixture, mark
 
 from pypoker.constructs import Card
 from pypoker.engine2 import BasePokerEngine
@@ -189,6 +189,18 @@ def test_when_check_all_card_values_unique_and_duplicates_then_false_returned(
     assert result is False
 
 
+@mark.parametrize("cards, expected", [
+    ("C4|D4|S4|H4", True),
+    ("C4|D4|S5|H4", False)
+])
+def test_when_check_all_card_values_match_then_correct_value_returned(base_engine, get_test_cards, cards, expected):
+    cards = get_test_cards(cards)
+
+    actual = base_engine.check_all_card_values_match(cards)
+
+    assert actual == expected
+
+
 def test_when_check_all_card_suits_unique_and_are_unique_then_true_returned(
     base_engine, get_test_cards
 ):
@@ -205,3 +217,31 @@ def test_when_check_all_card_suits_unique_and_duplicates_then_false_returned(
     result = base_engine.check_all_card_suits_unique(cards)
 
     assert result is False
+
+
+@mark.parametrize("cards, expected", [
+    ("C4|C8|CK|C2", True),
+    ("C4|C8|CK|H2", False)
+])
+def test_when_check_all_card_suits_match_then_correct_value_returned(base_engine, get_test_cards, cards, expected):
+    cards = get_test_cards(cards)
+
+    actual = base_engine.check_all_card_suits_match(cards)
+
+    assert actual == expected
+
+
+@mark.parametrize("cards, treat_ace_low, expected", [
+    ("D4|C7|D5|H6|H3", True, True),
+    ("D4|C7|D5|S9|H6|H3|S8", True, True),
+    ("HT|HQ|DJ|SA|CK", True, True),
+    ("H4|H5|D2|SA|C3", True, True),
+    ("H4|H5|D2|SA|C3", False, False),
+    ("H9|HQ|DJ|SA|CK", True, False),
+])
+def test_when_check_cards_consecutive_then_correct_values_returned(base_engine, get_test_cards, cards, treat_ace_low, expected):
+    cards = get_test_cards(cards)
+
+    actual = base_engine.check_cards_consecutive(cards, treat_ace_low)
+
+    assert actual == expected

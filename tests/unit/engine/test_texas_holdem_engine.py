@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
-    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR
+    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD
 from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
@@ -904,3 +904,141 @@ def test_when_make_pair_hands_and_only_no_kicker_available_then_correct_list_ret
     assert result[1].cards == get_test_cards("C4|D4")
     assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("S4|D4"), [4, None, None, None])
     assert result[2].cards == get_test_cards("S4|D4")
+
+
+def test_when_make_high_card_hands_then_return_five_card_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|D8|SK|C5|DT|S2")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 6
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|DT|D8|C5|C4"), [13, 10, 8, 5, 4])
+    assert result[0].cards == get_test_cards("SK|DT|D8|C5|C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|DT|D8|C5|S2"), [13, 10, 8, 5, 2])
+    assert result[1].cards == get_test_cards("SK|DT|D8|C5|S2")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|DT|D8|C4|S2"), [13, 10, 8, 4, 2])
+    assert result[2].cards == get_test_cards("SK|DT|D8|C4|S2")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|DT|C5|C4|S2"), [13, 10, 5, 4, 2])
+    assert result[3].cards == get_test_cards("SK|DT|C5|C4|S2")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|D8|C5|C4|S2"), [13, 8, 5, 4, 2])
+    assert result[4].cards == get_test_cards("SK|D8|C5|C4|S2")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("DT|D8|C5|C4|S2"), [10, 8, 5, 4, 2])
+    assert result[5].cards == get_test_cards("DT|D8|C5|C4|S2")
+
+
+def test_when_make_high_card_hands_and_pairs_excluded_then_return_five_card_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|D8|SK|C8|DT|S2")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|DT|D8|C4|S2"), [13, 10, 8, 4, 2])
+    assert result[0].cards == get_test_cards("SK|DT|D8|C4|S2")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|DT|C8|C4|S2"), [13, 10, 8, 4, 2])
+    assert result[1].cards == get_test_cards("SK|DT|C8|C4|S2")
+
+
+def test_when_make_high_card_hands_and_flush_excluded_then_return_five_card_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|C8|SK|C7|CT|C2")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 5
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|CT|C8|C7|C4"), [13, 10, 8, 7, 4])
+    assert result[0].cards == get_test_cards("SK|CT|C8|C7|C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|CT|C8|C7|C2"), [13, 10, 8, 7, 2])
+    assert result[1].cards == get_test_cards("SK|CT|C8|C7|C2")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|CT|C8|C4|C2"), [13, 10, 8, 4, 2])
+    assert result[2].cards == get_test_cards("SK|CT|C8|C4|C2")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|CT|C7|C4|C2"), [13, 10, 7, 4, 2])
+    assert result[3].cards == get_test_cards("SK|CT|C7|C4|C2")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("SK|C8|C7|C4|C2"), [13, 8, 7, 4, 2])
+    assert result[4].cards == get_test_cards("SK|C8|C7|C4|C2")
+
+
+def test_when_make_high_card_hands_and_straight_excluded_then_return_five_card_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|S8|S9|H7|D5|C6")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|S8|H7|C6|C4"), [9, 8, 7, 6, 4])
+    assert result[0].cards == get_test_cards("S9|S8|H7|C6|C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|S8|H7|D5|C4"), [9, 8, 7, 5, 4])
+    assert result[1].cards == get_test_cards("S9|S8|H7|D5|C4")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|S8|C6|D5|C4"), [9, 8, 6, 5, 4])
+    assert result[2].cards == get_test_cards("S9|S8|C6|D5|C4")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|H7|C6|D5|C4"), [9, 7, 6, 5, 4])
+    assert result[3].cards == get_test_cards("S9|H7|C6|D5|C4")
+
+
+def test_when_make_high_card_hands_and_only_four_card_combos_available_then_return_correct_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|S4|S9|H7|D5")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|H7|D5|C4"), [9, 7, 5, 4, None])
+    assert result[0].cards == get_test_cards("S9|H7|D5|C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|H7|D5|S4"), [9, 7, 5, 4, None])
+    assert result[1].cards == get_test_cards("S9|H7|D5|S4")
+
+
+def test_when_make_high_card_hands_and_only_three_card_combos_available_then_return_correct_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|S4|S9|H7|D7")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|H7|C4"), [9, 7, 4, None, None])
+    assert result[0].cards == get_test_cards("S9|H7|C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|D7|C4"), [9, 7, 4, None, None])
+    assert result[1].cards == get_test_cards("S9|D7|C4")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|H7|S4"), [9, 7, 4, None, None])
+    assert result[2].cards == get_test_cards("S9|H7|S4")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|D7|S4"), [9, 7, 4, None, None])
+    assert result[3].cards == get_test_cards("S9|D7|S4")
+
+
+def test_when_make_high_card_hands_and_only_two_card_combos_available_then_return_correct_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|S4|S9|H4")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|C4"), [9, 4, None, None, None])
+    assert result[0].cards == get_test_cards("S9|C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|S4"), [9, 4, None, None, None])
+    assert result[1].cards == get_test_cards("S9|S4")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S9|H4"), [9, 4, None, None, None])
+    assert result[2].cards == get_test_cards("S9|H4")
+
+
+def test_when_make_high_card_hands_and_only_single_card_combos_available_then_return_correct_hands(engine, get_test_cards):
+    cards = get_test_cards("C4|S4|H4")
+
+    result = engine.make_high_card_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 3
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("C4"), [4, None, None, None, None])
+    assert result[0].cards == get_test_cards("C4")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("S4"), [4, None, None, None, None])
+    assert result[1].cards == get_test_cards("S4")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("H4"), [4, None, None, None, None])
+    assert result[2].cards == get_test_cards("H4")
