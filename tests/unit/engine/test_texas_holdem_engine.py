@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
-    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS
+    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR
 from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
@@ -562,9 +562,13 @@ def test_when_make_two_pair_hands_and_single_set_of_values_then_correct_list_ret
 
     assert isinstance(result, list)
     assert len(result) == 3
-    assert [cards[0], cards[2], cards[1], cards[3], cards[4]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[5]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[6]] in result
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|SA"), [7, 4, 14])
+    assert result[0].cards == get_test_cards("C4|D4|S7|H7|SA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|HK"), [7, 4, 13])
+    assert result[1].cards == get_test_cards("C4|D4|S7|H7|HK")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|SJ"), [7, 4, 11])
+    assert result[2].cards == get_test_cards("C4|D4|S7|H7|SJ")
 
 
 def test_when_make_two_pair_hands_and_single_set_of_values_over_two_then_correct_list_returned(engine, get_test_cards):
@@ -574,41 +578,61 @@ def test_when_make_two_pair_hands_and_single_set_of_values_over_two_then_correct
 
     assert isinstance(result, list)
     assert len(result) == 27
-    assert [cards[0], cards[2], cards[1], cards[3], cards[4]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[5]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[6]] in result
 
-    assert [cards[0], cards[2], cards[1], cards[8], cards[4]] in result
-    assert [cards[0], cards[2], cards[1], cards[8], cards[5]] in result
-    assert [cards[0], cards[2], cards[1], cards[8], cards[6]] in result
-
-    assert [cards[0], cards[2], cards[3], cards[8], cards[4]] in result
-    assert [cards[0], cards[2], cards[3], cards[8], cards[5]] in result
-    assert [cards[0], cards[2], cards[3], cards[8], cards[6]] in result
-
-    assert [cards[0], cards[7], cards[1], cards[3], cards[4]] in result
-    assert [cards[0], cards[7], cards[1], cards[3], cards[5]] in result
-    assert [cards[0], cards[7], cards[1], cards[3], cards[6]] in result
-
-    assert [cards[0], cards[7], cards[1], cards[8], cards[4]] in result
-    assert [cards[0], cards[7], cards[1], cards[8], cards[5]] in result
-    assert [cards[0], cards[7], cards[1], cards[8], cards[6]] in result
-
-    assert [cards[0], cards[7], cards[3], cards[8], cards[4]] in result
-    assert [cards[0], cards[7], cards[3], cards[8], cards[5]] in result
-    assert [cards[0], cards[7], cards[3], cards[8], cards[6]] in result
-
-    assert [cards[2], cards[7], cards[1], cards[3], cards[4]] in result
-    assert [cards[2], cards[7], cards[1], cards[3], cards[5]] in result
-    assert [cards[2], cards[7], cards[1], cards[3], cards[6]] in result
-
-    assert [cards[2], cards[7], cards[1], cards[8], cards[4]] in result
-    assert [cards[2], cards[7], cards[1], cards[8], cards[5]] in result
-    assert [cards[2], cards[7], cards[1], cards[8], cards[6]] in result
-
-    assert [cards[2], cards[7], cards[3], cards[8], cards[4]] in result
-    assert [cards[2], cards[7], cards[3], cards[8], cards[5]] in result
-    assert [cards[2], cards[7], cards[3], cards[8], cards[6]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|SA"), [7, 4, 14])
+    assert result[0].cards == get_test_cards("C4|D4|S7|H7|SA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|C7|SA"), [7, 4, 14])
+    assert result[1].cards == get_test_cards("C4|D4|S7|C7|SA")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|H7|C7|SA"), [7, 4, 14])
+    assert result[2].cards == get_test_cards("C4|D4|H7|C7|SA")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|H7|SA"), [7, 4, 14])
+    assert result[3].cards == get_test_cards("C4|S4|S7|H7|SA")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|C7|SA"), [7, 4, 14])
+    assert result[4].cards == get_test_cards("C4|S4|S7|C7|SA")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|H7|C7|SA"), [7, 4, 14])
+    assert result[5].cards == get_test_cards("C4|S4|H7|C7|SA")
+    assert result[6] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|H7|SA"), [7, 4, 14])
+    assert result[6].cards == get_test_cards("D4|S4|S7|H7|SA")
+    assert result[7] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|C7|SA"), [7, 4, 14])
+    assert result[7].cards == get_test_cards("D4|S4|S7|C7|SA")
+    assert result[8] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|H7|C7|SA"), [7, 4, 14])
+    assert result[8].cards == get_test_cards("D4|S4|H7|C7|SA")
+    assert result[9] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|HK"), [7, 4, 13])
+    assert result[9].cards == get_test_cards("C4|D4|S7|H7|HK")
+    assert result[10] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|C7|HK"), [7, 4, 13])
+    assert result[10].cards == get_test_cards("C4|D4|S7|C7|HK")
+    assert result[11] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|H7|C7|HK"), [7, 4, 13])
+    assert result[11].cards == get_test_cards("C4|D4|H7|C7|HK")
+    assert result[12] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|H7|HK"), [7, 4, 13])
+    assert result[12].cards == get_test_cards("C4|S4|S7|H7|HK")
+    assert result[13] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|C7|HK"), [7, 4, 13])
+    assert result[13].cards == get_test_cards("C4|S4|S7|C7|HK")
+    assert result[14] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|H7|C7|HK"), [7, 4, 13])
+    assert result[14].cards == get_test_cards("C4|S4|H7|C7|HK")
+    assert result[15] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|H7|HK"), [7, 4, 13])
+    assert result[15].cards == get_test_cards("D4|S4|S7|H7|HK")
+    assert result[16] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|C7|HK"), [7, 4, 13])
+    assert result[16].cards == get_test_cards("D4|S4|S7|C7|HK")
+    assert result[17] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|H7|C7|HK"), [7, 4, 13])
+    assert result[17].cards == get_test_cards("D4|S4|H7|C7|HK")
+    assert result[18] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|SJ"), [7, 4, 11])
+    assert result[18].cards == get_test_cards("C4|D4|S7|H7|SJ")
+    assert result[19] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|C7|SJ"), [7, 4, 11])
+    assert result[19].cards == get_test_cards("C4|D4|S7|C7|SJ")
+    assert result[20] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|H7|C7|SJ"), [7, 4, 11])
+    assert result[20].cards == get_test_cards("C4|D4|H7|C7|SJ")
+    assert result[21] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|H7|SJ"), [7, 4, 11])
+    assert result[21].cards == get_test_cards("C4|S4|S7|H7|SJ")
+    assert result[22] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|C7|SJ"), [7, 4, 11])
+    assert result[22].cards == get_test_cards("C4|S4|S7|C7|SJ")
+    assert result[23] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|H7|C7|SJ"), [7, 4, 11])
+    assert result[23].cards == get_test_cards("C4|S4|H7|C7|SJ")
+    assert result[24] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|H7|SJ"), [7, 4, 11])
+    assert result[24].cards == get_test_cards("D4|S4|S7|H7|SJ")
+    assert result[25] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|C7|SJ"), [7, 4, 11])
+    assert result[25].cards == get_test_cards("D4|S4|S7|C7|SJ")
+    assert result[26] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|H7|C7|SJ"), [7, 4, 11])
+    assert result[26].cards == get_test_cards("D4|S4|H7|C7|SJ")
 
 
 def test_when_make_two_pair_hands_and_multiple_sets_of_values_then_correct_list_returned(engine, get_test_cards):
@@ -619,34 +643,50 @@ def test_when_make_two_pair_hands_and_multiple_sets_of_values_then_correct_list_
     assert isinstance(result, list)
     assert len(result) == 22
 
-    assert [cards[0], cards[2], cards[1], cards[3], cards[4]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[5]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[6]] in result
-    assert [cards[0], cards[2], cards[1], cards[3], cards[7]] in result
-
-    assert [cards[0], cards[2], cards[4], cards[6], cards[1]] in result
-    assert [cards[0], cards[2], cards[4], cards[6], cards[3]] in result
-    assert [cards[0], cards[2], cards[4], cards[6], cards[5]] in result
-
-    assert [cards[0], cards[2], cards[4], cards[7], cards[1]] in result
-    assert [cards[0], cards[2], cards[4], cards[7], cards[3]] in result
-    assert [cards[0], cards[2], cards[4], cards[7], cards[5]] in result
-
-    assert [cards[0], cards[2], cards[6], cards[7], cards[1]] in result
-    assert [cards[0], cards[2], cards[6], cards[7], cards[3]] in result
-    assert [cards[0], cards[2], cards[6], cards[7], cards[5]] in result
-
-    assert [cards[1], cards[3], cards[4], cards[6], cards[0]] in result
-    assert [cards[1], cards[3], cards[4], cards[6], cards[2]] in result
-    assert [cards[1], cards[3], cards[4], cards[6], cards[5]] in result
-
-    assert [cards[1], cards[3], cards[4], cards[7], cards[0]] in result
-    assert [cards[1], cards[3], cards[4], cards[7], cards[2]] in result
-    assert [cards[1], cards[3], cards[4], cards[7], cards[5]] in result
-
-    assert [cards[1], cards[3], cards[6], cards[7], cards[0]] in result
-    assert [cards[1], cards[3], cards[6], cards[7], cards[2]] in result
-    assert [cards[1], cards[3], cards[6], cards[7], cards[5]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|SA|SJ"), [14, 7, 11])
+    assert result[0].cards == get_test_cards("S7|H7|HA|SA|SJ")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|CA|SJ"), [14, 7, 11])
+    assert result[1].cards == get_test_cards("S7|H7|HA|CA|SJ")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|SA|CA|SJ"), [14, 7, 11])
+    assert result[2].cards == get_test_cards("S7|H7|SA|CA|SJ")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|SA|C4"), [14, 7, 4])
+    assert result[3].cards == get_test_cards("S7|H7|HA|SA|C4")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|SA|D4"), [14, 7, 4])
+    assert result[4].cards == get_test_cards("S7|H7|HA|SA|D4")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|CA|C4"), [14, 7, 4])
+    assert result[5].cards == get_test_cards("S7|H7|HA|CA|C4")
+    assert result[6] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|CA|D4"), [14, 7, 4])
+    assert result[6].cards == get_test_cards("S7|H7|HA|CA|D4")
+    assert result[7] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|SA|CA|C4"), [14, 7, 4])
+    assert result[7].cards == get_test_cards("S7|H7|SA|CA|C4")
+    assert result[8] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|SA|CA|D4"), [14, 7, 4])
+    assert result[8].cards == get_test_cards("S7|H7|SA|CA|D4")
+    assert result[9] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|SA|SJ"), [14, 4, 11])
+    assert result[9].cards == get_test_cards("C4|D4|HA|SA|SJ")
+    assert result[10] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|CA|SJ"), [14, 4, 11])
+    assert result[10].cards == get_test_cards("C4|D4|HA|CA|SJ")
+    assert result[11] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|SA|CA|SJ"), [14, 4, 11])
+    assert result[11].cards == get_test_cards("C4|D4|SA|CA|SJ")
+    assert result[12] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|SA|S7"), [14, 4, 7])
+    assert result[12].cards == get_test_cards("C4|D4|HA|SA|S7")
+    assert result[13] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|SA|H7"), [14, 4, 7])
+    assert result[13].cards == get_test_cards("C4|D4|HA|SA|H7")
+    assert result[14] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|CA|S7"), [14, 4, 7])
+    assert result[14].cards == get_test_cards("C4|D4|HA|CA|S7")
+    assert result[15] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|CA|H7"), [14, 4, 7])
+    assert result[15].cards == get_test_cards("C4|D4|HA|CA|H7")
+    assert result[16] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|SA|CA|S7"), [14, 4, 7])
+    assert result[16].cards == get_test_cards("C4|D4|SA|CA|S7")
+    assert result[17] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|SA|CA|H7"), [14, 4, 7])
+    assert result[17].cards == get_test_cards("C4|D4|SA|CA|H7")
+    assert result[18] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|HA"), [7, 4, 14])
+    assert result[18].cards == get_test_cards("C4|D4|S7|H7|HA")
+    assert result[19] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|SA"), [7, 4, 14])
+    assert result[19].cards == get_test_cards("C4|D4|S7|H7|SA")
+    assert result[20] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|CA"), [7, 4, 14])
+    assert result[20].cards == get_test_cards("C4|D4|S7|H7|CA")
+    assert result[21] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7|SJ"), [7, 4, 11])
+    assert result[21].cards == get_test_cards("C4|D4|S7|H7|SJ")
 
 
 def test_when_make_two_pair_hands_and_not_kickers_then_correct_list_returned(engine, get_test_cards):
@@ -657,26 +697,33 @@ def test_when_make_two_pair_hands_and_not_kickers_then_correct_list_returned(eng
     assert isinstance(result, list)
     assert len(result) == 7
 
-    assert [cards[0], cards[2], cards[1], cards[3]] in result
-    assert [cards[0], cards[2], cards[4], cards[6]] in result
-    assert [cards[0], cards[2], cards[4], cards[7]] in result
-    assert [cards[0], cards[2], cards[6], cards[7]] in result
-    assert [cards[1], cards[3], cards[4], cards[6]] in result
-    assert [cards[1], cards[3], cards[4], cards[7]] in result
-    assert [cards[1], cards[3], cards[6], cards[7]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|SA"), [14, 7, None])
+    assert result[0].cards == get_test_cards("S7|H7|HA|SA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|HA|CA"), [14, 7, None])
+    assert result[1].cards == get_test_cards("S7|H7|HA|CA")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("S7|H7|SA|CA"), [14, 7, None])
+    assert result[2].cards == get_test_cards("S7|H7|SA|CA")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|SA"), [14, 4, None])
+    assert result[3].cards == get_test_cards("C4|D4|HA|SA")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|HA|CA"), [14, 4, None])
+    assert result[4].cards == get_test_cards("C4|D4|HA|CA")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|SA|CA"), [14, 4, None])
+    assert result[5].cards == get_test_cards("C4|D4|SA|CA")
+    assert result[6] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7"), [7, 4, None])
+    assert result[6].cards == get_test_cards("C4|D4|S7|H7")
 
 
 def test_when_make_two_pair_hands_and_no_kickers_available_then_correct_list_returned(engine, get_test_cards):
     cards = get_test_cards("C4|S7|D4|H7|S4")
 
-    result = engine.make_two_pair_hands(cards, include_kickers=False)
+    result = engine.make_two_pair_hands(cards, include_kickers=True)
 
     assert isinstance(result, list)
     assert len(result) == 3
 
-    assert [cards[0], cards[2], cards[1], cards[3]] in result
-    assert [cards[0], cards[4], cards[1], cards[3]] in result
-    assert [cards[2], cards[4], cards[1], cards[3]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|D4|S7|H7"), [7, 4, None])
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("C4|S4|S7|H7"), [7, 4, None])
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D4|S4|S7|H7"), [7, 4, None])
 
 
 def test_when_make_pair_hands_and_less_than_two_cards_then_correct_list_returned(engine, get_test_cards):

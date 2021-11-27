@@ -277,7 +277,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(trip_hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_two_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
+    def make_two_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible two-pair hands with the given cards, optionally including kickers.
@@ -290,7 +290,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         :param include_kickers: Boolean indicating if the returned hands should include the kicker cards or
             if the combinations should just be the cards required to make the two-pair.
             Note that setting this to true will return many more hands as it builds all hands possible with kickers.
-        :return: List of lists of card objects representing all of the two-pairs that could be made.
+        :return: Ordered list of Hand objects that represent each two-pair hand possible.
         """
 
         if len(available_cards) < 4:
@@ -320,13 +320,28 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             kicker_cards = [val for sublist in kicker_cards for val in sublist]
 
             if not include_kickers or not kicker_cards:
-                two_pair_hands.extend(two_pair_sets)
+                two_pair_hands.extend([
+                    Hand(
+                        GAME_TEXAS_HOLDEM,
+                        TH_HAND_TWO_PAIR,
+                        two_pair,
+                        [max(two_pair_value_list), min(two_pair_value_list), None]
+                    )
+                    for two_pair in two_pair_sets
+                ])
                 continue
 
-            for two_pair_cards in two_pair_sets:
-                two_pair_hands.extend([two_pair_cards + [kicker] for kicker in kicker_cards])
+            two_pair_hands.extend([
+                Hand(
+                    GAME_TEXAS_HOLDEM,
+                    TH_HAND_TWO_PAIR,
+                    two_pair + [kicker],
+                    [max(two_pair_value_list), min(two_pair_value_list), kicker.value]
+                )
+                for two_pair in two_pair_sets for kicker in kicker_cards
+            ])
 
-        return two_pair_hands
+        return sorted(two_pair_hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
     def make_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
         """
