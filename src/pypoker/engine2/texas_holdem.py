@@ -80,16 +80,15 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 tiebreaker = [5]
             hands.append(Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, cards, tiebreaker))
 
-        hands = sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
-        return hands
+        return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_quads_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+    def make_quads_hands(self, available_cards: List[Card]) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible quads hands with the given cards
 
         :param available_cards: List of card objects available to use.
-        :return: List of lists of card objects representing all of the quads that could be made.
+        :return: Ordered list of Hand objects that represent each quad hand possible.
         """
 
         if len(available_cards) < 4:
@@ -106,14 +105,17 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         for quad_value in eligible_values:
             quad_cards = value_grouped_cards[quad_value]
             other_cards = [card for card in available_cards if card.value != quad_value]
-            if (
-                not other_cards
-            ):  # manages for the usecase of only getting 4 cards of the same value and no kickers
-                quad_hands.append(quad_cards)
+            if not other_cards:  # manages for the usecase of only getting 4 cards of the same value and no kickers
+                quad_hands.append(
+                    Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, quad_cards, [quad_value, None])
+                )
             else:
-                quad_hands.extend([quad_cards + [card] for card in other_cards])
+                quad_hands.extend([
+                    Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, quad_cards + [card], [quad_value, card.value])
+                    for card in other_cards
+                ])
 
-        return quad_hands
+        return sorted(quad_hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
     def make_full_house_hands(self, available_cards: List[Card]) -> List[List[Card]]:
         """

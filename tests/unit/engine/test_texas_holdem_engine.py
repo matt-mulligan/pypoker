@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH
+from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS
 from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
@@ -104,7 +104,9 @@ def test_when_make_quads_hands_and_only_four_cards_then_correct_values_returned(
 
     assert isinstance(result, list)
     assert len(result) == 1
-    assert result[0] == [cards[0], cards[1], cards[2], cards[3]]
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4"), [4, None])
+    assert result[0].cards == get_test_cards("D4|C4|S4|H4")
 
 
 def test_when_make_quads_hands_and_only_five_cards_then_correct_values_returned(
@@ -115,7 +117,8 @@ def test_when_make_quads_hands_and_only_five_cards_then_correct_values_returned(
 
     assert isinstance(result, list)
     assert len(result) == 1
-    assert result[0] == [cards[0], cards[1], cards[3], cards[4], cards[2]]
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|DA"), [4, 14])
+    assert result[0].cards == get_test_cards("D4|C4|S4|H4|DA")
 
 
 def test_when_make_quads_hands_and_many_kickers_then_correct_values_returned(
@@ -126,9 +129,13 @@ def test_when_make_quads_hands_and_many_kickers_then_correct_values_returned(
 
     assert isinstance(result, list)
     assert len(result) == 3
-    assert result[0] == [cards[1], cards[3], cards[5], cards[6], cards[0]]
-    assert result[1] == [cards[1], cards[3], cards[5], cards[6], cards[2]]
-    assert result[2] == [cards[1], cards[3], cards[5], cards[6], cards[4]]
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|CA"), [4, 14])
+    assert result[0].cards == get_test_cards("D4|C4|S4|H4|CA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|DA"), [4, 14])
+    assert result[1].cards == get_test_cards("D4|C4|S4|H4|DA")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|S3"), [4, 3])
+    assert result[2].cards == get_test_cards("D4|C4|S4|H4|S3")
 
 
 def test_when_make_quads_hands_and_multiple_quads_then_correct_values_returned(
@@ -140,17 +147,27 @@ def test_when_make_quads_hands_and_multiple_quads_then_correct_values_returned(
     assert isinstance(result, list)
     assert len(result) == 10
 
-    assert [cards[0], cards[2], cards[4], cards[7], cards[1]] in result
-    assert [cards[0], cards[2], cards[4], cards[7], cards[3]] in result
-    assert [cards[0], cards[2], cards[4], cards[7], cards[5]] in result
-    assert [cards[0], cards[2], cards[4], cards[7], cards[6]] in result
-    assert [cards[0], cards[2], cards[4], cards[7], cards[8]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("CA|SA|DA|HA|S7"), [14, 7])
+    assert result[0].cards == get_test_cards("CA|SA|DA|HA|S7")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("CA|SA|DA|HA|D4"), [14, 4])
+    assert result[1].cards == get_test_cards("CA|SA|DA|HA|D4")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("CA|SA|DA|HA|C4"), [14, 4])
+    assert result[2].cards == get_test_cards("CA|SA|DA|HA|C4")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("CA|SA|DA|HA|S4"), [14, 4])
+    assert result[3].cards == get_test_cards("CA|SA|DA|HA|S4")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("CA|SA|DA|HA|H4"), [14, 4])
+    assert result[4].cards == get_test_cards("CA|SA|DA|HA|H4")
 
-    assert [cards[1], cards[3], cards[5], cards[6], cards[0]] in result
-    assert [cards[1], cards[3], cards[5], cards[6], cards[2]] in result
-    assert [cards[1], cards[3], cards[5], cards[6], cards[4]] in result
-    assert [cards[1], cards[3], cards[5], cards[6], cards[7]] in result
-    assert [cards[1], cards[3], cards[5], cards[6], cards[8]] in result
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|CA"), [4, 14])
+    assert result[5].cards == get_test_cards("D4|C4|S4|H4|CA")
+    assert result[6] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|SA"), [4, 14])
+    assert result[6].cards == get_test_cards("D4|C4|S4|H4|SA")
+    assert result[7] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|DA"), [4, 14])
+    assert result[7].cards == get_test_cards("D4|C4|S4|H4|DA")
+    assert result[8] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|HA"), [4, 14])
+    assert result[8].cards == get_test_cards("D4|C4|S4|H4|HA")
+    assert result[9] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D4|C4|S4|H4|S7"), [4, 7])
+    assert result[9].cards == get_test_cards("D4|C4|S4|H4|S7")
 
 
 def test_when_make_full_house_hands_and_not_enough_cards_then_return_empty_list(
