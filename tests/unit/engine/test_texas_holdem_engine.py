@@ -1,5 +1,7 @@
 from pytest import fixture
 
+from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH
+from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
 
@@ -38,7 +40,8 @@ def test_when_make_straight_flush_hands_and_single_set_then_correct_values_retur
 
     assert isinstance(result, list)
     assert len(result) == 1
-    assert result[0] == [cards[2], cards[4], cards[0], cards[3], cards[1]]
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("D2|D3|D4|D5|D6"), [6])
+    assert result[0].cards == get_test_cards("D2|D3|D4|D5|D6")
 
 
 def test_when_make_straight_flush_hands_and_multiple_sets_then_correct_values_returned(
@@ -49,8 +52,11 @@ def test_when_make_straight_flush_hands_and_multiple_sets_then_correct_values_re
 
     assert isinstance(result, list)
     assert len(result) == 2
-    assert [cards[0], cards[9], cards[3], cards[5], cards[8]] in result
-    assert [cards[4], cards[7], cards[1], cards[6], cards[2]] in result
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("H8|H9|HT|HJ|HQ"), [12])
+    assert result[0].cards == get_test_cards("H8|H9|HT|HJ|HQ")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("D2|D3|D4|D5|D6"), [6])
+    assert result[1].cards == get_test_cards("D2|D3|D4|D5|D6")
 
 
 def test_when_make_straight_flush_hands_and_overlapping_set_then_correct_values_returned(
@@ -61,9 +67,13 @@ def test_when_make_straight_flush_hands_and_overlapping_set_then_correct_values_
 
     assert isinstance(result, list)
     assert len(result) == 3
-    assert result[0] == [cards[2], cards[4], cards[0], cards[3], cards[1]]
-    assert result[1] == [cards[4], cards[0], cards[3], cards[1], cards[6]]
-    assert result[2] == [cards[0], cards[3], cards[1], cards[6], cards[7]]
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("D4|D5|D6|D7|D8"), [8])
+    assert result[0].cards == get_test_cards("D4|D5|D6|D7|D8")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("D3|D4|D5|D6|D7"), [7])
+    assert result[1].cards == get_test_cards("D3|D4|D5|D6|D7")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("D2|D3|D4|D5|D6"), [6])
+    assert result[2].cards == get_test_cards("D2|D3|D4|D5|D6")
 
 
 def test_when_make_quads_hands_and_not_enough_cards_then_return_empty_list(

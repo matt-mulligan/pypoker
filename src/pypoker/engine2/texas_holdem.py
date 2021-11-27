@@ -9,8 +9,8 @@ from itertools import combinations
 from typing import List
 
 from pypoker.constants import TH_HANDS_ORDERED, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
-    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD
-from pypoker.constructs import Card
+    TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD, GAME_TEXAS_HOLDEM
+from pypoker.constructs import Card, Hand
 from pypoker.engine2 import BasePokerEngine
 from pypoker.player import BasePlayer
 
@@ -50,15 +50,13 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
     # Public "Hand Maker" methods
     # ---------------------------
-    def make_straight_flush_hands(
-        self, available_cards: List[Card]
-    ) -> List[List[Card]]:
+    def make_straight_flush_hands(self, available_cards: List[Card]) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible straight flush hands with the given cards
 
         :param available_cards: List of card objects available to use.
-        :return: List of lists of card objects representing all of the straight flushes that could be made.
+        :return: Ordered list of Hand objects that represent each straight flush hand possible.
         """
 
         if len(available_cards) < 5:
@@ -73,7 +71,17 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             self.find_consecutive_value_cards(cards, treat_ace_low=True, run_size=5)
             for cards in eligible_suits
         ]
-        return [val for sublist in straight_flushes for val in sublist]
+        straight_flushes = [val for sublist in straight_flushes for val in sublist]
+
+        hands = []
+        for cards in straight_flushes:
+            tiebreaker = [max([card.value for card in cards])]
+            if tiebreaker == [14] and any(card.value == 5 for card in cards):
+                tiebreaker = [5]
+            hands.append(Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, cards, tiebreaker))
+
+        hands = sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
+        return hands
 
     def make_quads_hands(self, available_cards: List[Card]) -> List[List[Card]]:
         """
