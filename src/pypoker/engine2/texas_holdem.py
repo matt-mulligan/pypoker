@@ -343,7 +343,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(two_pair_hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
+    def make_pair_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible pair hands with the given cards, optionally including kickers.
@@ -356,7 +356,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         :param include_kickers: Boolean indicating if the returned hands should include the kicker cards or
             if the combinations should just be the cards required to make the pair.
             Note that setting this to true will return many more hands as it builds all hands possible with kickers.
-        :return: List of lists of card objects representing all of the pairs that could be made.
+        :return: Ordered list of Hand objects that represent each pair hand possible.
         """
 
         if len(available_cards) < 2:
@@ -376,23 +376,55 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             kicker_cards = [card for card in available_cards if card.value != pair_value]
 
             if not include_kickers or not kicker_cards:
-                pair_hands.extend(pairs)
+                pair_hands.extend([
+                    Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, pair, [pair_value, None, None, None]) for pair in pairs
+                ])
                 continue
 
             kicker_sets = self.find_all_unique_card_combos(kicker_cards, 3)
-            kicker_sets = [kicker_set for kicker_set in kicker_sets if self.check_all_card_values_unique(kicker_set)]
+            kicker_sets = [
+                sorted(kicker_set, key=lambda card: card.value, reverse=True)
+                for kicker_set in kicker_sets if self.check_all_card_values_unique(kicker_set)
+            ]
 
             if kicker_sets:
-                pair_hands.extend([pair_set + kicker_set for pair_set in pairs for kicker_set in kicker_sets])
+                pair_hands.extend([
+                    Hand(
+                        GAME_TEXAS_HOLDEM,
+                        TH_HAND_PAIR,
+                        pair + kicker_set,
+                        [pair_value, kicker_set[0].value, kicker_set[1].value, kicker_set[2].value]
+                    )
+                    for pair in pairs for kicker_set in kicker_sets
+                ])
                 continue
 
             kicker_sets = self.find_all_unique_card_combos(kicker_cards, 2)
-            kicker_sets = [kicker_set for kicker_set in kicker_sets if self.check_all_card_values_unique(kicker_set)]
+            kicker_sets = [
+                sorted(kicker_set, key=lambda card: card.value, reverse=True)
+                for kicker_set in kicker_sets if self.check_all_card_values_unique(kicker_set)
+            ]
 
             if kicker_sets:
-                pair_hands.extend([pair_set + kicker_set for pair_set in pairs for kicker_set in kicker_sets])
+                pair_hands.extend([
+                    Hand(
+                        GAME_TEXAS_HOLDEM,
+                        TH_HAND_PAIR,
+                        pair + kicker_set,
+                        [pair_value, kicker_set[0].value, kicker_set[1].value, None]
+                    )
+                    for pair in pairs for kicker_set in kicker_sets
+                ])
                 continue
 
-            pair_hands.extend([pair_set + [card] for pair_set in pairs for card in kicker_cards])
+            pair_hands.extend([
+                Hand(
+                    GAME_TEXAS_HOLDEM,
+                    TH_HAND_PAIR,
+                    pair + [card],
+                    [pair_value, card.value, None, None]
+                )
+                for pair in pairs for card in kicker_cards
+            ])
 
-        return pair_hands
+        return sorted(pair_hands, key=lambda hand: hand.tiebreakers, reverse=True)
