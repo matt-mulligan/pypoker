@@ -3,7 +3,7 @@ from pytest import fixture
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
     TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD
 from pypoker.constructs import Hand
-from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
+from pypoker.engine.texas_holdem import TexasHoldemPokerEngine
 
 
 @fixture

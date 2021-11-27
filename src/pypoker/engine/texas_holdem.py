@@ -11,7 +11,7 @@ from typing import List
 from pypoker.constants import TH_HANDS_ORDERED, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
     TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD, GAME_TEXAS_HOLDEM
 from pypoker.constructs import Card, Hand
-from pypoker.engine2 import BasePokerEngine
+from pypoker.engine import BasePokerEngine
 from pypoker.player import BasePlayer
 
 

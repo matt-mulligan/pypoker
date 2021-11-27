@@ -3,7 +3,7 @@ from typing import List
 from pytest import fixture, mark
 
 from pypoker.constructs import Card
-from pypoker.engine2 import BasePokerEngine
+from pypoker.engine import BasePokerEngine
 from pypoker.player import BasePlayer
 
 
