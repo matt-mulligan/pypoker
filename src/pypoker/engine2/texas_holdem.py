@@ -158,13 +158,13 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(full_houses, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_flush_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+    def make_flush_hands(self, available_cards: List[Card]) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible flush hands with the given cards
 
         :param available_cards: List of card objects available to use.
-        :return: List of lists of card objects representing all of the full houses that could be made.
+        :return: Ordered list of Hand objects that represent each flush hand possible.
         """
 
         if len(available_cards) < 5:
@@ -176,7 +176,13 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return []
 
         flushes = [self.find_all_unique_card_combos(cards, 5) for cards in eligible_suits]
-        return [val for sublist in flushes for val in sublist]
+        flushes = [val for sublist in flushes for val in sublist]
+        flushes = [
+            Hand(GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, cards, sorted([card.value for card in cards], reverse=True))
+            for cards in flushes
+        ]
+
+        return sorted(flushes, key=lambda hand: hand.tiebreakers, reverse=True)
 
     def make_straight_hands(self, available_cards: List[Card]) -> List[List[Card]]:
         """
