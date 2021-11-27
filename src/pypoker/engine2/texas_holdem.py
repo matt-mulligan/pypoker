@@ -184,19 +184,28 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(flushes, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_straight_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+    def make_straight_hands(self, available_cards: List[Card]) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible straight hands with the given cards
 
         :param available_cards: List of card objects available to use.
-        :return: List of lists of card objects representing all of the straights that could be made.
+        :return: Ordered list of Hand objects that represent each straight hand possible.
         """
 
         if len(available_cards) < 5:
             return []
 
-        return self.find_consecutive_value_cards(available_cards, treat_ace_low=True, run_size=5)
+        straights = self.find_consecutive_value_cards(available_cards, treat_ace_low=True, run_size=5)
+
+        hands = []
+        for cards in straights:
+            tiebreaker = [max([card.value for card in cards])]
+            if tiebreaker == [14] and any(card.value == 5 for card in cards):
+                tiebreaker = [5]
+            hands.append(Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, cards, tiebreaker))
+
+        return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
     def make_trips_hands(self, available_cards: List[Card], include_kickers: bool = True) -> List[List[Card]]:
         """

@@ -1,7 +1,7 @@
 from pytest import fixture
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
-    TH_HAND_FLUSH
+    TH_HAND_FLUSH, TH_HAND_STRAIGHT
 from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
@@ -337,12 +337,13 @@ def test_when_make_straight_hands_and_less_than_five_cards_then_return_correct_v
 def test_when_make_straight_hands_and_single_straight_then_return_correct_values(
     engine, get_test_cards
 ):
-    cards = get_test_cards("CA|SJ|DK|ST|CQ")
+    cards = get_test_cards("CA|SJ|C7|DK|ST|CQ")
     result = engine.make_straight_hands(cards)
 
     assert isinstance(result, list)
     assert len(result) == 1
-    assert [cards[3], cards[1], cards[4], cards[2], cards[0]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("CA|SJ|DK|ST|CQ"), [14])
+    assert result[0].cards == get_test_cards("ST|SJ|CQ|DK|CA")
 
 
 def test_when_make_straight_hands_and_running_straights_then_return_correct_values(
@@ -353,9 +354,13 @@ def test_when_make_straight_hands_and_running_straights_then_return_correct_valu
 
     assert isinstance(result, list)
     assert len(result) == 3
-    assert [cards[0], cards[5], cards[4], cards[2], cards[6]] in result
-    assert [cards[5], cards[4], cards[2], cards[6], cards[3]] in result
-    assert [cards[4], cards[2], cards[6], cards[3], cards[1]] in result
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("ST|SJ|CQ|DK|CA"), [14])
+    assert result[0].cards == get_test_cards("ST|SJ|CQ|DK|CA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("D9|ST|SJ|CQ|DK"), [13])
+    assert result[1].cards == get_test_cards("D9|ST|SJ|CQ|DK")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("D8|D9|ST|SJ|CQ"), [12])
+    assert result[2].cards == get_test_cards("D8|D9|ST|SJ|CQ")
 
 
 def test_when_make_straight_hands_and_ace_low_straight_then_return_correct_values(
@@ -366,8 +371,11 @@ def test_when_make_straight_hands_and_ace_low_straight_then_return_correct_value
 
     assert isinstance(result, list)
     assert len(result) == 2
-    assert [cards[1], cards[3], cards[2], cards[5], cards[0]] in result
-    assert [cards[3], cards[2], cards[5], cards[0], cards[4]] in result
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("D2|S3|D4|D5|S6"), [6])
+    assert result[0].cards == get_test_cards("D2|S3|D4|D5|S6")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("CA|D2|S3|D4|D5"), [5])
+    assert result[1].cards == get_test_cards("CA|D2|S3|D4|D5")
 
 
 def test_when_make_straight_hands_and_disconnected_straights_then_return_correct_values(
@@ -378,8 +386,10 @@ def test_when_make_straight_hands_and_disconnected_straights_then_return_correct
 
     assert isinstance(result, list)
     assert len(result) == 2
-    assert [cards[1], cards[5], cards[0], cards[7], cards[8]] in result
-    assert [cards[4], cards[2], cards[6], cards[3], cards[1]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("ST|SJ|CQ|DK|CA"), [14])
+    assert result[0].cards == get_test_cards("ST|SJ|CQ|DK|CA")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("CA|D2|D3|S4|S5"), [5])
+    assert result[1].cards == get_test_cards("CA|D2|D3|S4|S5")
 
 
 def test_when_make_trips_hands_and_less_then_3_cards_then_return_empty_list(engine, get_test_cards):
