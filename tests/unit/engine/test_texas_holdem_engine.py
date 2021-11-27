@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS
+from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE
 from pypoker.constructs import Hand
 from pypoker.engine2.texas_holdem import TexasHoldemPokerEngine
 
@@ -189,7 +189,8 @@ def test_when_make_full_house_hands_and_single_option_then_return_correct_values
     assert isinstance(result, list)
     assert len(result) == 1
 
-    assert result[0] == [cards[0], cards[1], cards[3], cards[2], cards[4]]
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|DA|HA|S4|C4"), [14, 4])
+    assert result[0].cards == get_test_cards("CA|DA|HA|S4|C4")
 
 
 def test_when_make_full_house_hands_and_many_options_then_return_correct_values(
@@ -201,26 +202,44 @@ def test_when_make_full_house_hands_and_many_options_then_return_correct_values(
     assert isinstance(result, list)
     assert len(result) == 18
 
-    assert [cards[2], cards[4], cards[6], cards[1], cards[3]] in result
-    assert [cards[2], cards[4], cards[6], cards[1], cards[7]] in result
-    assert [cards[2], cards[4], cards[6], cards[3], cards[7]] in result
-    assert [cards[2], cards[4], cards[6], cards[0], cards[5]] in result
-    assert [cards[2], cards[4], cards[6], cards[0], cards[8]] in result
-    assert [cards[2], cards[4], cards[6], cards[5], cards[8]] in result
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|SA|HA|D7|H7"), [14, 7])
+    assert result[0].cards == get_test_cards("CA|SA|HA|D7|H7")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|SA|HA|D7|S7"), [14, 7])
+    assert result[1].cards == get_test_cards("CA|SA|HA|D7|S7")
+    assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|SA|HA|H7|S7"), [14, 7])
+    assert result[2].cards == get_test_cards("CA|SA|HA|H7|S7")
+    assert result[3] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|SA|HA|S2|C2"), [14, 2])
+    assert result[3].cards == get_test_cards("CA|SA|HA|S2|C2")
+    assert result[4] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|SA|HA|S2|D2"), [14, 2])
+    assert result[4].cards == get_test_cards("CA|SA|HA|S2|D2")
+    assert result[5] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("CA|SA|HA|C2|D2"), [14, 2])
+    assert result[5].cards == get_test_cards("CA|SA|HA|C2|D2")
 
-    assert [cards[1], cards[3], cards[7], cards[2], cards[4]] in result
-    assert [cards[1], cards[3], cards[7], cards[2], cards[6]] in result
-    assert [cards[1], cards[3], cards[7], cards[4], cards[6]] in result
-    assert [cards[1], cards[3], cards[7], cards[0], cards[5]] in result
-    assert [cards[1], cards[3], cards[7], cards[0], cards[8]] in result
-    assert [cards[1], cards[3], cards[7], cards[5], cards[8]] in result
+    assert result[6] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("D7|H7|S7|CA|SA"), [7, 14])
+    assert result[6].cards == get_test_cards("D7|H7|S7|CA|SA")
+    assert result[7] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("D7|H7|S7|CA|HA"), [7, 14])
+    assert result[7].cards == get_test_cards("D7|H7|S7|CA|HA")
+    assert result[8] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("D7|H7|S7|SA|HA"), [7, 14])
+    assert result[8].cards == get_test_cards("D7|H7|S7|SA|HA")
+    assert result[9] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("D7|H7|S7|S2|C2"), [7, 2])
+    assert result[9].cards == get_test_cards("D7|H7|S7|S2|C2")
+    assert result[10] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("D7|H7|S7|S2|D2"), [7, 2])
+    assert result[10].cards == get_test_cards("D7|H7|S7|S2|D2")
+    assert result[11] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("D7|H7|S7|C2|D2"), [7, 2])
+    assert result[11].cards == get_test_cards("D7|H7|S7|C2|D2")
 
-    assert [cards[0], cards[5], cards[8], cards[2], cards[4]] in result
-    assert [cards[0], cards[5], cards[8], cards[2], cards[6]] in result
-    assert [cards[0], cards[5], cards[8], cards[4], cards[6]] in result
-    assert [cards[0], cards[5], cards[8], cards[1], cards[3]] in result
-    assert [cards[0], cards[5], cards[8], cards[1], cards[7]] in result
-    assert [cards[0], cards[5], cards[8], cards[3], cards[7]] in result
+    assert result[12] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("S2|C2|D2|CA|SA"), [2, 14])
+    assert result[12].cards == get_test_cards("S2|C2|D2|CA|SA")
+    assert result[13] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("S2|C2|D2|CA|HA"), [2, 14])
+    assert result[13].cards == get_test_cards("S2|C2|D2|CA|HA")
+    assert result[14] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("S2|C2|D2|SA|HA"), [2, 14])
+    assert result[14].cards == get_test_cards("S2|C2|D2|SA|HA")
+    assert result[15] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("S2|C2|D2|D7|H7"), [2, 7])
+    assert result[15].cards == get_test_cards("S2|C2|D2|D7|H7")
+    assert result[16] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("S2|C2|D2|D7|S7"), [2, 7])
+    assert result[16].cards == get_test_cards("S2|C2|D2|D7|S7")
+    assert result[17] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("S2|C2|D2|H7|S7"), [2, 7])
+    assert result[17].cards == get_test_cards("S2|C2|D2|H7|S7")
 
 
 def test_when_make_flush_hands_and_less_than_five_cards_then_return_correct_values(

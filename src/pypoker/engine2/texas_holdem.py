@@ -117,13 +117,13 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return sorted(quad_hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
-    def make_full_house_hands(self, available_cards: List[Card]) -> List[List[Card]]:
+    def make_full_house_hands(self, available_cards: List[Card]) -> List[Hand]:
         """
         Texas Holdem Poker Engine Hand Maker Method
         method to make all possible full house hands with the given cards
 
         :param available_cards: List of card objects available to use.
-        :return: List of lists of card objects representing all of the full houses that could be made.
+        :return: Ordered list of Hand objects that represent each full house hand possible.
         """
 
         if len(available_cards) < 5:
@@ -147,17 +147,16 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         for trip_value in trips_values:
             trip_cards = value_grouped_cards[trip_value]
             trip_combos = self.find_all_unique_card_combos(trip_cards, 3)
-            hands = [
-                [
-                    trip_combo + pair_combo
-                    for pair_combo in pair_combos
-                    if pair_combo[0].value != trip_value
-                ]
-                for trip_combo in trip_combos
-            ]
-            full_houses.extend([val for sublist in hands for val in sublist])
 
-        return full_houses
+            hands = [
+                Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, trip_combo + pair_combo, [trip_value, pair_combo[0].value])
+                for trip_combo in trip_combos for pair_combo in pair_combos
+                if pair_combo[0].value != trip_value
+            ]
+
+            full_houses.extend(hands)
+
+        return sorted(full_houses, key=lambda hand: hand.tiebreakers, reverse=True)
 
     def make_flush_hands(self, available_cards: List[Card]) -> List[List[Card]]:
         """
