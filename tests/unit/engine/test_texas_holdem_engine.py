@@ -1,14 +1,59 @@
-from pytest import fixture
+from pytest import fixture, mark
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
     TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD
 from pypoker.constructs import Hand
 from pypoker.engine.texas_holdem import TexasHoldemPokerEngine
+from pypoker.player.human import HumanPlayer
 
 
 @fixture
 def engine():
     return TexasHoldemPokerEngine()
+
+
+# Public Concrete Implementation of PokerEngine Abstract Methods
+# ---------------------------------------------------------------
+@mark.parametrize("hole_cards, board_cards, expected_hand_type, expected_hand_cards, expected_tiebreakers",[
+    ("D4|D5", "D7|H6|D6|C3|D3", TH_HAND_STRAIGHT_FLUSH, "D3|D4|D5|D6|D7", [7]),
+    ("D4|D5", "C5|H6|DA|H5|S5", TH_HAND_QUADS, "D5|C5|H5|S5|DA", [5, 14]),
+    ("D4|D5", "C5|H6|DA|H5|S6", TH_HAND_FULL_HOUSE, "D5|C5|H5|H6|S6", [5, 6]),
+    ("D4|H5", "D7|H6|DK|D3|DQ", TH_HAND_FLUSH, "D4|D7|DK|D3|DQ", [13, 12, 7, 4, 3]),
+    ("D4|H5", "S7|H6|C3|SK", TH_HAND_STRAIGHT, "C3|D4|H5|H6|S7", [7]),
+    ("D4|H5", "S4|H4|C3|SK", TH_HAND_TRIPS, "D4|S4|H4|SK|H5", [4, 13, 5]),
+    ("D4|H5", "S4|H3|C3|SK", TH_HAND_TWO_PAIR, "H3|C3|D4|S4|SK", [4, 3, 13]),
+    ("D4|H5", "S4|H3|C9|SK", TH_HAND_PAIR, "D4|S4|SK|C9|H5", [4, 13, 9, 5]),
+    ("D4|H5", "SJ|H3|C9|SK", TH_HAND_HIGH_CARD, "SK|SJ|C9|H5|D4", [13, 11, 9, 5, 4]),
+])
+def test_when_find_player_best_hand_then_correct_hand_returned(
+        engine, get_test_cards, hole_cards, board_cards, expected_hand_type, expected_hand_cards, expected_tiebreakers
+):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards(hole_cards))
+
+    result = engine.find_player_best_hand(player, get_test_cards(board_cards))
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0] == Hand(
+        GAME_TEXAS_HOLDEM, expected_hand_type, get_test_cards(expected_hand_cards), expected_tiebreakers
+    )
+    assert result[0].cards == get_test_cards(expected_hand_cards)
+
+
+def test_when_find_player_best_hand_and_multiple_hands_with_identical_tiebreakers_then_all_returned(
+        engine, get_test_cards
+):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("D9|SK"))
+    board_cards = get_test_cards("S9|C9|HK|H9|C7")
+
+    result = engine.find_player_best_hand(player, board_cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D9|S9|C9|H9|SK"), [9, 13])
+    assert result[0].cards == get_test_cards("D9|S9|C9|H9|SK")
+    assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D9|S9|C9|H9|HK"), [9, 13])
+    assert result[1].cards == get_test_cards("D9|S9|C9|H9|HK")
 
 
 # Public "Hand Maker" method tests
@@ -75,6 +120,19 @@ def test_when_make_straight_flush_hands_and_overlapping_set_then_correct_values_
     assert result[1].cards == get_test_cards("D3|D4|D5|D6|D7")
     assert result[2] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("D2|D3|D4|D5|D6"), [6])
     assert result[2].cards == get_test_cards("D2|D3|D4|D5|D6")
+
+
+def test_when_make_straight_flush_hands_and_ace_low_hand_then_correct_values_returned(
+    engine, get_test_cards
+):
+    cards = get_test_cards("D4|DA|D2|D5|D3|HQ|D7|D8")
+    result = engine.make_straight_flush_hands(cards)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+    assert result[0] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, get_test_cards("DA|D2|D3|D4|D5"), [5])
+    assert result[0].cards == get_test_cards("DA|D2|D3|D4|D5")
 
 
 def test_when_make_quads_hands_and_not_enough_cards_then_return_empty_list(

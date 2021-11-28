@@ -172,13 +172,17 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         card_vals = [card.value for card in cards]
 
-        consecutive = sorted(card_vals) == list(range(min(card_vals), max(card_vals) + 1))
+        consecutive = sorted(card_vals) == list(
+            range(min(card_vals), max(card_vals) + 1)
+        )
         consecutive_ace_low = False
 
         if treat_ace_low and 14 in card_vals:
             card_vals.append(1)
             card_vals = [val for val in card_vals if val != 14]
-            consecutive_ace_low = sorted(card_vals) == list(range(min(card_vals), max(card_vals) + 1))
+            consecutive_ace_low = sorted(card_vals) == list(
+                range(min(card_vals), max(card_vals) + 1)
+            )
 
         return consecutive or consecutive_ace_low
 

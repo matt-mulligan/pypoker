@@ -9,8 +9,13 @@ import random
 from dataclasses import dataclass, InitVar, field
 from typing import List
 
-from pypoker.constants import GAME_TYPES, GAME_HAND_TYPES, GAME_HAND_STRENGTHS, GAME_HAND_TIEBREAKERS_ARGS, \
-    GAME_HAND_NUM_CARDS
+from pypoker.constants import (
+    GAME_TYPES,
+    GAME_HAND_TYPES,
+    GAME_HAND_STRENGTHS,
+    GAME_HAND_TIEBREAKERS_ARGS,
+    GAME_HAND_NUM_CARDS,
+)
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
 CARD_SUITS = ["Clubs", "Diamonds", "Hearts", "Spades"]
@@ -271,7 +276,9 @@ class Hand(object):
     Construct class used to represent a hand within pypoker.
     """
 
-    def __init__(self, game: str, hand_type: str, cards: List[Card], tiebreakers: List[int]):
+    def __init__(
+        self, game: str, hand_type: str, cards: List[Card], tiebreakers: List[int]
+    ):
         self.game = self._validate_game(game)
         self.type = self._validate_type(game, hand_type)
         self.cards = self._validate_cards(game, hand_type, cards)
@@ -284,7 +291,9 @@ class Hand(object):
         equality check does not check that hand.cards are the same.
         """
         if self.game != other.game:
-            raise GameMismatchError("Hand comparisons can only occur for hands of the same game type.")
+            raise GameMismatchError(
+                "Hand comparisons can only occur for hands of the same game type."
+            )
 
         return self.strength == other.strength and self.tiebreakers == other.tiebreakers
 
@@ -294,7 +303,9 @@ class Hand(object):
         equality check does not check that hand.cards are the same.
         """
         if self.game != other.game:
-            raise GameMismatchError("Hand comparisons can only occur for hands of the same game type.")
+            raise GameMismatchError(
+                "Hand comparisons can only occur for hands of the same game type."
+            )
 
         if self.strength > other.strength:
             return True
@@ -321,7 +332,9 @@ class Hand(object):
         equality check does not check that hand.cards are the same.
         """
         if self.game != other.game:
-            raise GameMismatchError("Hand comparisons can only occur for hands of the same game type.")
+            raise GameMismatchError(
+                "Hand comparisons can only occur for hands of the same game type."
+            )
 
         if self.strength > other.strength:
             return False
@@ -341,7 +354,7 @@ class Hand(object):
                 return True
 
         return False
-    
+
     def __ge__(self, other):
         """
         Tests equality of hands in terms of hand type, strength and tiebreakers.
@@ -391,7 +404,7 @@ class Hand(object):
         hand_types = GAME_HAND_TYPES[game]
         if hand_type not in hand_types:
             raise InvalidHandTypeError(f"Hand type '{hand_type}' is invalid")
-        
+
         return hand_type
 
     @staticmethod
@@ -405,11 +418,15 @@ class Hand(object):
         """
 
         if not all(isinstance(card, Card) for card in cards):
-            raise ValueError("Cards object passed to hand must be a list of Card objects")
+            raise ValueError(
+                "Cards object passed to hand must be a list of Card objects"
+            )
 
         min_cards, max_cards = GAME_HAND_NUM_CARDS[game][hand_type]
         if not min_cards <= len(cards) <= max_cards:
-            raise ValueError(f"{game} {hand_type} hand required between {min_cards} and {max_cards} cards")
+            raise ValueError(
+                f"{game} {hand_type} hand required between {min_cards} and {max_cards} cards"
+            )
 
         return cards
 
@@ -428,7 +445,9 @@ class Hand(object):
         return hand_strengths[hand_type]
 
     @staticmethod
-    def _validate_tiebreakers(game: str, hand_type: str, tiebreakers: List[int]) -> List[int]:
+    def _validate_tiebreakers(
+        game: str, hand_type: str, tiebreakers: List[int]
+    ) -> List[int]:
         """
         private method to check that the tiebreaker lists has the correct datatypes and number of args
         based on the game and hand types
@@ -441,7 +460,9 @@ class Hand(object):
         """
 
         if not all(isinstance(arg, int) or arg is None for arg in tiebreakers):
-            raise ValueError("all arguments in tiebreakers must be integers or Nonetype")
+            raise ValueError(
+                "all arguments in tiebreakers must be integers or Nonetype"
+            )
 
         arg_num = GAME_HAND_TIEBREAKERS_ARGS[game][hand_type]
         if not len(tiebreakers) == arg_num:

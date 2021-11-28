@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pypoker"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python poker game + logic engine"
 authors = ["Matt Mulligan <matt@mattmulligan.net>"]
 license = "GPL-3.0-or-later"
