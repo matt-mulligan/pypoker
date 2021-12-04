@@ -4,12 +4,15 @@ from pytest import mark, raises, fixture
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, \
     TH_HAND_FULL_HOUSE, TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR
-from pypoker.constructs import Card, Deck, Hand
-from pypoker.exceptions import InvalidGameError, InvalidHandError, InvalidHandTypeError, GameMismatchError
+from pypoker.constructs import Card, Deck, Hand, AnyValueCard, AnySuitCard, AnyCard
+from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
+
 
 """
 Test Fixtures
 """
+
+
 @fixture
 def deck_card_names():
     return [
@@ -76,6 +79,8 @@ def cards_five():
 """
 Card Construct Tests
 """
+
+
 @mark.parametrize(
     "card_val, card_rank, card_suit, card_name, card_id",
     [
@@ -191,6 +196,22 @@ def test_when_card_greater_than_then_correct_result_returned(card_a, card_b, exp
 
 
 @mark.parametrize(
+    "card_a, card_b",
+    [
+        (AnyValueCard("D"), Card("DT")),
+        (AnySuitCard("Q"), Card("H3")),
+        (AnyCard(""), Card("CK")),
+        (Card("DT"), AnyValueCard("D")),
+        (Card("H3"), AnySuitCard("Q")),
+        (Card("CK"), AnyCard("")),
+    ],
+)
+def test_when_card_greater_than_and_special_card_then_raise_error(card_a, card_b):
+    with raises(ValueError, match="Cannot compare any cards of type SpecialCard"):
+        value = card_a > card_b
+
+
+@mark.parametrize(
     "card_a, card_b, expected",
     [
         (Card("D7"), Card("DT"), True),
@@ -203,6 +224,77 @@ def test_when_card_greater_than_then_correct_result_returned(card_a, card_b, exp
 def test_when_card_less_than_then_correct_result_returned(card_a, card_b, expected):
     actual = card_a < card_b
     assert actual == expected
+
+
+@mark.parametrize(
+    "card_a, card_b",
+    [
+        (AnyValueCard("D"), Card("DT")),
+        (AnySuitCard("Q"), Card("H3")),
+        (AnyCard(""), Card("CK")),
+        (Card("DT"), AnyValueCard("D")),
+        (Card("H3"), AnySuitCard("Q")),
+        (Card("CK"), AnyCard("")),
+    ],
+)
+def test_when_card_less_than_and_special_card_then_raise_error(card_a, card_b):
+    with raises(ValueError, match="Cannot compare any cards of type SpecialCard"):
+        result = card_a < card_b
+
+
+"""
+SpecialCard Constructs Tests
+"""
+
+
+def test_when_any_value_card_and_id_too_long_then_raise_error():
+    with raises(ValueError, match="Card ID provided for AnyValueCard must be exactly 1 character"):
+        AnyValueCard("hearts")
+
+
+def test_when_any_value_card_and_bad_suit_then_raise_error():
+    with raises(ValueError, match="Card ID 'J' is not within valid list of suit identifiers "):
+        AnyValueCard("J")
+
+
+def test_when_any_value_card_then_attributes_correct():
+    card = AnyValueCard("H")
+
+    assert card.identity == "HANY_VALUE"
+    assert card.rank == "ANY_VALUE"
+    assert card.suit == "Hearts"
+    assert card.value is None
+    assert card.name == "ANY_VALUE of Hearts"
+
+
+def test_when_any_suit_card_and_id_too_long_then_raise_error():
+    with raises(ValueError, match="Card ID provided for AnySuitCard must be exactly 1 character"):
+        AnySuitCard("seven")
+
+
+def test_when_any_suit_card_and_bad_suit_then_raise_error():
+    with raises(ValueError, match="Card ID '1' is not within valid list of rank identifiers "):
+        AnySuitCard("1")
+
+
+def test_when_any_suit_card_then_attributes_correct():
+    card = AnySuitCard("7")
+
+    assert card.identity == "ANY_SUIT7"
+    assert card.rank == "Seven"
+    assert card.suit == "ANY_SUIT"
+    assert card.value == 7
+    assert card.name == "Seven of ANY_SUIT"
+
+
+def test_when_any_card_then_attributes_correct():
+    card = AnyCard("")
+
+    assert card.identity == "ANY_SUITANY_VALUE"
+    assert card.rank == "ANY_VALUE"
+    assert card.suit == "ANY_SUIT"
+    assert card.value is None
+    assert card.name == "ANY_VALUE of ANY_SUIT"
 
 
 """

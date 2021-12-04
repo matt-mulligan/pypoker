@@ -1,4 +1,12 @@
 """
+Card Construct Constants
+"""
+
+CARD_ANY_VALUE = "ANY_VALUE"
+CARD_ANY_SUIT = "ANY_SUIT"
+
+
+"""
 Texas Hold'em Constants
 """
 

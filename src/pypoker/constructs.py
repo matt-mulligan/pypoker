@@ -15,6 +15,8 @@ from pypoker.constants import (
     GAME_HAND_STRENGTHS,
     GAME_HAND_TIEBREAKERS_ARGS,
     GAME_HAND_NUM_CARDS,
+    CARD_ANY_VALUE,
+    CARD_ANY_SUIT,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -73,9 +75,15 @@ class Card(object):
         self.name = self._determine_name(self.rank, self.suit)
 
     def __gt__(self, other):
+        if any(isinstance(obj, SpecialCard) for obj in [self, other]):
+            raise ValueError("Cannot compare any cards of type SpecialCard")
+
         return self.value > other.value
 
     def __lt__(self, other):
+        if any(isinstance(obj, SpecialCard) for obj in [self, other]):
+            raise ValueError("Cannot compare any cards of type SpecialCard")
+
         return self.value < other.value
 
     @staticmethod
@@ -148,6 +156,7 @@ class Card(object):
             "Queen": 12,
             "King": 13,
             "Ace": 14,
+            CARD_ANY_VALUE: None,
         }[rank]
 
     @staticmethod
@@ -161,6 +170,101 @@ class Card(object):
         """
 
         return f"{rank} of {suit}"
+
+
+@dataclass()
+class SpecialCard(Card):
+    """
+    data class to identify "special" cards
+    special cards are ones that are not used within games but represent abstract card sets
+    e.g. any 7 card, any heart card, any card at all
+    """
+
+
+@dataclass()
+class AnyValueCard(SpecialCard):
+
+    rank: str = field(init=False, compare=False, repr=False)
+    suit: str = field(init=False, compare=False, repr=False)
+    value: int = field(init=False, compare=False, repr=False)
+    name: str = field(init=False)
+
+    def __post_init__(self, card_id):
+        self.identity = self._check_card_any_value_id(card_id)
+        self.rank = CARD_ANY_VALUE
+        self.suit = self._determine_suit(self.identity)
+        self.value = self._determine_value(self.rank)
+        self.name = self._determine_name(self.rank, self.suit)
+
+    @staticmethod
+    def _check_card_any_value_id(card_id):
+        """
+        checks the ID value passed to AnyValueCard class.
+        Value should be just the suit component
+        """
+
+        if len(card_id) != 1:
+            raise ValueError(
+                "Card ID provided for AnyValueCard must be exactly 1 character."
+            )
+
+        if card_id not in CARD_ID_SUITS.keys():
+            raise ValueError(
+                f"Card ID '{card_id}' is not within valid list of suit identifiers '{CARD_ID_SUITS.keys()}'"
+            )
+
+        return f"{card_id}{CARD_ANY_VALUE}"
+
+
+@dataclass()
+class AnySuitCard(SpecialCard):
+
+    rank: str = field(init=False, compare=False, repr=False)
+    suit: str = field(init=False, compare=False, repr=False)
+    value: int = field(init=False, compare=False, repr=False)
+    name: str = field(init=False)
+
+    def __post_init__(self, card_id):
+        self.identity = self._check_card_any_suit_id(card_id)
+        self.rank = CARD_ID_RANKS[card_id]
+        self.suit = CARD_ANY_SUIT
+        self.value = self._determine_value(self.rank)
+        self.name = self._determine_name(self.rank, self.suit)
+
+    @staticmethod
+    def _check_card_any_suit_id(card_id):
+        """
+        checks the ID value passed to AnySuitCard class.
+        Value should be just the suit component
+        """
+
+        if len(card_id) != 1:
+            raise ValueError(
+                "Card ID provided for AnySuitCard must be exactly 1 character."
+            )
+
+        if card_id not in CARD_ID_RANKS.keys():
+            raise ValueError(
+                f"Card ID '{card_id}' is not within valid list of rank identifiers '{CARD_ID_RANKS.keys()}'"
+            )
+
+        return f"{CARD_ANY_SUIT}{card_id}"
+
+
+@dataclass()
+class AnyCard(SpecialCard):
+
+    rank: str = field(init=False, compare=False, repr=False)
+    suit: str = field(init=False, compare=False, repr=False)
+    value: int = field(init=False, compare=False, repr=False)
+    name: str = field(init=False)
+
+    def __post_init__(self, card_id):
+        self.identity = f"{CARD_ANY_SUIT}{CARD_ANY_VALUE}"
+        self.rank = CARD_ANY_VALUE
+        self.suit = CARD_ANY_SUIT
+        self.value = self._determine_value(self.rank)
+        self.name = self._determine_name(self.rank, self.suit)
 
 
 class Deck(object):
