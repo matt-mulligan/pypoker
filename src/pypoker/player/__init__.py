@@ -22,7 +22,7 @@ class BasePlayer(object, metaclass=ABCMeta):
         chips: int = None,
         hole_cards: List[Card] = None,
         table_pos: int = None,
-        hand: Hand = None
+        hand: Hand = None,
     ):
         self.name = name
         self._chips = None if not chips else self._valid_chips_check(chips)

@@ -67,7 +67,9 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     if hand.tiebreakers == best_hand_tiebreaker
                 ]
 
-    def rank_player_hands(self, players: List[BasePlayer]) -> Dict[int, List[BasePlayer]]:
+    def rank_player_hands(
+        self, players: List[BasePlayer]
+    ) -> Dict[int, List[BasePlayer]]:
         """
         For the given list of players, rank them based on the player.hand attributes.
 
@@ -83,9 +85,15 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             raise RankingError("All values of players list must be of BasePlayer Type")
 
         if any(player.hand is None for player in players):
-            raise RankingError("All players must have their player.hand attribute set to rank them.")
+            raise RankingError(
+                "All players must have their player.hand attribute set to rank them."
+            )
 
-        players = sorted(players, key=lambda player: (player.hand.strength, player.hand.tiebreakers), reverse=True)
+        players = sorted(
+            players,
+            key=lambda player: (player.hand.strength, player.hand.tiebreakers),
+            reverse=True,
+        )
 
         ranked_players = dict()
         rank = 1
@@ -98,7 +106,10 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 current_tb = player.hand.tiebreakers
                 ranked_players[rank] = [player]
 
-            elif player.hand.strength == current_strength and player.hand.tiebreakers == current_tb:
+            elif (
+                player.hand.strength == current_strength
+                and player.hand.tiebreakers == current_tb
+            ):
                 ranked_players[rank].append(player)
 
             else:

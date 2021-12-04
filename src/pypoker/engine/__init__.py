@@ -23,13 +23,17 @@ class BasePokerEngine(object, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def find_player_best_hand(self, player: BasePlayer, board: List[Card]) -> List[Hand]:
+    def find_player_best_hand(
+        self, player: BasePlayer, board: List[Card]
+    ) -> List[Hand]:
         """
         Abstract method to determine the given players best possible hand with the cards currently available
         """
 
     @abstractmethod
-    def rank_player_hands(self, players: List[BasePlayer]) -> Dict[int, List[BasePlayer]]:
+    def rank_player_hands(
+        self, players: List[BasePlayer]
+    ) -> Dict[int, List[BasePlayer]]:
         """
         Abstract method to rank players based on their hand attributes.
         If player.hand is None this method should raise an exception.
