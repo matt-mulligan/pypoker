@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
 from typing import List, Dict
 
-from pypoker.constructs import Card
+from pypoker.constructs import Card, Hand
 from pypoker.player import BasePlayer
 
 
@@ -23,9 +23,18 @@ class BasePokerEngine(object, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def find_player_best_hand(self, player: BasePlayer, board: List[Card], **kwargs):
+    def find_player_best_hand(self, player: BasePlayer, board: List[Card]) -> List[Hand]:
         """
         Abstract method to determine the given players best possible hand with the cards currently available
+        """
+
+    @abstractmethod
+    def rank_player_hands(self, players: List[BasePlayer]) -> Dict[int, List[BasePlayer]]:
+        """
+        Abstract method to rank players based on their hand attributes.
+        If player.hand is None this method should raise an exception.
+        Method to return a dictionary where key is the rank (1 is highest) and the value is a list of player objects
+        sharing that rank
         """
 
     # Shared utility methods for all engine classes
