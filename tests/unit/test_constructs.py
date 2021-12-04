@@ -3,7 +3,8 @@ from unittest.mock import patch, call
 from pytest import mark, raises, fixture
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, \
-    TH_HAND_FULL_HOUSE, TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR
+    TH_HAND_FULL_HOUSE, TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, CardRank, \
+    CardSuit
 from pypoker.constructs import Card, Deck, Hand, AnyValueCard, AnySuitCard, AnyCard
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -84,58 +85,58 @@ Card Construct Tests
 @mark.parametrize(
     "card_val, card_rank, card_suit, card_name, card_id",
     [
-        (2, "Two", "Clubs", "Two of Clubs", "C2"),
-        (3, "Three", "Clubs", "Three of Clubs", "C3"),
-        (4, "Four", "Clubs", "Four of Clubs", "C4"),
-        (5, "Five", "Clubs", "Five of Clubs", "C5"),
-        (6, "Six", "Clubs", "Six of Clubs", "C6"),
-        (7, "Seven", "Clubs", "Seven of Clubs", "C7"),
-        (8, "Eight", "Clubs", "Eight of Clubs", "C8"),
-        (9, "Nine", "Clubs", "Nine of Clubs", "C9"),
-        (10, "Ten", "Clubs", "Ten of Clubs", "CT"),
-        (11, "Jack", "Clubs", "Jack of Clubs", "CJ"),
-        (12, "Queen", "Clubs", "Queen of Clubs", "CQ"),
-        (13, "King", "Clubs", "King of Clubs", "CK"),
-        (14, "Ace", "Clubs", "Ace of Clubs", "CA"),
-        (2, "Two", "Diamonds", "Two of Diamonds", "D2"),
-        (3, "Three", "Diamonds", "Three of Diamonds", "D3"),
-        (4, "Four", "Diamonds", "Four of Diamonds", "D4"),
-        (5, "Five", "Diamonds", "Five of Diamonds", "D5"),
-        (6, "Six", "Diamonds", "Six of Diamonds", "D6"),
-        (7, "Seven", "Diamonds", "Seven of Diamonds", "D7"),
-        (8, "Eight", "Diamonds", "Eight of Diamonds", "D8"),
-        (9, "Nine", "Diamonds", "Nine of Diamonds", "D9"),
-        (10, "Ten", "Diamonds", "Ten of Diamonds", "DT"),
-        (11, "Jack", "Diamonds", "Jack of Diamonds", "DJ"),
-        (12, "Queen", "Diamonds", "Queen of Diamonds", "DQ"),
-        (13, "King", "Diamonds", "King of Diamonds", "DK"),
-        (14, "Ace", "Diamonds", "Ace of Diamonds", "DA"),
-        (2, "Two", "Hearts", "Two of Hearts", "H2"),
-        (3, "Three", "Hearts", "Three of Hearts", "H3"),
-        (4, "Four", "Hearts", "Four of Hearts", "H4"),
-        (5, "Five", "Hearts", "Five of Hearts", "H5"),
-        (6, "Six", "Hearts", "Six of Hearts", "H6"),
-        (7, "Seven", "Hearts", "Seven of Hearts", "H7"),
-        (8, "Eight", "Hearts", "Eight of Hearts", "H8"),
-        (9, "Nine", "Hearts", "Nine of Hearts", "H9"),
-        (10, "Ten", "Hearts", "Ten of Hearts", "HT"),
-        (11, "Jack", "Hearts", "Jack of Hearts", "HJ"),
-        (12, "Queen", "Hearts", "Queen of Hearts", "HQ"),
-        (13, "King", "Hearts", "King of Hearts", "HK"),
-        (14, "Ace", "Hearts", "Ace of Hearts", "HA"),
-        (2, "Two", "Spades", "Two of Spades", "S2"),
-        (3, "Three", "Spades", "Three of Spades", "S3"),
-        (4, "Four", "Spades", "Four of Spades", "S4"),
-        (5, "Five", "Spades", "Five of Spades", "S5"),
-        (6, "Six", "Spades", "Six of Spades", "S6"),
-        (7, "Seven", "Spades", "Seven of Spades", "S7"),
-        (8, "Eight", "Spades", "Eight of Spades", "S8"),
-        (9, "Nine", "Spades", "Nine of Spades", "S9"),
-        (10, "Ten", "Spades", "Ten of Spades", "ST"),
-        (11, "Jack", "Spades", "Jack of Spades", "SJ"),
-        (12, "Queen", "Spades", "Queen of Spades", "SQ"),
-        (13, "King", "Spades", "King of Spades", "SK"),
-        (14, "Ace", "Spades", "Ace of Spades", "SA"),
+        (2, CardRank("2"), CardSuit("C"), "Two of Clubs", "C2"),
+        (3, CardRank("3"), CardSuit("C"), "Three of Clubs", "C3"),
+        (4, CardRank("4"), CardSuit("C"), "Four of Clubs", "C4"),
+        (5, CardRank("5"), CardSuit("C"), "Five of Clubs", "C5"),
+        (6, CardRank("6"), CardSuit("C"), "Six of Clubs", "C6"),
+        (7, CardRank("7"), CardSuit("C"), "Seven of Clubs", "C7"),
+        (8, CardRank("8"), CardSuit("C"), "Eight of Clubs", "C8"),
+        (9, CardRank("9"), CardSuit("C"), "Nine of Clubs", "C9"),
+        (10, CardRank("T"), CardSuit("C"), "Ten of Clubs", "CT"),
+        (11, CardRank("J"), CardSuit("C"), "Jack of Clubs", "CJ"),
+        (12, CardRank("Q"), CardSuit("C"), "Queen of Clubs", "CQ"),
+        (13, CardRank("K"), CardSuit("C"), "King of Clubs", "CK"),
+        (14, CardRank("A"), CardSuit("C"), "Ace of Clubs", "CA"),
+        (2, CardRank("2"), CardSuit("D"), "Two of Diamonds", "D2"),
+        (3, CardRank("3"), CardSuit("D"), "Three of Diamonds", "D3"),
+        (4, CardRank("4"), CardSuit("D"), "Four of Diamonds", "D4"),
+        (5, CardRank("5"), CardSuit("D"), "Five of Diamonds", "D5"),
+        (6, CardRank("6"), CardSuit("D"), "Six of Diamonds", "D6"),
+        (7, CardRank("7"), CardSuit("D"), "Seven of Diamonds", "D7"),
+        (8, CardRank("8"), CardSuit("D"), "Eight of Diamonds", "D8"),
+        (9, CardRank("9"), CardSuit("D"), "Nine of Diamonds", "D9"),
+        (10, CardRank("T"), CardSuit("D"), "Ten of Diamonds", "DT"),
+        (11, CardRank("J"), CardSuit("D"), "Jack of Diamonds", "DJ"),
+        (12, CardRank("Q"), CardSuit("D"), "Queen of Diamonds", "DQ"),
+        (13, CardRank("K"), CardSuit("D"), "King of Diamonds", "DK"),
+        (14, CardRank("A"), CardSuit("D"), "Ace of Diamonds", "DA"),
+        (2, CardRank("2"), CardSuit("H"), "Two of Hearts", "H2"),
+        (3, CardRank("3"), CardSuit("H"), "Three of Hearts", "H3"),
+        (4, CardRank("4"), CardSuit("H"), "Four of Hearts", "H4"),
+        (5, CardRank("5"), CardSuit("H"), "Five of Hearts", "H5"),
+        (6, CardRank("6"), CardSuit("H"), "Six of Hearts", "H6"),
+        (7, CardRank("7"), CardSuit("H"), "Seven of Hearts", "H7"),
+        (8, CardRank("8"), CardSuit("H"), "Eight of Hearts", "H8"),
+        (9, CardRank("9"), CardSuit("H"), "Nine of Hearts", "H9"),
+        (10, CardRank("T"), CardSuit("H"), "Ten of Hearts", "HT"),
+        (11, CardRank("J"), CardSuit("H"), "Jack of Hearts", "HJ"),
+        (12, CardRank("Q"), CardSuit("H"), "Queen of Hearts", "HQ"),
+        (13, CardRank("K"), CardSuit("H"), "King of Hearts", "HK"),
+        (14, CardRank("A"), CardSuit("H"), "Ace of Hearts", "HA"),
+        (2, CardRank("2"), CardSuit("S"), "Two of Spades", "S2"),
+        (3, CardRank("3"), CardSuit("S"), "Three of Spades", "S3"),
+        (4, CardRank("4"), CardSuit("S"), "Four of Spades", "S4"),
+        (5, CardRank("5"), CardSuit("S"), "Five of Spades", "S5"),
+        (6, CardRank("6"), CardSuit("S"), "Six of Spades", "S6"),
+        (7, CardRank("7"), CardSuit("S"), "Seven of Spades", "S7"),
+        (8, CardRank("8"), CardSuit("S"), "Eight of Spades", "S8"),
+        (9, CardRank("9"), CardSuit("S"), "Nine of Spades", "S9"),
+        (10, CardRank("T"), CardSuit("S"), "Ten of Spades", "ST"),
+        (11, CardRank("J"), CardSuit("S"), "Jack of Spades", "SJ"),
+        (12, CardRank("Q"), CardSuit("S"), "Queen of Spades", "SQ"),
+        (13, CardRank("K"), CardSuit("S"), "King of Spades", "SK"),
+        (14, CardRank("A"), CardSuit("S"), "Ace of Spades", "SA"),
     ],
 )
 def test_when_card_init_then_correct_values_set(
@@ -261,10 +262,10 @@ def test_when_any_value_card_then_attributes_correct():
     card = AnyValueCard("H")
 
     assert card.identity == "HANY_VALUE"
-    assert card.rank == "ANY_VALUE"
-    assert card.suit == "Hearts"
+    assert card.rank == CardRank("ANY_VALUE")
+    assert card.suit == CardSuit("H")
     assert card.value is None
-    assert card.name == "ANY_VALUE of Hearts"
+    assert card.name == "Any of Hearts"
 
 
 def test_when_any_suit_card_and_id_too_long_then_raise_error():
@@ -281,20 +282,20 @@ def test_when_any_suit_card_then_attributes_correct():
     card = AnySuitCard("7")
 
     assert card.identity == "ANY_SUIT7"
-    assert card.rank == "Seven"
-    assert card.suit == "ANY_SUIT"
+    assert card.rank == CardRank("7")
+    assert card.suit == CardSuit("ANY_SUIT")
     assert card.value == 7
-    assert card.name == "Seven of ANY_SUIT"
+    assert card.name == "Seven of Any"
 
 
 def test_when_any_card_then_attributes_correct():
     card = AnyCard("")
 
     assert card.identity == "ANY_SUITANY_VALUE"
-    assert card.rank == "ANY_VALUE"
-    assert card.suit == "ANY_SUIT"
+    assert card.rank == CardRank("ANY_VALUE")
+    assert card.suit == CardSuit("ANY_SUIT")
     assert card.value is None
-    assert card.name == "ANY_VALUE of ANY_SUIT"
+    assert card.name == "Any of Any"
 
 
 """

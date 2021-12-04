@@ -1,9 +1,43 @@
 """
 Card Construct Constants
 """
+from enum import Enum
 
 CARD_ANY_VALUE = "ANY_VALUE"
 CARD_ANY_SUIT = "ANY_SUIT"
+
+
+class CardRank(Enum):
+    Two = "2"
+    Three = "3"
+    Four = "4"
+    Five = "5"
+    Six = "6"
+    Seven = "7"
+    Eight = "8"
+    Nine = "9"
+    Ten = "T"
+    Jack = "J"
+    Queen = "Q"
+    King = "K"
+    Ace = "A"
+    Any = "ANY_VALUE"
+
+
+CARD_RANK_VALUES = [e.value for e in CardRank]
+CARD_RANK_NAMES = [e.name for e in CardRank]
+
+
+class CardSuit(Enum):
+    Hearts = "H"
+    Diamonds = "D"
+    Spades = "S"
+    Clubs = "C"
+    Any = "ANY_SUIT"
+
+
+CARD_SUIT_VALUES = [e.value for e in CardSuit]
+CARD_SUIT_NAMES = [e.name for e in CardSuit]
 
 
 """

@@ -55,7 +55,7 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         return {
             suit: list(group)
             for suit, group in groupby(
-                sorted(cards, key=lambda card: card.suit), key=lambda card: card.suit
+                sorted(cards, key=lambda card: card.suit.name), key=lambda card: card.suit.name
             )
         }
 
