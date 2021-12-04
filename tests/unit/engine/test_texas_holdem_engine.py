@@ -1,9 +1,12 @@
-from pytest import fixture, mark
+import re
+
+from pytest import fixture, mark, raises
 
 from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, TH_HAND_FULL_HOUSE, \
     TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, TH_HAND_HIGH_CARD
 from pypoker.constructs import Hand
 from pypoker.engine.texas_holdem import TexasHoldemPokerEngine
+from pypoker.exceptions import RankingError
 from pypoker.player.human import HumanPlayer
 
 
@@ -54,6 +57,138 @@ def test_when_find_player_best_hand_and_multiple_hands_with_identical_tiebreaker
     assert result[0].cards == get_test_cards("D9|S9|C9|H9|SK")
     assert result[1] == Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("D9|S9|C9|H9|HK"), [9, 13])
     assert result[1].cards == get_test_cards("D9|S9|C9|H9|HK")
+
+
+def test_when_rank_player_hands_and_not_all_players_are_player_objects_then_raise_error(engine):
+    player_a = HumanPlayer("Matt")
+    player_b = "Greg"
+    player_c = HumanPlayer("Bill")
+
+    with raises(RankingError, match=re.escape("All values of players list must be of BasePlayer Type")):
+        engine.rank_player_hands([player_a, player_b, player_c])
+
+
+def test_when_rank_player_hands_and_not_all_hands_set_then_raise_error(engine, get_test_cards):
+    player_a = HumanPlayer("Matt", hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7"), [7, None, None, None]))
+    player_b = HumanPlayer("Bill")
+
+    with raises(RankingError, match=re.escape("All players must have their player.hand attribute set to rank them.")):
+        engine.rank_player_hands([player_a, player_b])
+
+
+def test_when_rank_player_hands_and_all_different_strengths_then_return_correct_dict(engine, get_test_cards):
+    player_a = HumanPlayer(
+        "Matt",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|HA|HT|HJ"), [7, 14, 11, 10])
+    )
+    player_b = HumanPlayer(
+        "Greg",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_QUADS, get_test_cards("C7|D7|H7|HK|S7"), [7, 13])
+    )
+    player_c = HumanPlayer(
+        "Sarah",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, get_test_cards("C7|D9|HT|H6|S8"), [10])
+    )
+    player_d = HumanPlayer(
+        "Jane",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("C7|D4|HA|S9|S2"), [14, 9, 7, 4, 2])
+    )
+    player_e = HumanPlayer(
+        "Lucy",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("C7|D7|HA|SA|DA"), [14, 7])
+    )
+
+    ranked = engine.rank_player_hands([player_a, player_b, player_c, player_d, player_e])
+
+    assert ranked == {
+        1: [player_b], 2: [player_e], 3: [player_c], 4: [player_a], 5: [player_d]
+    }
+
+
+def test_when_rank_player_hands_and_strength_overlaps_then_return_correct_dict(engine, get_test_cards):
+    player_a = HumanPlayer(
+        "Matt",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|H2|HK|S7"), [7, 13, 7, 2])
+    )
+    player_b = HumanPlayer(
+        "Greg",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|HQ|HT|HJ"), [7, 12, 11, 10])
+    )
+    player_c = HumanPlayer(
+        "Sarah",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C9|D9|H2|H4|S6"), [9, 6, 4, 2])
+    )
+    player_d = HumanPlayer(
+        "Jane",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("C7|D4|HA|S9|S2"), [14, 9, 7, 4, 2])
+    )
+    player_e = HumanPlayer(
+        "Lucy",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("C7|D7|HA|SA|DA"), [14, 7])
+    )
+
+    ranked = engine.rank_player_hands([player_a, player_b, player_c, player_d, player_e])
+
+    assert ranked == {
+        1: [player_e], 2: [player_c], 3: [player_a], 4: [player_b], 5: [player_d]
+    }
+
+
+def test_when_rank_player_hands_and_strength_tiebreaker_overlaps_then_return_correct_dict(engine, get_test_cards):
+    player_a = HumanPlayer(
+        "Matt",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|H2|HK|S7"), [7, 13, 7, 2])
+    )
+    player_b = HumanPlayer(
+        "Greg",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|SK|H2|S7"), [7, 13, 7, 2])
+    )
+    player_c = HumanPlayer(
+        "Sarah",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C9|D9|H2|H4|S6"), [9, 6, 4, 2])
+    )
+    player_d = HumanPlayer(
+        "Jane",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, get_test_cards("C7|D4|HA|S9|S2"), [14, 9, 7, 4, 2])
+    )
+    player_e = HumanPlayer(
+        "Lucy",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, get_test_cards("C7|D7|HA|SA|DA"), [14, 7])
+    )
+
+    ranked = engine.rank_player_hands([player_a, player_b, player_c, player_d, player_e])
+
+    assert ranked == {
+        1: [player_e], 2: [player_c], 3: [player_a, player_b], 4: [player_d]
+    }
+
+
+def test_when_rank_player_hands_and_incomplete_hands_then_return_correct_dict(engine, get_test_cards):
+    player_a = HumanPlayer(
+        "Matt",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|SK|S7"), [7, 13, 7, None])
+    )
+    player_b = HumanPlayer(
+        "Greg",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C7|D7|H2|HK"), [7, 13, 2, None])
+    )
+    player_c = HumanPlayer(
+        "Sarah",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("C9|D9|H2|H4"), [9, 4, 2, None])
+    )
+    player_d = HumanPlayer(
+        "Ted",
+        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, get_test_cards("C9|D9|H9|H4"), [9, 4, None])
+    )
+
+    ranked = engine.rank_player_hands([player_a, player_b, player_c, player_d])
+
+    assert ranked == {
+        1: [player_d], 2: [player_c], 3: [player_a], 4: [player_b]
+    }
+
+
+
 
 
 # Public "Hand Maker" method tests

@@ -15,6 +15,9 @@ def base_engine():
         ):
             pass
 
+        def rank_player_hands(self, players: List[BasePlayer]):
+            pass
+
     return FakePokerEngine()
 
 

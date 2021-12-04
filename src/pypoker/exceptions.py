@@ -30,3 +30,9 @@ class InvalidHandError(PyPokerError):
         too many cards for a valid hand
         duplicate cards for a game type that dosen't accept this
     """
+
+
+class RankingError(PyPokerError):
+    """
+    Error thrown when trying to rank player hands but an error occurs, usually a player dosent have their hand attr set
+    """

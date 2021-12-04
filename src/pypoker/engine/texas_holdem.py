@@ -5,8 +5,8 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-from itertools import combinations
-from typing import List
+from itertools import combinations, groupby
+from typing import List, Dict
 
 from pypoker.constants import (
     TH_HANDS_ORDERED,
@@ -23,6 +23,7 @@ from pypoker.constants import (
 )
 from pypoker.constructs import Card, Hand
 from pypoker.engine import BasePokerEngine
+from pypoker.exceptions import RankingError
 from pypoker.player import BasePlayer
 
 
@@ -34,7 +35,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
     # Concrete Implementation of public methods
     # -----------------------------------------
     def find_player_best_hand(
-        self, player: BasePlayer, board: List[Card], **kwargs
+        self, player: BasePlayer, board: List[Card]
     ) -> List[Hand]:
         """
         Find a given players best possible hand with the current cards available.
@@ -65,6 +66,59 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     for hand in made_hands
                     if hand.tiebreakers == best_hand_tiebreaker
                 ]
+
+    def rank_player_hands(
+        self, players: List[BasePlayer]
+    ) -> Dict[int, List[BasePlayer]]:
+        """
+        For the given list of players, rank them based on the player.hand attributes.
+
+        If any player in the list does not have a hand attribute set, raise exception.
+
+        :param players: List of players to rank
+
+        :returns: Dictionary where key is the rank (1 being highest) and value is a list of player objects sharing
+        that rank.
+        """
+
+        if not all(isinstance(player, BasePlayer) for player in players):
+            raise RankingError("All values of players list must be of BasePlayer Type")
+
+        if any(player.hand is None for player in players):
+            raise RankingError(
+                "All players must have their player.hand attribute set to rank them."
+            )
+
+        players = sorted(
+            players,
+            key=lambda player: (player.hand.strength, player.hand.tiebreakers),
+            reverse=True,
+        )
+
+        ranked_players = dict()
+        rank = 1
+        current_strength = None
+        current_tb = None
+
+        for player in players:
+            if not current_strength:
+                current_strength = player.hand.strength
+                current_tb = player.hand.tiebreakers
+                ranked_players[rank] = [player]
+
+            elif (
+                player.hand.strength == current_strength
+                and player.hand.tiebreakers == current_tb
+            ):
+                ranked_players[rank].append(player)
+
+            else:
+                rank += 1
+                current_strength = player.hand.strength
+                current_tb = player.hand.tiebreakers
+                ranked_players[rank] = [player]
+
+        return ranked_players
 
     # Public "Hand Maker" methods
     # ---------------------------
