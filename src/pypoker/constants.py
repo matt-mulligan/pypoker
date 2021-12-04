@@ -25,7 +25,6 @@ class CardRank(Enum):
 
 
 CARD_RANK_VALUES = [e.value for e in CardRank]
-CARD_RANK_NAMES = [e.name for e in CardRank]
 
 
 class CardSuit(Enum):
@@ -37,14 +36,13 @@ class CardSuit(Enum):
 
 
 CARD_SUIT_VALUES = [e.value for e in CardSuit]
-CARD_SUIT_NAMES = [e.name for e in CardSuit]
 
 """
-Hand Construct Classes
+Hand Construct Constants
 """
 
 
-class HandType:
+class HandType(Enum):
     """
     Grouping class used as a parent to all game specific hand type enum classes
     """
@@ -55,7 +53,7 @@ Texas Hold'em Constants
 """
 
 
-class TexasHoldemHands(HandType, Enum):
+class TexasHoldemHandType(HandType, Enum):
     StraightFlush = "Straight Flush"
     Quads = "Quads"
     FullHouse = "Full House"
@@ -67,53 +65,62 @@ class TexasHoldemHands(HandType, Enum):
     HighCard = "High Card"
 
 
-TH_HAND_STRENGTHS = {
-    TexasHoldemHands.StraightFlush: 9,
-    TexasHoldemHands.Quads: 8,
-    TexasHoldemHands.FullHouse: 7,
-    TexasHoldemHands.Flush: 6,
-    TexasHoldemHands.Straight: 5,
-    TexasHoldemHands.Trips: 4,
-    TexasHoldemHands.TwoPair: 3,
-    TexasHoldemHands.Pair: 2,
-    TexasHoldemHands.HighCard: 1,
-}
+class TexasHoldemHandStrength(Enum):
+    StraightFlush = 9
+    Quads = 8
+    FullHouse = 7
+    Flush = 6
+    Straight = 5
+    Trips = 4
+    TwoPair = 3
+    Pair = 2
+    HighCard = 1
 
-TH_HAND_TIEBREAKER_ARGS = {
-    TexasHoldemHands.StraightFlush: 1,
-    TexasHoldemHands.Quads: 2,
-    TexasHoldemHands.FullHouse: 2,
-    TexasHoldemHands.Flush: 5,
-    TexasHoldemHands.Straight: 1,
-    TexasHoldemHands.Trips: 3,
-    TexasHoldemHands.TwoPair: 3,
-    TexasHoldemHands.Pair: 4,
-    TexasHoldemHands.HighCard: 5,
-}
 
-TH_HAND_NUM_CARDS = {
-    TexasHoldemHands.StraightFlush: (5, 5),
-    TexasHoldemHands.Quads: (4, 5),
-    TexasHoldemHands.FullHouse: (5, 5),
-    TexasHoldemHands.Flush: (5, 5),
-    TexasHoldemHands.Straight: (5, 5),
-    TexasHoldemHands.Trips: (3, 5),
-    TexasHoldemHands.TwoPair: (4, 5),
-    TexasHoldemHands.Pair: (2, 5),
-    TexasHoldemHands.HighCard: (1, 5),
-}
+class TexasHoldemHandTiebreakerArgs(Enum):
+    StraightFlush = 1
+    Quads = 2
+    FullHouse = 2
+    Flush = 5
+    Straight = 1
+    Trips = 3
+    TwoPair = 3
+    Pair = 4
+    HighCard = 5
+    
+    
+class TexasHoldemHandNumCards(Enum):
+    StraightFlush = (5, 5)
+    Quads = (4, 5)
+    FullHouse = (5, 5)
+    Flush = (5, 5)
+    Straight = (5, 5)
+    Trips = (3, 5)
+    TwoPair = (4, 5)
+    Pair = (2, 5)
+    HighCard = (1, 5)
 
 
 """
 Game filtered constants
 """
-GAME_TEXAS_HOLDEM = "Texas Hold'em"
-GAME_TYPES = [GAME_TEXAS_HOLDEM]
 
-GAME_HAND_TYPES = {GAME_TEXAS_HOLDEM: TexasHoldemHands}
 
-GAME_HAND_STRENGTHS = {GAME_TEXAS_HOLDEM: TH_HAND_STRENGTHS}
+class GameTypes(Enum):
+    TexasHoldem = "Texas Hold'em"
 
-GAME_HAND_NUM_CARDS = {GAME_TEXAS_HOLDEM: TH_HAND_NUM_CARDS}
 
-GAME_HAND_TIEBREAKERS_ARGS = {GAME_TEXAS_HOLDEM: TH_HAND_TIEBREAKER_ARGS}
+class GameHandTypes(Enum):
+    TexasHoldem = TexasHoldemHandType
+
+
+class GameHandStrengths(Enum):
+    TexasHoldem = TexasHoldemHandStrength
+
+
+class GameHandNumCards(Enum):
+    TexasHoldem = TexasHoldemHandNumCards
+
+
+class GameHandTiebreakerArgs(Enum):
+    TexasHoldem = TexasHoldemHandTiebreakerArgs

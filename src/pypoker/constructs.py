@@ -10,18 +10,13 @@ from dataclasses import dataclass, InitVar, field
 from typing import List
 
 from pypoker.constants import (
-    GAME_TYPES,
-    GAME_HAND_TYPES,
-    GAME_HAND_STRENGTHS,
-    GAME_HAND_TIEBREAKERS_ARGS,
-    GAME_HAND_NUM_CARDS,
     CARD_ANY_VALUE,
     CARD_ANY_SUIT,
     CardRank,
     CardSuit,
     CARD_SUIT_VALUES,
     CARD_RANK_VALUES,
-    HandType,
+    HandType, GameTypes, GameHandTypes, GameHandStrengths, GameHandNumCards, GameHandTiebreakerArgs,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -316,7 +311,7 @@ class Hand(object):
     """
 
     def __init__(
-        self, game: str, hand_type: HandType, cards: List[Card], tiebreakers: List[int]
+        self, game: GameTypes, hand_type: HandType, cards: List[Card], tiebreakers: List[int]
     ):
         self.game = self._validate_game(game)
         self.type = self._validate_type(game, hand_type)
@@ -415,7 +410,7 @@ class Hand(object):
         return False
 
     @staticmethod
-    def _validate_game(game: str) -> str:
+    def _validate_game(game: GameTypes) -> GameTypes:
         """
         private method to validate the game value.
 
@@ -424,13 +419,13 @@ class Hand(object):
         :return: validated game type
         """
 
-        if game not in GAME_TYPES:
-            raise InvalidGameError(f"Game type '{game}' is invalid")
+        if not isinstance(game, GameTypes):
+            raise InvalidGameError("game object must be Enum of type GameTypes")
 
         return game
 
     @staticmethod
-    def _validate_type(game: str, hand_type: HandType) -> HandType:
+    def _validate_type(game: GameTypes, hand_type: HandType) -> HandType:
         """
         private method to validate the hand type give
 
@@ -445,7 +440,7 @@ class Hand(object):
                 "hand_type passed to Hand is not of type HandType"
             )
 
-        hand_types = GAME_HAND_TYPES[game]
+        hand_types = GameHandTypes[game.name].value
         if hand_type not in hand_types:
             raise InvalidHandTypeError(
                 f"Hand type '{hand_type}' is not part of {game} hand types"
@@ -455,7 +450,7 @@ class Hand(object):
 
     @staticmethod
     def _validate_cards(
-        game: str, hand_type: HandType, cards: List[Card]
+        game: GameTypes, hand_type: HandType, cards: List[Card]
     ) -> List[Card]:
         """
         private method to validate card objects.
@@ -469,7 +464,7 @@ class Hand(object):
                 "Cards object passed to hand must be a list of Card objects"
             )
 
-        min_cards, max_cards = GAME_HAND_NUM_CARDS[game][hand_type]
+        min_cards, max_cards = GameHandNumCards[game.name].value[hand_type.name].value
         if not min_cards <= len(cards) <= max_cards:
             raise ValueError(
                 f"{game} {hand_type} hand required between {min_cards} and {max_cards} cards"
@@ -478,7 +473,7 @@ class Hand(object):
         return cards
 
     @staticmethod
-    def _get_hand_strength(game: str, hand_type: HandType) -> int:
+    def _get_hand_strength(game: GameTypes, hand_type: HandType) -> int:
         """
         private method to get the strength of the hand type for a specific game
 
@@ -488,11 +483,11 @@ class Hand(object):
         :return: strength of the hand type for the specific game type
         """
 
-        return GAME_HAND_STRENGTHS[game][hand_type]
+        return GameHandStrengths[game.name].value[hand_type.name].value
 
     @staticmethod
     def _validate_tiebreakers(
-        game: str, hand_type: HandType, tiebreakers: List[int]
+        game: GameTypes, hand_type: HandType, tiebreakers: List[int]
     ) -> List[int]:
         """
         private method to check that the tiebreaker lists has the correct datatypes and number of args
@@ -510,7 +505,7 @@ class Hand(object):
                 "all arguments in tiebreakers must be integers or Nonetype"
             )
 
-        arg_num = GAME_HAND_TIEBREAKERS_ARGS[game][hand_type]
+        arg_num = GameHandTiebreakerArgs[game.name].value[hand_type.name].value
         if not len(tiebreakers) == arg_num:
             raise ValueError(f"{game} {hand_type} hand requires {arg_num} tiebreakers")
 
