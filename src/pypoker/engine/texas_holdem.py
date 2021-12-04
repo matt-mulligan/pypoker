@@ -5,22 +5,10 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-from itertools import combinations, groupby
+from itertools import combinations
 from typing import List, Dict
 
-from pypoker.constants import (
-    TH_HANDS_ORDERED,
-    TH_HAND_STRAIGHT_FLUSH,
-    TH_HAND_QUADS,
-    TH_HAND_FULL_HOUSE,
-    TH_HAND_FLUSH,
-    TH_HAND_STRAIGHT,
-    TH_HAND_TRIPS,
-    TH_HAND_TWO_PAIR,
-    TH_HAND_PAIR,
-    TH_HAND_HIGH_CARD,
-    GAME_TEXAS_HOLDEM,
-)
+from pypoker.constants import GAME_TEXAS_HOLDEM, TexasHoldemHands
 from pypoker.constructs import Card, Hand
 from pypoker.engine import BasePokerEngine
 from pypoker.exceptions import RankingError
@@ -46,17 +34,17 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         available_cards = player.hole_cards + board
 
-        for hand_type in TH_HANDS_ORDERED:
+        for hand_type in TexasHoldemHands:
             made_hands = {
-                TH_HAND_STRAIGHT_FLUSH: self.make_straight_flush_hands,
-                TH_HAND_QUADS: self.make_quads_hands,
-                TH_HAND_FULL_HOUSE: self.make_full_house_hands,
-                TH_HAND_FLUSH: self.make_flush_hands,
-                TH_HAND_STRAIGHT: self.make_straight_hands,
-                TH_HAND_TRIPS: self.make_trips_hands,
-                TH_HAND_TWO_PAIR: self.make_two_pair_hands,
-                TH_HAND_PAIR: self.make_pair_hands,
-                TH_HAND_HIGH_CARD: self.make_high_card_hands,
+                TexasHoldemHands.StraightFlush: self.make_straight_flush_hands,
+                TexasHoldemHands.Quads: self.make_quads_hands,
+                TexasHoldemHands.FullHouse: self.make_full_house_hands,
+                TexasHoldemHands.Flush: self.make_flush_hands,
+                TexasHoldemHands.Straight: self.make_straight_hands,
+                TexasHoldemHands.Trips: self.make_trips_hands,
+                TexasHoldemHands.TwoPair: self.make_two_pair_hands,
+                TexasHoldemHands.Pair: self.make_pair_hands,
+                TexasHoldemHands.HighCard: self.make_high_card_hands,
             }[hand_type](available_cards)
 
             if made_hands:
@@ -151,7 +139,9 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             if tiebreaker == [14] and any(card.value == 5 for card in cards):
                 tiebreaker = [5]
             hands.append(
-                Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, cards, tiebreaker)
+                Hand(
+                    GAME_TEXAS_HOLDEM, TexasHoldemHands.StraightFlush, cards, tiebreaker
+                )
             )
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
@@ -186,7 +176,10 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             ):  # manages for the usecase of only getting 4 cards of the same value and no kickers
                 quad_hands.append(
                     Hand(
-                        GAME_TEXAS_HOLDEM, TH_HAND_QUADS, quad_cards, [quad_value, None]
+                        GAME_TEXAS_HOLDEM,
+                        TexasHoldemHands.Quads,
+                        quad_cards,
+                        [quad_value, None],
                     )
                 )
             else:
@@ -194,7 +187,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     [
                         Hand(
                             GAME_TEXAS_HOLDEM,
-                            TH_HAND_QUADS,
+                            TexasHoldemHands.Quads,
                             quad_cards + [card],
                             [quad_value, card.value],
                         )
@@ -238,7 +231,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             hands = [
                 Hand(
                     GAME_TEXAS_HOLDEM,
-                    TH_HAND_FULL_HOUSE,
+                    TexasHoldemHands.FullHouse,
                     trip_combo + pair_combo,
                     [trip_value, pair_combo[0].value],
                 )
@@ -275,7 +268,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         flushes = [
             Hand(
                 GAME_TEXAS_HOLDEM,
-                TH_HAND_FLUSH,
+                TexasHoldemHands.Flush,
                 cards,
                 sorted([card.value for card in cards], reverse=True),
             )
@@ -305,7 +298,9 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             tiebreaker = [max([card.value for card in cards])]
             if tiebreaker == [14] and any(card.value == 5 for card in cards):
                 tiebreaker = [5]
-            hands.append(Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, cards, tiebreaker))
+            hands.append(
+                Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Straight, cards, tiebreaker)
+            )
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
@@ -351,7 +346,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     [
                         Hand(
                             GAME_TEXAS_HOLDEM,
-                            TH_HAND_TRIPS,
+                            TexasHoldemHands.Trips,
                             trip_combo,
                             [trip_combo[0].value, None, None],
                         )
@@ -372,7 +367,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                         [
                             Hand(
                                 GAME_TEXAS_HOLDEM,
-                                TH_HAND_TRIPS,
+                                TexasHoldemHands.Trips,
                                 trip_combo + [kicker_card],
                                 [trip_value, kicker_card.value, None],
                             )
@@ -386,7 +381,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                         [
                             Hand(
                                 GAME_TEXAS_HOLDEM,
-                                TH_HAND_TRIPS,
+                                TexasHoldemHands.Trips,
                                 trip_combo + kicker_combo,
                                 [
                                     trip_value,
@@ -460,7 +455,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     [
                         Hand(
                             GAME_TEXAS_HOLDEM,
-                            TH_HAND_TWO_PAIR,
+                            TexasHoldemHands.TwoPair,
                             two_pair,
                             [max(two_pair_value_list), min(two_pair_value_list), None],
                         )
@@ -473,7 +468,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 [
                     Hand(
                         GAME_TEXAS_HOLDEM,
-                        TH_HAND_TWO_PAIR,
+                        TexasHoldemHands.TwoPair,
                         two_pair + [kicker],
                         [
                             max(two_pair_value_list),
@@ -529,7 +524,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     [
                         Hand(
                             GAME_TEXAS_HOLDEM,
-                            TH_HAND_PAIR,
+                            TexasHoldemHands.Pair,
                             pair,
                             [pair_value, None, None, None],
                         )
@@ -550,7 +545,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     [
                         Hand(
                             GAME_TEXAS_HOLDEM,
-                            TH_HAND_PAIR,
+                            TexasHoldemHands.Pair,
                             pair + kicker_set,
                             [
                                 pair_value,
@@ -577,7 +572,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     [
                         Hand(
                             GAME_TEXAS_HOLDEM,
-                            TH_HAND_PAIR,
+                            TexasHoldemHands.Pair,
                             pair + kicker_set,
                             [
                                 pair_value,
@@ -596,7 +591,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 [
                     Hand(
                         GAME_TEXAS_HOLDEM,
-                        TH_HAND_PAIR,
+                        TexasHoldemHands.Pair,
                         pair + [card],
                         [pair_value, card.value, None, None],
                     )
@@ -632,7 +627,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 [
                     Hand(
                         GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        TexasHoldemHands.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True),
                     )
@@ -654,7 +649,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 [
                     Hand(
                         GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        TexasHoldemHands.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True) + [None],
                     )
@@ -676,7 +671,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 [
                     Hand(
                         GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        TexasHoldemHands.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True)
                         + [None, None],
@@ -699,7 +694,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 [
                     Hand(
                         GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        TexasHoldemHands.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True)
                         + [None, None, None],
@@ -714,7 +709,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             [
                 Hand(
                     GAME_TEXAS_HOLDEM,
-                    TH_HAND_HIGH_CARD,
+                    TexasHoldemHands.HighCard,
                     [card],
                     [card.value, None, None, None, None],
                 )

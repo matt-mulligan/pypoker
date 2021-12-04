@@ -41,6 +41,14 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         sharing that rank
         """
 
+    # @abstractmethod
+    # def find_player_outs(
+    #         self, player: BasePlayer, board: List[Card], possible_cards: List[Card]
+    # ) -> List[Hand]:
+    #     """
+    #     Abstract method to determine the given players best possible hand with the cards currently available
+    #     """
+
     # Shared utility methods for all engine classes
     # ---------------------------------------------
     @staticmethod
@@ -55,7 +63,8 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         return {
             suit: list(group)
             for suit, group in groupby(
-                sorted(cards, key=lambda card: card.suit.name), key=lambda card: card.suit.name
+                sorted(cards, key=lambda card: card.suit.name),
+                key=lambda card: card.suit.name,
             )
         }
 

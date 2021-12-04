@@ -2,9 +2,7 @@ from unittest.mock import patch, call
 
 from pytest import mark, raises, fixture
 
-from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, TH_HAND_STRAIGHT_FLUSH, TH_HAND_QUADS, \
-    TH_HAND_FULL_HOUSE, TH_HAND_FLUSH, TH_HAND_STRAIGHT, TH_HAND_TRIPS, TH_HAND_TWO_PAIR, TH_HAND_PAIR, CardRank, \
-    CardSuit
+from pypoker.constants import GAME_TEXAS_HOLDEM, CardRank, CardSuit, TexasHoldemHands
 from pypoker.constructs import Card, Deck, Hand, AnyValueCard, AnySuitCard, AnyCard
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -493,13 +491,13 @@ def test_when_hand_and_bad_game_type_then_raise_error(get_test_cards):
     cards = get_test_cards("C9")
 
     with raises(InvalidGameError, match="Game type 'DERP' is invalid"):
-        Hand("DERP", TH_HAND_HIGH_CARD, cards, [1])
+        Hand("DERP", TexasHoldemHands.HighCard, cards, [1])
 
 
-def test_when_hand_and_bad_hand_type_then_raise_error(get_test_cards):
+def test_when_hand_and_hand_type_not_hand_type_then_raise_error(get_test_cards):
     cards = get_test_cards("C9")
 
-    with raises(InvalidHandTypeError, match="Hand type 'DERP' is invalid"):
+    with raises(InvalidHandTypeError, match="hand_type passed to Hand is not of type HandType"):
         Hand(GAME_TEXAS_HOLDEM, "DERP", cards, [1])
 
 
@@ -508,27 +506,27 @@ def test_when_hand_and_cards_are_not_all_cards_then_raise_error(get_test_cards):
     cards.append("D9")
 
     with raises(ValueError, match="Cards object passed to hand must be a list of Card objects"):
-        Hand(GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, cards, [1])
+        Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.HighCard, cards, [1])
 
 
 @mark.parametrize("game, hand_type, cards, min_cards, max_cards", [
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7|C8|C9", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4", 4, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA|SQ", 4, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA|CA", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ|CT", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7|C8|C9", 5, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4", 3, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ|DA", 3, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA", 4, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6|ST", 4, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4", 2, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9|H7", 2, 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D4|ST|HA|C9|H7", 1, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.StraightFlush, "C4|C5|C6|C7", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.StraightFlush, "C4|C5|C6|C7|C8|C9", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Quads, "C4|S4|H4", 4, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Quads, "C4|S4|H4|D4|HA|SQ", 4, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.FullHouse, "C4|S4|H4|DA", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.FullHouse, "C4|S4|H4|DA|SA|CA", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Flush, "C4|CA|C8|C2", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Flush, "C4|CA|C8|C2|CJ|CT", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Straight, "C4|S5|H6|D7", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Straight, "C4|S5|H6|D7|C8|C9", 5, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Trips, "C4|S4", 3, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Trips, "C4|S4|D4|D8|DJ|DA", 3, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, "C4|S4|HA", 4, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, "C4|S4|HA|DA|D6|ST", 4, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, "C4", 2, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, "C4|D4|ST|HA|C9|H7", 2, 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.HighCard, "C4|D4|ST|HA|C9|H7", 1, 5),
 ])
 def test_when_hand_and_incorrect_num_cards_then_raise_error(get_test_cards, game, hand_type, cards, min_cards, max_cards):
     cards = get_test_cards(cards)
@@ -541,26 +539,26 @@ def test_when_hand_and_tiebreakers_not_int_or_none_then_raise_error(get_test_car
     cards = get_test_cards("C4|C5|C6|C7|C8")
 
     with raises(ValueError, match="all arguments in tiebreakers must be integers or Nonetype"):
-        Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, cards, ["DERP"])
+        Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.StraightFlush, cards, ["DERP"])
 
 
 @mark.parametrize("game, hand_type, cards, tiebreakers, tb", [
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7|C8", [8, 7], 1),
-    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA", [4], 2),
-    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA", [4, 14, 12], 2),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA", [14], 2),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA", [14, 4, 2], 2),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ", [3, 4, 5, 6], 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ", [3, 4, 5, 6, 8, 12], 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7|C8", [3, 5], 1),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ", [4, 7], 3),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ", [4, 7, 5, 3], 3),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6", [5], 3),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6", [5, 6, 9, 13], 3),
-    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9", [5, 7, 8], 4),
-    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9", [5, 7, 8, 3, 12], 4),
-    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D4|ST|HA|C9", [3, 7, 2, 5], 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D4|ST|HA|C9", [3, 7, 2, 5, 12, 14], 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.StraightFlush, "C4|C5|C6|C7|C8", [8, 7], 1),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Quads, "C4|S4|H4|D4|HA", [4], 2),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Quads, "C4|S4|H4|D4|HA", [4, 14, 12], 2),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.FullHouse, "C4|S4|H4|DA|SA", [14], 2),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.FullHouse, "C4|S4|H4|DA|SA", [14, 4, 2], 2),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Flush, "C4|CA|C8|C2|CJ", [3, 4, 5, 6], 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Flush, "C4|CA|C8|C2|CJ", [3, 4, 5, 6, 8, 12], 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Straight, "C4|S5|H6|D7|C8", [3, 5], 1),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Trips, "C4|S4|D4|D8|DJ", [4, 7], 3),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Trips, "C4|S4|D4|D8|DJ", [4, 7, 5, 3], 3),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, "C4|S4|HA|DA|D6", [5], 3),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, "C4|S4|HA|DA|D6", [5, 6, 9, 13], 3),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, "C4|D4|ST|HA|C9", [5, 7, 8], 4),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, "C4|D4|ST|HA|C9", [5, 7, 8, 3, 12], 4),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.HighCard, "C4|D4|ST|HA|C9", [3, 7, 2, 5], 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.HighCard, "C4|D4|ST|HA|C9", [3, 7, 2, 5, 12, 14], 5),
 ])
 def test_when_hand_and_incorrect_num_tiebreakers_then_raise_error(get_test_cards, game, hand_type, cards, tiebreakers, tb):
     cards = get_test_cards(cards)
@@ -570,20 +568,20 @@ def test_when_hand_and_incorrect_num_tiebreakers_then_raise_error(get_test_cards
 
 
 @mark.parametrize("game, hand_type, cards, tiebreakers, strength", [
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, "C4|C5|C6|C7|C8", [8], 9),
-    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4|HA", [4, 14], 8),
-    (GAME_TEXAS_HOLDEM, TH_HAND_QUADS, "C4|S4|H4|D4", [4, None], 8),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FULL_HOUSE, "C4|S4|H4|DA|SA", [4, 14], 7),
-    (GAME_TEXAS_HOLDEM, TH_HAND_FLUSH, "C4|CA|C8|C2|CJ", [14, 11, 8, 4, 2], 6),
-    (GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, "C4|S5|H6|D7|C8", [8], 5),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8|DJ", [4, 11, 8], 4),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TRIPS, "C4|S4|D4|D8", [4, 8, None], 4),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA|D6", [14, 4, 6], 3),
-    (GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, "C4|S4|HA|DA", [14, 4, None], 3),
-    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4|ST|HA|C9", [4, 14, 10, 9], 2),
-    (GAME_TEXAS_HOLDEM, TH_HAND_PAIR, "C4|D4", [4, None, None, None], 2),
-    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "C4|D2|ST|HA|C9", [14, 10, 9, 4, 2], 1),
-    (GAME_TEXAS_HOLDEM, TH_HAND_HIGH_CARD, "ST|HA|C9", [14, 10, 9, None, None], 1),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.StraightFlush, "C4|C5|C6|C7|C8", [8], 9),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Quads, "C4|S4|H4|D4|HA", [4, 14], 8),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Quads, "C4|S4|H4|D4", [4, None], 8),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.FullHouse, "C4|S4|H4|DA|SA", [4, 14], 7),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Flush, "C4|CA|C8|C2|CJ", [14, 11, 8, 4, 2], 6),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Straight, "C4|S5|H6|D7|C8", [8], 5),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Trips, "C4|S4|D4|D8|DJ", [4, 11, 8], 4),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Trips, "C4|S4|D4|D8", [4, 8, None], 4),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, "C4|S4|HA|DA|D6", [14, 4, 6], 3),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, "C4|S4|HA|DA", [14, 4, None], 3),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, "C4|D4|ST|HA|C9", [4, 14, 10, 9], 2),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, "C4|D4", [4, None, None, None], 2),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.HighCard, "C4|D2|ST|HA|C9", [14, 10, 9, 4, 2], 1),
+    (GAME_TEXAS_HOLDEM, TexasHoldemHands.HighCard, "ST|HA|C9", [14, 10, 9, None, None], 1),
 ])
 def test_when_hand_then_correct_values_set(get_test_cards, game, hand_type, cards, tiebreakers, strength):
     cards = get_test_cards(cards)
@@ -598,8 +596,8 @@ def test_when_hand_then_correct_values_set(get_test_cards, game, hand_type, card
 
 
 def test_when_hand_equality_and_diff_games_then_raise_error(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
 
     hand_b.game = "diff_game"
 
@@ -608,56 +606,56 @@ def test_when_hand_equality_and_diff_games_then_raise_error(get_test_cards):
 
 
 def test_when_hand_equality_and_diff_strength_then_return_false(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
 
     result = hand_a == hand_b
     assert result is False
 
 
 def test_when_hand_equality_and_tiebreaker_top_level_diff_then_return_false(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
 
     result = hand_a == hand_b
     assert result is False
 
 
 def test_when_hand_equality_and_tiebreaker_lower_level_diff_then_return_false(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
 
     result = hand_a == hand_b
     assert result is False
 
 
 def test_when_hand_equality_and_tiebreaker_with_nones_dff_then_return_false(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
 
     result = hand_a == hand_b
     assert result is False
 
 
 def test_when_hand_equality_and_equal_then_return_true(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
 
     result = hand_a == hand_b
     assert result is True
 
 
 def test_when_hand_equality_and_equal_with_nones_then_return_true(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9"), [5, 9, None, None])
 
     result = hand_a == hand_b
     assert result is True
 
 
 def test_when_hand_greater_than_and_diff_games_then_raise_error(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
 
     hand_b.game = "diff_game"
 
@@ -669,8 +667,8 @@ def test_when_hand_greater_than_and_diff_games_then_raise_error(get_test_cards):
 
 
 def test_when_hand_greater_than_and_diff_strength_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
 
     result = hand_a > hand_b
     assert result is False
@@ -686,8 +684,8 @@ def test_when_hand_greater_than_and_diff_strength_then_correct_returns(get_test_
 
 
 def test_when_hand_greater_than_and_tiebreaker_top_level_diff_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
 
     result = hand_a > hand_b
     assert result is False
@@ -703,8 +701,8 @@ def test_when_hand_greater_than_and_tiebreaker_top_level_diff_then_correct_retur
 
 
 def test_when_hand_greater_than_and_tiebreaker_lower_level_diff_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
 
     result = hand_a > hand_b
     assert result is False
@@ -720,8 +718,8 @@ def test_when_hand_greater_than_and_tiebreaker_lower_level_diff_then_correct_ret
 
 
 def test_when_hand_greater_than_and_tiebreaker_with_nones_dff_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
 
     result = hand_a > hand_b
     assert result is True
@@ -737,8 +735,8 @@ def test_when_hand_greater_than_and_tiebreaker_with_nones_dff_then_correct_retur
 
 
 def test_when_hand_greater_than_and_equal_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
 
     result = hand_a > hand_b
     assert result is False
@@ -754,8 +752,8 @@ def test_when_hand_greater_than_and_equal_then_correct_returns(get_test_cards):
 
 
 def test_when_hand_greater_than_and_equal_with_nones_then_return_true(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9"), [5, 9, None, None])
 
     result = hand_a > hand_b
     assert result is False
@@ -771,8 +769,8 @@ def test_when_hand_greater_than_and_equal_with_nones_then_return_true(get_test_c
 
 
 def test_when_hand_less_than_and_diff_games_then_raise_error(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
 
     hand_b.game = "diff_game"
 
@@ -784,8 +782,8 @@ def test_when_hand_less_than_and_diff_games_then_raise_error(get_test_cards):
 
 
 def test_when_hand_less_than_and_diff_strength_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_TWO_PAIR, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.TwoPair, get_test_cards("D5|H5|H9|C9|SA"), [9, 5, 14])
 
     result = hand_a < hand_b
     assert result is True
@@ -801,8 +799,8 @@ def test_when_hand_less_than_and_diff_strength_then_correct_returns(get_test_car
 
 
 def test_when_hand_less_than_and_tiebreaker_top_level_diff_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D6|H6|H9|CJ|SA"), [6, 14, 11, 9])
 
     result = hand_a < hand_b
     assert result is True
@@ -818,8 +816,8 @@ def test_when_hand_less_than_and_tiebreaker_top_level_diff_then_correct_returns(
 
 
 def test_when_hand_less_than_and_tiebreaker_lower_level_diff_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CQ|SA"), [5, 14, 12, 9])
 
     result = hand_a < hand_b
     assert result is True
@@ -835,8 +833,8 @@ def test_when_hand_less_than_and_tiebreaker_lower_level_diff_then_correct_return
 
 
 def test_when_hand_less_than_and_tiebreaker_with_nones_dff_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|S2"), [5, 11, 9, 2])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|SJ"), [5, 11, 9, None])
 
     result = hand_a < hand_b
     assert result is False
@@ -852,8 +850,8 @@ def test_when_hand_less_than_and_tiebreaker_with_nones_dff_then_correct_returns(
 
 
 def test_when_hand_less_than_and_equal_then_correct_returns(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|CJ|SA"), [5, 14, 11, 9])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9|SJ|DA"), [5, 14, 11, 9])
 
     result = hand_a < hand_b
     assert result is False
@@ -869,8 +867,8 @@ def test_when_hand_less_than_and_equal_then_correct_returns(get_test_cards):
 
 
 def test_when_hand_less_than_and_equal_with_nones_then_return_true(get_test_cards):
-    hand_a = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
-    hand_b = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_a = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9"), [5, 9, None, None])
+    hand_b = Hand(GAME_TEXAS_HOLDEM, TexasHoldemHands.Pair, get_test_cards("D5|H5|H9"), [5, 9, None, None])
 
     result = hand_a < hand_b
     assert result is False

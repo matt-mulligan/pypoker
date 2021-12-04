@@ -16,7 +16,12 @@ from pypoker.constants import (
     GAME_HAND_TIEBREAKERS_ARGS,
     GAME_HAND_NUM_CARDS,
     CARD_ANY_VALUE,
-    CARD_ANY_SUIT, CardRank, CardSuit, CARD_SUIT_VALUES, CARD_RANK_VALUES,
+    CARD_ANY_SUIT,
+    CardRank,
+    CardSuit,
+    CARD_SUIT_VALUES,
+    CARD_RANK_VALUES,
+    HandType,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -311,7 +316,7 @@ class Hand(object):
     """
 
     def __init__(
-        self, game: str, hand_type: str, cards: List[Card], tiebreakers: List[int]
+        self, game: str, hand_type: HandType, cards: List[Card], tiebreakers: List[int]
     ):
         self.game = self._validate_game(game)
         self.type = self._validate_type(game, hand_type)
@@ -425,9 +430,9 @@ class Hand(object):
         return game
 
     @staticmethod
-    def _validate_type(game: str, hand_type: str) -> str:
+    def _validate_type(game: str, hand_type: HandType) -> HandType:
         """
-        private method to validate the hand type giv
+        private method to validate the hand type give
 
         :param game: type of game the hand is from
         :param hand_type: the hand type to validate
@@ -435,19 +440,27 @@ class Hand(object):
         :return: validated hand type
         """
 
+        if not isinstance(hand_type, HandType):
+            raise InvalidHandTypeError(
+                "hand_type passed to Hand is not of type HandType"
+            )
+
         hand_types = GAME_HAND_TYPES[game]
         if hand_type not in hand_types:
-            raise InvalidHandTypeError(f"Hand type '{hand_type}' is invalid")
+            raise InvalidHandTypeError(
+                f"Hand type '{hand_type}' is not part of {game} hand types"
+            )
 
         return hand_type
 
     @staticmethod
-    def _validate_cards(game: str, hand_type: str, cards: List[Card]) -> List[Card]:
+    def _validate_cards(
+        game: str, hand_type: HandType, cards: List[Card]
+    ) -> List[Card]:
         """
         private method to validate card objects.
 
         :param cards: value to validate
-
         :return: validated cards object
         """
 
@@ -465,7 +478,7 @@ class Hand(object):
         return cards
 
     @staticmethod
-    def _get_hand_strength(game: str, hand_type: str) -> int:
+    def _get_hand_strength(game: str, hand_type: HandType) -> int:
         """
         private method to get the strength of the hand type for a specific game
 
@@ -475,12 +488,11 @@ class Hand(object):
         :return: strength of the hand type for the specific game type
         """
 
-        hand_strengths = GAME_HAND_STRENGTHS[game]
-        return hand_strengths[hand_type]
+        return GAME_HAND_STRENGTHS[game][hand_type]
 
     @staticmethod
     def _validate_tiebreakers(
-        game: str, hand_type: str, tiebreakers: List[int]
+        game: str, hand_type: HandType, tiebreakers: List[int]
     ) -> List[int]:
         """
         private method to check that the tiebreaker lists has the correct datatypes and number of args

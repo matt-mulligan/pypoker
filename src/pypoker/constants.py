@@ -39,67 +39,68 @@ class CardSuit(Enum):
 CARD_SUIT_VALUES = [e.value for e in CardSuit]
 CARD_SUIT_NAMES = [e.name for e in CardSuit]
 
+"""
+Hand Construct Classes
+"""
+
+
+class HandType:
+    """
+    Grouping class used as a parent to all game specific hand type enum classes
+    """
+
 
 """
 Texas Hold'em Constants
 """
 
-TH_HAND_STRAIGHT_FLUSH = "Straight Flush"
-TH_HAND_QUADS = "Quads"
-TH_HAND_FULL_HOUSE = "Full House"
-TH_HAND_FLUSH = "Flush"
-TH_HAND_STRAIGHT = "Straight"
-TH_HAND_TRIPS = "Trips"
-TH_HAND_TWO_PAIR = "Two Pair"
-TH_HAND_PAIR = "Pair"
-TH_HAND_HIGH_CARD = "High Card"
 
-TH_HANDS_ORDERED = [
-    TH_HAND_STRAIGHT_FLUSH,
-    TH_HAND_QUADS,
-    TH_HAND_FULL_HOUSE,
-    TH_HAND_FLUSH,
-    TH_HAND_STRAIGHT,
-    TH_HAND_TRIPS,
-    TH_HAND_TWO_PAIR,
-    TH_HAND_PAIR,
-    TH_HAND_HIGH_CARD,
-]
+class TexasHoldemHands(HandType, Enum):
+    StraightFlush = "Straight Flush"
+    Quads = "Quads"
+    FullHouse = "Full House"
+    Flush = "Flush"
+    Straight = "Straight"
+    Trips = "Trips"
+    TwoPair = "Two Pair"
+    Pair = "Pair"
+    HighCard = "High Card"
+
 
 TH_HAND_STRENGTHS = {
-    TH_HAND_STRAIGHT_FLUSH: 9,
-    TH_HAND_QUADS: 8,
-    TH_HAND_FULL_HOUSE: 7,
-    TH_HAND_FLUSH: 6,
-    TH_HAND_STRAIGHT: 5,
-    TH_HAND_TRIPS: 4,
-    TH_HAND_TWO_PAIR: 3,
-    TH_HAND_PAIR: 2,
-    TH_HAND_HIGH_CARD: 1,
+    TexasHoldemHands.StraightFlush: 9,
+    TexasHoldemHands.Quads: 8,
+    TexasHoldemHands.FullHouse: 7,
+    TexasHoldemHands.Flush: 6,
+    TexasHoldemHands.Straight: 5,
+    TexasHoldemHands.Trips: 4,
+    TexasHoldemHands.TwoPair: 3,
+    TexasHoldemHands.Pair: 2,
+    TexasHoldemHands.HighCard: 1,
 }
 
 TH_HAND_TIEBREAKER_ARGS = {
-    TH_HAND_STRAIGHT_FLUSH: 1,
-    TH_HAND_QUADS: 2,
-    TH_HAND_FULL_HOUSE: 2,
-    TH_HAND_FLUSH: 5,
-    TH_HAND_STRAIGHT: 1,
-    TH_HAND_TRIPS: 3,
-    TH_HAND_TWO_PAIR: 3,
-    TH_HAND_PAIR: 4,
-    TH_HAND_HIGH_CARD: 5,
+    TexasHoldemHands.StraightFlush: 1,
+    TexasHoldemHands.Quads: 2,
+    TexasHoldemHands.FullHouse: 2,
+    TexasHoldemHands.Flush: 5,
+    TexasHoldemHands.Straight: 1,
+    TexasHoldemHands.Trips: 3,
+    TexasHoldemHands.TwoPair: 3,
+    TexasHoldemHands.Pair: 4,
+    TexasHoldemHands.HighCard: 5,
 }
 
 TH_HAND_NUM_CARDS = {
-    TH_HAND_STRAIGHT_FLUSH: (5, 5),
-    TH_HAND_QUADS: (4, 5),
-    TH_HAND_FULL_HOUSE: (5, 5),
-    TH_HAND_FLUSH: (5, 5),
-    TH_HAND_STRAIGHT: (5, 5),
-    TH_HAND_TRIPS: (3, 5),
-    TH_HAND_TWO_PAIR: (4, 5),
-    TH_HAND_PAIR: (2, 5),
-    TH_HAND_HIGH_CARD: (1, 5),
+    TexasHoldemHands.StraightFlush: (5, 5),
+    TexasHoldemHands.Quads: (4, 5),
+    TexasHoldemHands.FullHouse: (5, 5),
+    TexasHoldemHands.Flush: (5, 5),
+    TexasHoldemHands.Straight: (5, 5),
+    TexasHoldemHands.Trips: (3, 5),
+    TexasHoldemHands.TwoPair: (4, 5),
+    TexasHoldemHands.Pair: (2, 5),
+    TexasHoldemHands.HighCard: (1, 5),
 }
 
 
@@ -109,7 +110,7 @@ Game filtered constants
 GAME_TEXAS_HOLDEM = "Texas Hold'em"
 GAME_TYPES = [GAME_TEXAS_HOLDEM]
 
-GAME_HAND_TYPES = {GAME_TEXAS_HOLDEM: TH_HANDS_ORDERED}
+GAME_HAND_TYPES = {GAME_TEXAS_HOLDEM: TexasHoldemHands}
 
 GAME_HAND_STRENGTHS = {GAME_TEXAS_HOLDEM: TH_HAND_STRENGTHS}
 
