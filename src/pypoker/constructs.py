@@ -52,6 +52,9 @@ class Card(object):
 
         return self.value < other.value
 
+    def __hash__(self):
+        return hash(self.name)
+
     @staticmethod
     def _check_card_id(card_id: str) -> str:
         """
@@ -126,6 +129,9 @@ class AnyValueCard(SpecialCard):
         self.value = self._determine_value(self.rank)
         self.name = f"{self.rank.name} of {self.suit.name}"
 
+    def __hash__(self):
+        return hash(self.name)
+
     @staticmethod
     def _check_card_any_value_id(card_id):
         """
@@ -161,6 +167,9 @@ class AnySuitCard(SpecialCard):
         self.value = self._determine_value(self.rank)
         self.name = f"{self.rank.name} of {self.suit.name}"
 
+    def __hash__(self):
+        return hash(self.name)
+
     @staticmethod
     def _check_card_any_suit_id(card_id):
         """
@@ -195,6 +204,9 @@ class AnyCard(SpecialCard):
         self.suit = CardSuit(CARD_ANY_SUIT)
         self.value = self._determine_value(self.rank)
         self.name = f"{self.rank.name} of {self.suit.name}"
+
+    def __hash__(self):
+        return hash(self.name)
 
 
 class Deck(object):

@@ -2,6 +2,7 @@ from typing import List
 
 from pytest import fixture, mark
 
+from pypoker.constants import HandType
 from pypoker.constructs import Card
 from pypoker.engine import BasePokerEngine
 from pypoker.player import BasePlayer
@@ -16,6 +17,10 @@ def base_engine():
             pass
 
         def rank_player_hands(self, players: List[BasePlayer]):
+            pass
+
+        def find_player_outs(self, player: BasePlayer, board: List[Card], possible_draws: List[Card], target_hand: HandType
+        ) -> List[List[Card]]:
             pass
 
     return FakePokerEngine()

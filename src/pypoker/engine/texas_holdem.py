@@ -8,10 +8,10 @@ inherits from the BasePokerEngine class.
 from itertools import combinations
 from typing import List, Dict
 
-from pypoker.constants import GameTypes, TexasHoldemHandType
-from pypoker.constructs import Card, Hand
+from pypoker.constants import GameTypes, TexasHoldemHandType, HandType, CardSuit
+from pypoker.constructs import Card, Hand, AnyCard
 from pypoker.engine import BasePokerEngine
-from pypoker.exceptions import RankingError
+from pypoker.exceptions import RankingError, InvalidHandTypeError
 from pypoker.player import BasePlayer
 
 
@@ -107,6 +107,34 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 ranked_players[rank] = [player]
 
         return ranked_players
+
+    def find_player_outs(
+            self, player: BasePlayer, board: List[Card], possible_draws: List[Card], target_hand: TexasHoldemHandType
+    ) -> List[List[Card]]:
+        """
+        Concreet method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
+        If no way to get to the hand type then return empty list
+        This method uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
+        logical outs not direct outs.
+        """
+
+        if not isinstance(target_hand, TexasHoldemHandType):
+            raise InvalidHandTypeError("target_hand provided is not of type TexasHoldemHandType")
+
+        current_cards = player.hole_cards + board
+        remaining_draws = 5 - len(board)
+
+        return {
+            TexasHoldemHandType.StraightFlush: self.find_outs_straight_flush,
+            TexasHoldemHandType.Quads: self.find_outs_quads,
+            TexasHoldemHandType.FullHouse: self.find_outs_full_house,
+            TexasHoldemHandType.Flush: self.find_outs_flush,
+            TexasHoldemHandType.Straight: self.find_outs_straight,
+            TexasHoldemHandType.Trips: self.find_outs_trips,
+            TexasHoldemHandType.TwoPair: self.find_outs_two_pair,
+            TexasHoldemHandType.Pair: self.find_outs_pair,
+            TexasHoldemHandType.HighCard: self.find_outs_high_card,
+        }[target_hand](current_cards, possible_draws, remaining_draws)
 
     # Public "Hand Maker" methods
     # ---------------------------
@@ -718,3 +746,44 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             key=lambda hand: hand.tiebreakers,
             reverse=True,
         )
+
+    # Public "Find Outs" methods
+    # ---------------------------
+
+    def find_outs_straight_flush(self, current_cards, possible_draws, remaining_draws):
+        """
+        Public "find outs" method for texas holdem engine
+        attempt to find all the logical out combinations using special cards for the player to build a straight flush.
+
+        This method should return you all logical draws to make all possible straight flushes, better or worse ones.
+        """
+
+        cards_by_suit = self.group_cards_by_suit(current_cards)
+
+        eligible_suits = [suit for suit in CardSuit if len(cards_by_suit.get(suit.name, [])) + remaining_draws >= 5]
+        outs = []
+
+        for suit in eligible_suits:
+            current_suited_cards = [card for card in sorted(current_cards, key=lambda card: card.value, reverse=True) if card.suit == suit]
+            drawable_suited_cards = [card for card in sorted(possible_draws, key=lambda card: card.value, reverse=True) if card.suit == suit]
+
+            # Lazy/Slow approach, inject each unique combo of draw cards into the current cards and run them through
+            # find_consecutive_cards
+
+            for draw_combo in self.find_all_unique_card_combos(drawable_suited_cards, remaining_draws):
+                test_cards = current_suited_cards + draw_combo
+                straight_flushes = self.find_consecutive_value_cards(test_cards, True, 5)
+
+                for straight_flush in straight_flushes:
+                    drawn_cards = [card for card in straight_flush if card in draw_combo]
+                    drawn_cards += [AnyCard("")] * (remaining_draws - len(drawn_cards))
+                    outs.append(drawn_cards)
+
+            # Smarter/Faster approach, comparing values of current and drawbale cards, looks for what gaps can be
+            # plugged to make 5+ card hands
+
+            # not sure how :'(
+
+        return [list(x) for x in set(tuple(x) for x in outs)]
+
+

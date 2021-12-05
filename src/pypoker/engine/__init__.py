@@ -13,6 +13,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
 from typing import List, Dict
 
+from pypoker.constants import HandType
 from pypoker.constructs import Card, Hand
 from pypoker.player import BasePlayer
 
@@ -41,13 +42,16 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         sharing that rank
         """
 
-    # @abstractmethod
-    # def find_player_outs(
-    #         self, player: BasePlayer, board: List[Card], possible_cards: List[Card]
-    # ) -> List[Hand]:
-    #     """
-    #     Abstract method to determine the given players best possible hand with the cards currently available
-    #     """
+    @abstractmethod
+    def find_player_outs(
+            self, player: BasePlayer, board: List[Card], possible_draws: List[Card], target_hand: HandType
+    ) -> List[List[Card]]:
+        """
+        Abstract method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
+        If no way to get to the hand type then return empty list
+        This method uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
+        logical outs not direct outs.
+        """
 
     # Shared utility methods for all engine classes
     # ---------------------------------------------
