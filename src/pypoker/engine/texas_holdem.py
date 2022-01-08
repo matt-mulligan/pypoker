@@ -786,4 +786,30 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return [list(x) for x in set(tuple(x) for x in outs)]
 
+    def find_outs_quads(self, current_cards, possible_draws, remaining_draws):
+        """
+        Public "find outs" method for texas holdem engine
+        attempt to find all the logical out combinations using special cards for the player to build a quads hand.
+
+        This method should return you all logical draws to make all possible straight flushes, better or worse ones.
+        """
+
+        drawn_cards_by_value = self.group_cards_by_value(current_cards)
+        drawable_cards_by_value = self.group_cards_by_value(possible_draws)
+        eligible_values = [
+            value
+            for value, cards in drawn_cards_by_value.items()
+            if len(cards) + remaining_draws >= 4
+            and len(cards) + len(drawable_cards_by_value.get(value, [])) == 4
+        ]
+
+        outs = []
+        for value in eligible_values:
+            draws_needed = len(drawable_cards_by_value.get(value, []))
+            any_cards = [AnyCard("")] * (remaining_draws - draws_needed)
+
+            outs.append(drawable_cards_by_value.get(value, []) + any_cards)
+
+        return outs
+
 

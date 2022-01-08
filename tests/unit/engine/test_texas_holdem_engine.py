@@ -1529,3 +1529,135 @@ def test_when_find_outs_straight_flush_and_five_draws_then_return_outs(engine, g
     assert get_test_cards("ST|SJ|SQ|SK|SA") in outs
 
 
+def test_when_find_outs_quads_and_one_draw_no_quads_possible_then_empty_list_returned(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("D4|DK|S4|C9")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
+
+
+def test_when_find_outs_quads_and_one_draw_one_quads_possible_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("D4|DK|S4|C4")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 1
+
+    assert get_test_cards("H4") in outs
+
+
+def test_when_find_outs_quads_and_one_draw_multiple_quads_possible_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("D4|DK|S4|C4|HK|SK")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 2
+
+    assert get_test_cards("H4") in outs
+    assert get_test_cards("CK") in outs
+
+
+def test_when_find_outs_quads_and_one_draw_already_haev_quads_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CK|DK|S4|C4|HK|SK")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 1
+
+    assert get_test_cards("ANY_CARD") in outs
+
+
+def test_when_find_outs_quads_and_and_missing_card_not_in_possible_draws_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CK|D7|S4|C4|HK|SK")
+    possible_draws = [card for card in full_deck if card not in current_cards and card not in get_test_cards("DK")]
+    remaining_draws = 1
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
+
+
+
+
+
+
+
+
+def test_when_find_outs_quads_and_multiple_draws_no_quads_possible_then_empty_list_returned(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("D4|DK|SA|C9")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 2
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
+
+
+def test_when_find_outs_quads_and_multiple_draw_one_quads_possible_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("D4|DK|S4|C3|D9")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 2
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 1
+
+    assert get_test_cards("H4|C4") in outs
+
+
+def test_when_find_outs_quads_and_multiple_draw_multiple_quads_possible_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("D4|DK|S7|C9")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 3
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 4
+
+    assert get_test_cards("H4|C4|S4") in outs
+    assert get_test_cards("HK|CK|SK") in outs
+    assert get_test_cards("H7|D7|C7") in outs
+    assert get_test_cards("H9|D9|S9") in outs
+
+
+def test_when_find_outs_quads_and_multiple_draw_already_have_quads_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CK|DK|S4|C7|HK|SK")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 2
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 1
+
+    assert get_test_cards("ANY_CARD|ANY_CARD") in outs
+
+
+def test_when_find_outs_quads_and_multiple_draw_and_only_need_one_then_any_cards_fill_in_blanks(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CK|DK|S4|C7|HK")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 2
+
+    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 1
+
+    assert get_test_cards("SK|ANY_CARD") in outs
