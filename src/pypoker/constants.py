@@ -87,8 +87,8 @@ class TexasHoldemHandTiebreakerArgs(Enum):
     TwoPair = 3
     Pair = 4
     HighCard = 5
-    
-    
+
+
 class TexasHoldemHandNumCards(Enum):
     StraightFlush = (5, 5)
     Quads = (4, 5)

@@ -16,7 +16,12 @@ from pypoker.constants import (
     CardSuit,
     CARD_SUIT_VALUES,
     CARD_RANK_VALUES,
-    HandType, GameTypes, GameHandTypes, GameHandStrengths, GameHandNumCards, GameHandTiebreakerArgs,
+    HandType,
+    GameTypes,
+    GameHandTypes,
+    GameHandStrengths,
+    GameHandNumCards,
+    GameHandTiebreakerArgs,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -323,7 +328,11 @@ class Hand(object):
     """
 
     def __init__(
-        self, game: GameTypes, hand_type: HandType, cards: List[Card], tiebreakers: List[int]
+        self,
+        game: GameTypes,
+        hand_type: HandType,
+        cards: List[Card],
+        tiebreakers: List[int],
     ):
         self.game = self._validate_game(game)
         self.type = self._validate_type(game, hand_type)

@@ -109,7 +109,11 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         return ranked_players
 
     def find_player_outs(
-            self, player: BasePlayer, board: List[Card], possible_draws: List[Card], target_hand: TexasHoldemHandType
+        self,
+        player: BasePlayer,
+        board: List[Card],
+        possible_draws: List[Card],
+        target_hand: TexasHoldemHandType,
     ) -> List[List[Card]]:
         """
         Concreet method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
@@ -119,7 +123,9 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         """
 
         if not isinstance(target_hand, TexasHoldemHandType):
-            raise InvalidHandTypeError("target_hand provided is not of type TexasHoldemHandType")
+            raise InvalidHandTypeError(
+                "target_hand provided is not of type TexasHoldemHandType"
+            )
 
         current_cards = player.hole_cards + board
         remaining_draws = 5 - len(board)
@@ -168,7 +174,10 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 tiebreaker = [5]
             hands.append(
                 Hand(
-                    GameTypes.TexasHoldem, TexasHoldemHandType.StraightFlush, cards, tiebreaker
+                    GameTypes.TexasHoldem,
+                    TexasHoldemHandType.StraightFlush,
+                    cards,
+                    tiebreaker,
                 )
             )
 
@@ -327,7 +336,12 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             if tiebreaker == [14] and any(card.value == 5 for card in cards):
                 tiebreaker = [5]
             hands.append(
-                Hand(GameTypes.TexasHoldem, TexasHoldemHandType.Straight, cards, tiebreaker)
+                Hand(
+                    GameTypes.TexasHoldem,
+                    TexasHoldemHandType.Straight,
+                    cards,
+                    tiebreaker,
+                )
             )
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
@@ -760,22 +774,44 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         cards_by_suit = self.group_cards_by_suit(current_cards)
 
-        eligible_suits = [suit for suit in CardSuit if len(cards_by_suit.get(suit.name, [])) + remaining_draws >= 5]
+        eligible_suits = [
+            suit
+            for suit in CardSuit
+            if len(cards_by_suit.get(suit.name, [])) + remaining_draws >= 5
+        ]
         outs = []
 
         for suit in eligible_suits:
-            current_suited_cards = [card for card in sorted(current_cards, key=lambda card: card.value, reverse=True) if card.suit == suit]
-            drawable_suited_cards = [card for card in sorted(possible_draws, key=lambda card: card.value, reverse=True) if card.suit == suit]
+            current_suited_cards = [
+                card
+                for card in sorted(
+                    current_cards, key=lambda card: card.value, reverse=True
+                )
+                if card.suit == suit
+            ]
+            drawable_suited_cards = [
+                card
+                for card in sorted(
+                    possible_draws, key=lambda card: card.value, reverse=True
+                )
+                if card.suit == suit
+            ]
 
             # Lazy/Slow approach, inject each unique combo of draw cards into the current cards and run them through
             # find_consecutive_cards
 
-            for draw_combo in self.find_all_unique_card_combos(drawable_suited_cards, remaining_draws):
+            for draw_combo in self.find_all_unique_card_combos(
+                drawable_suited_cards, remaining_draws
+            ):
                 test_cards = current_suited_cards + draw_combo
-                straight_flushes = self.find_consecutive_value_cards(test_cards, True, 5)
+                straight_flushes = self.find_consecutive_value_cards(
+                    test_cards, True, 5
+                )
 
                 for straight_flush in straight_flushes:
-                    drawn_cards = [card for card in straight_flush if card in draw_combo]
+                    drawn_cards = [
+                        card for card in straight_flush if card in draw_combo
+                    ]
                     drawn_cards += [AnyCard("")] * (remaining_draws - len(drawn_cards))
                     outs.append(drawn_cards)
 
@@ -811,5 +847,3 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             outs.append(drawable_cards_by_value.get(value, []) + any_cards)
 
         return outs
-
-
