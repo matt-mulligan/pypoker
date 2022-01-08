@@ -1661,3 +1661,130 @@ def test_when_find_outs_quads_and_multiple_draw_and_only_need_one_then_any_cards
     assert len(outs) == 1
 
     assert get_test_cards("SK|ANY_CARD") in outs
+
+
+def test_when_find_outs_full_house_and_single_draw_and_no_full_house_possible_then_return_empty_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CK|DK|S4|C7|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
+
+
+def test_when_find_outs_full_house_and_single_draw_and_hand_possible_on_pair_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CK|DK|S4|HK|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 6
+
+    assert get_test_cards("H4") in outs
+    assert get_test_cards("C4") in outs
+    assert get_test_cards("D4") in outs
+
+    assert get_test_cards("S8") in outs
+    assert get_test_cards("C8") in outs
+    assert get_test_cards("D8") in outs
+
+
+def test_when_find_outs_full_house_and_single_draw_and_hand_possible_on_trips_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CA|D2|SA|H2|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 4
+
+    assert get_test_cards("DA") in outs
+    assert get_test_cards("HA") in outs
+
+    assert get_test_cards("C2") in outs
+    assert get_test_cards("S2") in outs
+
+
+def test_when_find_outs_full_house_and_single_draw_and_deck_exhausted_of_req_value_then_return_empty_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CA|D2|SA|H2|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards and card not in get_test_cards("DA|HA|C2|S2")]
+    remaining_draws = 1
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
+
+
+def test_when_find_outs_full_house_and_single_draw_and_already_have_full_house_then_return_correct_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CA|D2|SA|H2|HA")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 1
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 3
+
+    assert get_test_cards("ANY_CARD") in outs
+    assert get_test_cards("C2") in outs
+    assert get_test_cards("S2") in outs
+
+
+def test_when_find_outs_full_house_and_multiple_draw_and_no_full_house_possible_then_return_empty_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CA|D2|SK|H7|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 2
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
+
+
+def test_when_find_outs_full_house_and_multiple_draw_and_full_house_possible_then_return_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CA|D2|S2|H7|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards]
+    remaining_draws = 2
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 27
+
+    assert get_test_cards("H2|DA") in outs
+    assert get_test_cards("H2|SA") in outs
+    assert get_test_cards("H2|HA") in outs
+    assert get_test_cards("H2|C7") in outs
+    assert get_test_cards("H2|D7") in outs
+    assert get_test_cards("H2|S7") in outs
+    assert get_test_cards("H2|C8") in outs
+    assert get_test_cards("H2|D8") in outs
+    assert get_test_cards("H2|S8") in outs
+
+    assert get_test_cards("C2|DA") in outs
+    assert get_test_cards("C2|SA") in outs
+    assert get_test_cards("C2|HA") in outs
+    assert get_test_cards("C2|C7") in outs
+    assert get_test_cards("C2|D7") in outs
+    assert get_test_cards("C2|S7") in outs
+    assert get_test_cards("C2|C8") in outs
+    assert get_test_cards("C2|D8") in outs
+    assert get_test_cards("C2|S8") in outs
+
+    assert get_test_cards("HA|DA") in outs
+    assert get_test_cards("DA|SA") in outs
+    assert get_test_cards("HA|SA") in outs
+
+    assert get_test_cards("D7|C7") in outs
+    assert get_test_cards("D7|S7") in outs
+    assert get_test_cards("C7|S7") in outs
+
+    assert get_test_cards("D8|C8") in outs
+    assert get_test_cards("D8|S8") in outs
+    assert get_test_cards("C8|S8") in outs

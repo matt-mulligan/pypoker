@@ -847,3 +847,57 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             outs.append(drawable_cards_by_value.get(value, []) + any_cards)
 
         return outs
+
+    def find_outs_full_house(self, current_cards, possible_draws, remaining_draws):
+        """
+        Public "find outs" method for texas holdem engine
+        attempt to find all the logical out combinations using special cards for the player to build a full house hand.
+
+        This method should return you all logical draws to make all possible straight flushes, better or worse ones.
+        """
+
+        drawn_cards_by_value = self.group_cards_by_value(current_cards)
+        drawable_cards_by_value = self.group_cards_by_value(possible_draws)
+
+        # find possible trip/pair combos
+        possible_value_combinations = []  # list of tuples with the first value being the trip and second value being the pair
+        for trip_value in range(2, 15):
+            for pair_value in range(2, 15):
+
+                if trip_value == pair_value:
+                    # skip combinations where trip and pair are the same
+                    continue
+
+                trip_draws_required = max(3 - len(drawn_cards_by_value.get(trip_value, [])), 0)
+                pair_draws_required = max(2 - len(drawn_cards_by_value.get(pair_value, [])), 0)
+                if trip_draws_required + pair_draws_required > remaining_draws:
+                    # skip if cannot possibly draw enough cards
+                    continue
+
+                if trip_draws_required > len(drawable_cards_by_value.get(trip_value, [])) \
+                        or pair_draws_required > len(drawable_cards_by_value.get(pair_value, [])):
+                    # skip if deck is exhausted of the required value cards
+                    continue
+
+                possible_value_combinations.append((trip_value, pair_value))
+
+        # build outs for each combination
+        outs = []
+        for trip_value, pair_value in possible_value_combinations:
+            trip_draws_required = max(3 - len(drawn_cards_by_value.get(trip_value, [])), 0)
+            pair_draws_required = max(2 - len(drawn_cards_by_value.get(pair_value, [])), 0)
+
+            if not trip_draws_required and not pair_draws_required:
+                outs.append([AnyCard("")] * remaining_draws)
+                continue
+
+            trip_draw_combos = self.find_all_unique_card_combos(drawable_cards_by_value.get(trip_value, []), trip_draws_required)
+            pair_draw_combos = self.find_all_unique_card_combos(drawable_cards_by_value.get(pair_value, []), pair_draws_required)
+
+            for trip_draw_combo in trip_draw_combos:
+                for pair_draw_combo in pair_draw_combos:
+                    excess_cards = [AnyCard("")] * (remaining_draws - len(trip_draw_combo) - len(pair_draw_combo))
+                    outs.append(trip_draw_combo + pair_draw_combo + excess_cards)
+
+        return outs
+
