@@ -1788,3 +1788,14 @@ def test_when_find_outs_full_house_and_multiple_draw_and_full_house_possible_the
     assert get_test_cards("D8|C8") in outs
     assert get_test_cards("D8|S8") in outs
     assert get_test_cards("C8|S8") in outs
+
+
+def test_when_find_outs_full_house_and_deck_missing_required_outs_then_return_empty_list(engine, get_test_cards, full_deck):
+    current_cards = get_test_cards("CA|DA|S2|H2|H8")
+    possible_draws = [card for card in full_deck if card not in current_cards and card not in get_test_cards("SA|HA|C2|D2")]
+    remaining_draws = 1
+
+    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
+
+    assert isinstance(outs, list)
+    assert len(outs) == 0
