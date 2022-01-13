@@ -21,7 +21,7 @@ from pypoker.constants import (
     GameHandTypes,
     GameHandStrengths,
     GameHandNumCards,
-    GameHandTiebreakerArgs,
+    GameHandTiebreakerArgs, OutsCalculationMethod,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 
@@ -156,6 +156,15 @@ class AnyValueCard(SpecialCard):
 
         return f"{card_id}{CARD_ANY_VALUE}"
 
+    def to_explicit(self, cards: List[Card]):
+        """
+        Helper method on special card classes to convert them from their special card state to a list of explicit cards.
+
+        :param cards: list of possible card objects to create explict cards from.
+        """
+
+        return [card for card in cards if card.suit == self.suit]
+
 
 @dataclass()
 class AnySuitCard(SpecialCard):
@@ -194,6 +203,15 @@ class AnySuitCard(SpecialCard):
 
         return f"{CARD_ANY_SUIT}{card_id}"
 
+    def to_explicit(self, cards: List[Card]):
+        """
+        Helper method on special card classes to convert them from their special card state to a list of explicit cards.
+
+        :param cards: list of possible card objects to create explict cards from.
+        """
+
+        return [card for card in cards if card.value == self.value]
+
 
 @dataclass()
 class AnyCard(SpecialCard):
@@ -212,6 +230,16 @@ class AnyCard(SpecialCard):
 
     def __hash__(self):
         return hash(self.name)
+
+    @staticmethod
+    def to_explicit(cards: List[Card]):
+        """
+        Helper method on special card classes to convert them from their special card state to a list of explicit cards.
+
+        :param cards: list of possible card objects to create explict cards from.
+        """
+
+        return cards
 
 
 class Deck(object):

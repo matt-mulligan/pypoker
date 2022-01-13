@@ -266,6 +266,15 @@ def test_when_any_value_card_then_attributes_correct():
     assert card.name == "Any of Hearts"
 
 
+def test_when_any_value_card_to_explict_then_correct_cards_returned(get_test_cards):
+    card = AnyValueCard("H")
+    cards = get_test_cards("D7|H3|C9|HA|H3|C2")
+
+    explict = card.to_explicit(cards)
+
+    assert explict == get_test_cards("H3|HA|H3")
+
+
 def test_when_any_suit_card_and_id_too_long_then_raise_error():
     with raises(ValueError, match="Card ID provided for AnySuitCard must be exactly 1 character"):
         AnySuitCard("seven")
@@ -286,6 +295,15 @@ def test_when_any_suit_card_then_attributes_correct():
     assert card.name == "Seven of Any"
 
 
+def test_when_any_suit_card_to_explict_then_correct_cards_returned(get_test_cards):
+    card = AnySuitCard("7")
+    cards = get_test_cards("D7|H3|C9|H7|H3|C2")
+
+    explict = card.to_explicit(cards)
+
+    assert explict == get_test_cards("D7|H7")
+
+
 def test_when_any_card_then_attributes_correct():
     card = AnyCard("")
 
@@ -294,6 +312,16 @@ def test_when_any_card_then_attributes_correct():
     assert card.suit == CardSuit("ANY_SUIT")
     assert card.value is None
     assert card.name == "Any of Any"
+
+
+def test_when_any_card_to_explict_then_correct_cards_returned(get_test_cards):
+    card = AnyCard("")
+    cards = get_test_cards("D7|H3|C9|H7|H3|C2")
+
+    explict = card.to_explicit(cards)
+
+    assert explict == get_test_cards("D7|H3|C9|H7|H3|C2")
+
 
 
 """

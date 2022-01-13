@@ -1,8 +1,18 @@
+from enum import Enum
+
+"""
+General Enums
+"""
+
+
+class OutsCalculationMethod(Enum):
+    Implicit = "implicit"
+    ExplicitPartial = "explicit_partial"
+    ExplicitFull = "explicit_full"
+
 """
 Card Construct Constants
 """
-from enum import Enum
-
 CARD_ANY_VALUE = "ANY_VALUE"
 CARD_ANY_SUIT = "ANY_SUIT"
 
