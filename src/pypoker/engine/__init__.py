@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
 from typing import List, Dict
 
-from pypoker.constants import HandType
+from pypoker.constants import HandType, OutsCalculationMethod
 from pypoker.constructs import Card, Hand
 from pypoker.player import BasePlayer
 
@@ -49,12 +49,30 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         board: List[Card],
         possible_draws: List[Card],
         target_hand: HandType,
+        calc_method: OutsCalculationMethod = OutsCalculationMethod.ExplicitPartial
     ) -> List[List[Card]]:
         """
-        Abstract method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
+        Abstract method to determine all possible outs a player has to get the the specified hand type with the
+        possible draws remaining.
         If no way to get to the hand type then return empty list
-        This method uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
-        logical outs not direct outs.
+        This method provides an interface via the 'calc_method' argument to specify how explicitly outs should be
+        calculated
+
+        :param player: Pypoker player object, containign their card information
+
+        :param board: List of card objects representing the communal cards.
+
+        :param possible_draws: List of cards representing all remaining cards that could be drawn by the player.
+
+        :param target_hand: enum of the hand type the player is looking to have outs calculated for
+
+        :param calc_method: enum indicating to what level of explicitness to have the player outs calculated.
+        Implict - Out combinations returned from this method will make full use of "special" card objects
+        (e.g. AnySpade, AnySeven, AnyCard)
+        ExplicitPartial - out combinations returned from this method will use the explicit cards that are drawable
+        for the "meaningfull" cards but will still use the "AnyCard" special card for any surplus draws not required
+        ExplictFull - out combinations returned from this method will use the full explict set of cards, including
+        for the surpluss draws. This will majorly increase out combinations if surplus draws are available
         """
 
     # Shared utility methods for all engine classes
