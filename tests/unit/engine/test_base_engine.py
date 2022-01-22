@@ -253,3 +253,33 @@ def test_when_check_cards_consecutive_then_correct_values_returned(base_engine, 
     actual = base_engine.check_cards_consecutive(cards, treat_ace_low)
 
     assert actual == expected
+
+
+@mark.parametrize("raw_cards, expected_cards", [
+    ("D4", "D4"),
+    ("D9|H6|S2", "D9|H6|S2"),
+    ("D4|H9|C7|SK", "SK|H9|C7|D4"),
+    ("S9|D4|C9|CK|CA|H9", "CA|CK|S9|H9|C9|D4"),
+    ("D4|H9|ANY_DIAMOND|C7|ANY_HEART|SK", "SK|H9|C7|D4|ANY_HEART|ANY_DIAMOND"),
+    ("D4|H9|ANY_SEVEN|C7|ANY_CARD|SK", "SK|H9|C7|ANY_SEVEN|D4|ANY_CARD"),
+])
+def test_when_order_cards_then_correct_cards_returned(base_engine, get_test_cards, raw_cards, expected_cards):
+    raw_cards = get_test_cards(raw_cards)
+    expected_cards = get_test_cards(expected_cards)
+
+    actual = base_engine.order_cards(raw_cards)
+
+    assert actual == expected_cards
+
+
+@mark.parametrize("raw_sets, expected_sets", [
+    (["SK|S7", "C4|D9", "H2|CA"], ["CA|H2", "SK|S7", "D9|C4"]),
+    (["S7|DK", "S7|SK", "SK|S7", "C2|H3", "S7|SK"], ["SK|S7", "DK|S7", "H3|C2"]),
+])
+def test_when_deduplicate_card_sets_then_correct_sets_returned(base_engine, get_test_cards, raw_sets, expected_sets):
+    raw_sets = [get_test_cards(card_set) for card_set in raw_sets]
+    expected_sets = [get_test_cards(card_set) for card_set in expected_sets]
+
+    actual = base_engine.deduplicate_card_sets(raw_sets)
+
+    assert actual == expected_sets

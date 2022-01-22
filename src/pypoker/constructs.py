@@ -106,7 +106,7 @@ class Card(object):
             "Queen": 12,
             "King": 13,
             "Ace": 14,
-            "Any": None,
+            "Any": 0,
         }[rank.name]
 
 

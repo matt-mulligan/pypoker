@@ -9,6 +9,7 @@ the following tasks will be handled by the pypoker.engine classes:
     find odds of a player making X hand type from current position
     find odds of each player winning from current position
 """
+import itertools
 from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
 from typing import List, Dict
@@ -233,6 +234,31 @@ class BasePokerEngine(object, metaclass=ABCMeta):
             )
 
         return consecutive or consecutive_ace_low
+
+    @staticmethod
+    def order_cards(cards: List[Card]):
+        """
+        Helper function provided to order cards as one would in a hand.
+        Cards provided are sorted by value (High to Low) then by suit (Reverse Alphabetical Order)
+        This is mostly done to make analysis of hand outs easy as hand card order will always be the same.
+
+        :param cards: List of card objects to sort
+        """
+
+        ordered = sorted(cards, key=lambda card: (card.value, card.suit.value), reverse=True)
+        return ordered
+
+    def deduplicate_card_sets(self, card_sets: List[List[Card]]):
+        """
+        Public helper method
+        """
+
+        # Order each card set
+        card_sets = [self.order_cards(card_set) for card_set in card_sets]
+
+        # deduplicate card sets
+        card_sets.sort(key=lambda cards: ([card.value for card in cards], [card.suit.value for card in cards]), reverse=True)
+        return list(k for k, _ in itertools.groupby(card_sets))
 
     # Private Method Implementations
     # ------------------------------
