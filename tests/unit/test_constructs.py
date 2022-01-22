@@ -262,7 +262,7 @@ def test_when_any_value_card_then_attributes_correct():
     assert card.identity == "HANY_VALUE"
     assert card.rank == CardRank("ANY_VALUE")
     assert card.suit == CardSuit("H")
-    assert card.value is None
+    assert card.value == 0
     assert card.name == "Any of Hearts"
 
 
@@ -310,7 +310,7 @@ def test_when_any_card_then_attributes_correct():
     assert card.identity == "ANY_SUITANY_VALUE"
     assert card.rank == CardRank("ANY_VALUE")
     assert card.suit == CardSuit("ANY_SUIT")
-    assert card.value is None
+    assert card.value == 0
     assert card.name == "Any of Any"
 
 

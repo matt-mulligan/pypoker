@@ -5,11 +5,12 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
+import itertools
 from itertools import combinations
 from typing import List, Dict
 
-from pypoker.constants import GameTypes, TexasHoldemHandType, HandType, CardSuit
-from pypoker.constructs import Card, Hand, AnyCard
+from pypoker.constants import GameTypes, TexasHoldemHandType, HandType, CardSuit, OutsCalculationMethod
+from pypoker.constructs import Card, Hand, AnyCard, AnyValueCard
 from pypoker.engine import BasePokerEngine
 from pypoker.exceptions import RankingError, InvalidHandTypeError
 from pypoker.player import BasePlayer
@@ -114,11 +115,30 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         board: List[Card],
         possible_draws: List[Card],
         target_hand: TexasHoldemHandType,
+        calc_method: OutsCalculationMethod = OutsCalculationMethod.ExplicitPartial
     ) -> List[List[Card]]:
         """
-        Concreet method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
+        Concreat method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
         If no way to get to the hand type then return empty list
-        This method uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
+        This method provides an interface via the 'calc_method' argument to specify how explicitly outs should be
+        calculated
+
+        :param player: Pypoker player object, containign their card information
+
+        :param board: List of card objects representing the communal cards.
+
+        :param possible_draws: List of cards representing all remaining cards that could be drawn by the player.
+
+        :param target_hand: enum of the hand type the player is looking to have outs calculated for
+
+        :param calc_method: enum indicating to what level of explicitness to have the player outs calculated.
+        Implict - Out combinations returned from this method will make full use of "special" card objects
+        (e.g. AnySpade, AnySeven, AnyCard)
+        ExplicitPartial - out combinations returned from this method will use the explicit cards that are drawable
+        for the "meaningfull" cards but will still use the "AnyCard" special card for any surplus draws not required
+        ExplictFull - out combinations returned from this method will use the full explict set of cards, including
+        for the surpluss draws. This will majorly increase out combinations if surplus draws are availableThis method
+        uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
         logical outs not direct outs.
         """
 
@@ -140,7 +160,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             TexasHoldemHandType.TwoPair: self.find_outs_two_pair,
             TexasHoldemHandType.Pair: self.find_outs_pair,
             TexasHoldemHandType.HighCard: self.find_outs_high_card,
-        }[target_hand](current_cards, possible_draws, remaining_draws)
+        }[target_hand](current_cards, possible_draws, remaining_draws, calc_method)
 
     # Public "Hand Maker" methods
     # ---------------------------
@@ -764,46 +784,48 @@ class TexasHoldemPokerEngine(BasePokerEngine):
     # Public "Find Outs" methods
     # ---------------------------
 
-    def find_outs_straight_flush(self, current_cards, possible_draws, remaining_draws):
+    def find_outs_straight_flush(self, current_cards: List[Card], possible_draws: List[Card], remaining_draws: int, calc_method: OutsCalculationMethod):
         """
         Public "find outs" method for texas holdem engine
         attempt to find all the logical out combinations using special cards for the player to build a straight flush.
 
         This method should return you all logical draws to make all possible straight flushes, better or worse ones.
+
+        :param calc_method: enum indicating to what level of explicitness to have the player outs calculated.
+        Implict - Out combinations returned from this method will make full use of "special" card objects
+        (e.g. AnySpade, AnySeven, AnyCard)
+        ExplicitOuts - out combinations returned from this method will use the explicit cards that are drawable
+        for the "required" out cards but will still use the "AnyCard" special card for any surplus draws not required.
+        ExplictFull - out combinations returned from this method will use the full explict set of cards, including
+        for the surpluss draws. This will majorly increase out combinations if surplus draws are availableThis method
+        uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
+        logical outs not direct outs.
         """
 
-        cards_by_suit = self.group_cards_by_suit(current_cards)
+        drawn_cards_by_suit = self.group_cards_by_suit(current_cards)
+        drawable_cards_by_suit = self.group_cards_by_suit(possible_draws)
 
         eligible_suits = [
-            suit
-            for suit in CardSuit
-            if len(cards_by_suit.get(suit.name, [])) + remaining_draws >= 5
+            suit.name
+            for suit
+            in CardSuit
+            if len(drawn_cards_by_suit.get(suit.name, [])) + remaining_draws >= 5  # check enough draws to get missing suited cards
+            and len(drawn_cards_by_suit.get(suit.name, [])) + len(drawable_cards_by_suit.get(suit.name, [])) >= 5  # checks that their are cards in the deck of that suit we can draw
         ]
         outs = []
 
+        # Finds the CalcMethod.ExplictPartial out combinations
         for suit in eligible_suits:
-            current_suited_cards = [
-                card
-                for card in sorted(
-                    current_cards, key=lambda card: card.value, reverse=True
-                )
-                if card.suit == suit
-            ]
-            drawable_suited_cards = [
-                card
-                for card in sorted(
-                    possible_draws, key=lambda card: card.value, reverse=True
-                )
-                if card.suit == suit
-            ]
+            drawn_suit_cards = sorted(drawn_cards_by_suit.get(suit, []), key=lambda card: card.value, reverse=True)
+            drawable_suit_cards = sorted(drawable_cards_by_suit.get(suit, []), key=lambda card: card.value, reverse=True)
 
             # Lazy/Slow approach, inject each unique combo of draw cards into the current cards and run them through
             # find_consecutive_cards
 
             for draw_combo in self.find_all_unique_card_combos(
-                drawable_suited_cards, remaining_draws
+                drawable_suit_cards, remaining_draws
             ):
-                test_cards = current_suited_cards + draw_combo
+                test_cards = drawn_suit_cards + draw_combo
                 straight_flushes = self.find_consecutive_value_cards(
                     test_cards, True, 5
                 )
@@ -820,7 +842,25 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
             # not sure how :'(
 
-        return [list(x) for x in set(tuple(x) for x in outs)]
+        outs_explicit_partial = [list(x) for x in set(tuple(x) for x in outs)]
+
+        # converts the ExplicitPartial to ExplictFull if required
+        if calc_method == OutsCalculationMethod.ExplicitFull:
+            outs_explicit_full = []
+            for out_set in outs_explicit_partial:
+                surplus_outs = out_set.count(AnyCard(""))
+                meaningful_outs = [card for card in out_set if card != AnyCard("")]
+
+                if surplus_outs:
+                    possible_surplus_out_cards = [card for card in possible_draws if card not in out_set]
+                    surplus_sets = self.find_all_unique_card_combos(possible_surplus_out_cards, surplus_outs)
+                    outs_explicit_full.extend([meaningful_outs + surplus_set for surplus_set in surplus_sets])
+                else:
+                    outs_explicit_full.append(out_set)
+
+            return self.deduplicate_card_sets(outs_explicit_full)
+        else:
+            return self.deduplicate_card_sets(outs_explicit_partial)
 
     def find_outs_quads(self, current_cards, possible_draws, remaining_draws):
         """
@@ -901,3 +941,33 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return outs
 
+    def find_outs_flush(self, current_cards, possible_draws, remaining_draws):
+        """
+        Public "find outs" method for texas holdem engine
+        attempt to find all the logical out combinations using special cards for the player to build a flush hand.
+
+        This method should return you all logical draws to make all possible flushes, better or worse ones.
+        """
+
+        drawn_cards_by_suit = self.group_cards_by_suit(current_cards)
+        drawable_cards_by_suit = self.group_cards_by_suit(possible_draws)
+
+        eligible_suits = [
+            suit
+            for suit, cards
+            in drawn_cards_by_suit
+            if len(cards) + remaining_draws >= 5
+            and len(cards) + len(drawable_cards_by_suit.get(suit, [])) >= 5
+        ]
+
+        outs = []
+        for suit in eligible_suits:
+            required_suit_cards = 5 - len(drawn_cards_by_suit.get(suit, []))
+            required_any_cards = remaining_draws - required_suit_cards
+
+            suit_id = suit[0].upper()
+            out_set = [AnyValueCard(suit_id)] * required_suit_cards
+            out_set.extend([AnyCard("")] * required_any_cards)
+            outs.append(out_set)
+
+        return outs
