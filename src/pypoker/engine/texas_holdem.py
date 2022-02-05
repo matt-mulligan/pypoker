@@ -5,14 +5,13 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-import itertools
 from itertools import combinations
 from typing import List, Dict
 
-from pypoker.constants import GameTypes, TexasHoldemHandType, HandType, CardSuit, OutsCalculationMethod
-from pypoker.constructs import Card, Hand, AnyCard, AnyValueCard
+from pypoker.constants import GameTypes, TexasHoldemHandType
+from pypoker.constructs import Card, Hand, Deck, AnyCard
 from pypoker.engine import BasePokerEngine
-from pypoker.exceptions import RankingError, InvalidHandTypeError
+from pypoker.exceptions import RankingError
 from pypoker.player import BasePlayer
 
 
@@ -109,46 +108,23 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return ranked_players
 
-    def find_player_outs(
-        self,
-        player: BasePlayer,
-        board: List[Card],
-        possible_draws: List[Card],
-        target_hand: TexasHoldemHandType,
-        calc_method: OutsCalculationMethod = OutsCalculationMethod.ExplicitPartial
-    ) -> List[List[Card]]:
+    def find_outs(self, player: BasePlayer, hand_type: TexasHoldemHandType, board: List[Card], deck: Deck) -> List[List[Card]]:
         """
-        Concreat method to determine all possible outs a player has to get the the specified hand type with the possible draws remaining.
-        If no way to get to the hand type then return empty list
-        This method provides an interface via the 'calc_method' argument to specify how explicitly outs should be
-        calculated
+        abstract method to find the possible draws a player has to make the specified hand type with the current
+        board cards and the possible draws remaining.
 
-        :param player: Pypoker player object, containign their card information
+        :param player: pypoker player object representing the player we are looking for outs for.
+        :param hand_type: hand type enum used for determining the type of hand to find outs for.
+        :param deck: Pypoker deck object containing the remaining cards that are drawable
 
-        :param board: List of card objects representing the communal cards.
-
-        :param possible_draws: List of cards representing all remaining cards that could be drawn by the player.
-
-        :param target_hand: enum of the hand type the player is looking to have outs calculated for
-
-        :param calc_method: enum indicating to what level of explicitness to have the player outs calculated.
-        Implict - Out combinations returned from this method will make full use of "special" card objects
-        (e.g. AnySpade, AnySeven, AnyCard)
-        ExplicitPartial - out combinations returned from this method will use the explicit cards that are drawable
-        for the "meaningfull" cards but will still use the "AnyCard" special card for any surplus draws not required
-        ExplictFull - out combinations returned from this method will use the full explict set of cards, including
-        for the surpluss draws. This will majorly increase out combinations if surplus draws are availableThis method
-        uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
-        logical outs not direct outs.
+        :return: list of each combination of cards that would give the player this type of hand. Cards in these combinations
+        are explict normal cards (7H, 9D, etc) for cards required to make the out and AnyCard special cards for
+        any surplus draw cards not required to make the hand.
         """
-
-        if not isinstance(target_hand, TexasHoldemHandType):
-            raise InvalidHandTypeError(
-                "target_hand provided is not of type TexasHoldemHandType"
-            )
 
         current_cards = player.hole_cards + board
-        remaining_draws = 5 - len(board)
+        drawable_cards = deck.cards_available
+        draws_remaining = 5 - len(board)
 
         return {
             TexasHoldemHandType.StraightFlush: self.find_outs_straight_flush,
@@ -160,7 +136,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             TexasHoldemHandType.TwoPair: self.find_outs_two_pair,
             TexasHoldemHandType.Pair: self.find_outs_pair,
             TexasHoldemHandType.HighCard: self.find_outs_high_card,
-        }[target_hand](current_cards, possible_draws, remaining_draws, calc_method)
+        }[hand_type](current_cards, drawable_cards, draws_remaining)
 
     # Public "Hand Maker" methods
     # ---------------------------
@@ -784,190 +760,45 @@ class TexasHoldemPokerEngine(BasePokerEngine):
     # Public "Find Outs" methods
     # ---------------------------
 
-    def find_outs_straight_flush(self, current_cards: List[Card], possible_draws: List[Card], remaining_draws: int, calc_method: OutsCalculationMethod):
+    def find_outs_straight_flush(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> List[List[Card]]:
         """
-        Public "find outs" method for texas holdem engine
-        attempt to find all the logical out combinations using special cards for the player to build a straight flush.
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for the a straight flush hand with the given current_cards and available_cards
 
-        This method should return you all logical draws to make all possible straight flushes, better or worse ones.
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of drawd remaining.
 
-        :param calc_method: enum indicating to what level of explicitness to have the player outs calculated.
-        Implict - Out combinations returned from this method will make full use of "special" card objects
-        (e.g. AnySpade, AnySeven, AnyCard)
-        ExplicitOuts - out combinations returned from this method will use the explicit cards that are drawable
-        for the "required" out cards but will still use the "AnyCard" special card for any surplus draws not required.
-        ExplictFull - out combinations returned from this method will use the full explict set of cards, including
-        for the surpluss draws. This will majorly increase out combinations if surplus draws are availableThis method
-        uses SpecialCard constructs (e.g. any 7, any heart, any card at all) to limit the return set to
-        logical outs not direct outs.
+        :return List of draw combinations that would give a straight flush. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
         """
 
-        drawn_cards_by_suit = self.group_cards_by_suit(current_cards)
-        drawable_cards_by_suit = self.group_cards_by_suit(possible_draws)
+        current_suits_grouped = self.group_cards_by_suit(current_cards)
+        drawable_suits_grouped = self.group_cards_by_suit(available_cards)
 
-        eligible_suits = [
-            suit.name
-            for suit
-            in CardSuit
-            if len(drawn_cards_by_suit.get(suit.name, [])) + remaining_draws >= 5  # check enough draws to get missing suited cards
-            and len(drawn_cards_by_suit.get(suit.name, [])) + len(drawable_cards_by_suit.get(suit.name, [])) >= 5  # checks that their are cards in the deck of that suit we can draw
-        ]
-        outs = []
+        eligible_suits = {
+            suit: (curr_cards, drawable_suits_grouped[suit])
+            for suit, curr_cards in current_suits_grouped.items()
+            if len(curr_cards) + len(drawable_suits_grouped[suit]) >= 5
+        }
 
-        # Finds the CalcMethod.ExplictPartial out combinations
-        for suit in eligible_suits:
-            drawn_suit_cards = sorted(drawn_cards_by_suit.get(suit, []), key=lambda card: card.value, reverse=True)
-            drawable_suit_cards = sorted(drawable_cards_by_suit.get(suit, []), key=lambda card: card.value, reverse=True)
-
-            # Lazy/Slow approach, inject each unique combo of draw cards into the current cards and run them through
-            # find_consecutive_cards
-
-            for draw_combo in self.find_all_unique_card_combos(
-                drawable_suit_cards, remaining_draws
-            ):
-                test_cards = drawn_suit_cards + draw_combo
-                straight_flushes = self.find_consecutive_value_cards(
-                    test_cards, True, 5
-                )
-
-                for straight_flush in straight_flushes:
-                    drawn_cards = [
-                        card for card in straight_flush if card in draw_combo
-                    ]
-                    drawn_cards += [AnyCard("")] * (remaining_draws - len(drawn_cards))
-                    outs.append(drawn_cards)
-
-            # Smarter/Faster approach, comparing values of current and drawbale cards, looks for what gaps can be
-            # plugged to make 5+ card hands
-
-            # not sure how :'(
-
-        outs_explicit_partial = [list(x) for x in set(tuple(x) for x in outs)]
-
-        # converts the ExplicitPartial to ExplictFull if required
-        if calc_method == OutsCalculationMethod.ExplicitFull:
-            outs_explicit_full = []
-            for out_set in outs_explicit_partial:
-                surplus_outs = out_set.count(AnyCard(""))
-                meaningful_outs = [card for card in out_set if card != AnyCard("")]
-
-                if surplus_outs:
-                    possible_surplus_out_cards = [card for card in possible_draws if card not in out_set]
-                    surplus_sets = self.find_all_unique_card_combos(possible_surplus_out_cards, surplus_outs)
-                    outs_explicit_full.extend([meaningful_outs + surplus_set for surplus_set in surplus_sets])
-                else:
-                    outs_explicit_full.append(out_set)
-
-            return self.deduplicate_card_sets(outs_explicit_full)
-        else:
-            return self.deduplicate_card_sets(outs_explicit_partial)
-
-    def find_outs_quads(self, current_cards, possible_draws, remaining_draws):
-        """
-        Public "find outs" method for texas holdem engine
-        attempt to find all the logical out combinations using special cards for the player to build a quads hand.
-
-        This method should return you all logical draws to make all possible straight flushes, better or worse ones.
-        """
-
-        drawn_cards_by_value = self.group_cards_by_value(current_cards)
-        drawable_cards_by_value = self.group_cards_by_value(possible_draws)
-        eligible_values = [
-            value
-            for value, cards in drawn_cards_by_value.items()
-            if len(cards) + remaining_draws >= 4
-            and len(cards) + len(drawable_cards_by_value.get(value, [])) == 4
-        ]
+        if not eligible_suits:
+            return []
 
         outs = []
-        for value in eligible_values:
-            draws_needed = len(drawable_cards_by_value.get(value, []))
-            any_cards = [AnyCard("")] * (remaining_draws - draws_needed)
+        for curr_suit_cards, drawable_suit_cards in eligible_suits.values():
+            for draw_size in range(1, remaining_draws + 1):
+                straight_flushes = []
+                draw_combos = self.find_all_unique_card_combos(drawable_suit_cards, draw_size)
 
-            outs.append(drawable_cards_by_value.get(value, []) + any_cards)
+                for draw_combo in draw_combos:
+                    straight_flushes.extend(self.find_consecutive_value_cards(curr_suit_cards + draw_combo, run_size=5))
 
-        return outs
+                straight_flushes = self.deduplicate_card_sets(straight_flushes)
 
-    def find_outs_full_house(self, current_cards, possible_draws, remaining_draws):
-        """
-        Public "find outs" method for texas holdem engine
-        attempt to find all the logical out combinations using special cards for the player to build a full house hand.
+                for cards in straight_flushes:
+                    out_cards = [card for card in cards if card in drawable_suit_cards]
+                    out_cards = out_cards + [AnyCard("")] * (remaining_draws - len(out_cards))
+                    outs.append(out_cards)
 
-        This method should return you all logical draws to make all possible straight flushes, better or worse ones.
-        """
-
-        drawn_cards_by_value = self.group_cards_by_value(current_cards)
-        drawable_cards_by_value = self.group_cards_by_value(possible_draws)
-
-        # find possible trip/pair combos
-        possible_value_combinations = []  # list of tuples with the first value being the trip and second value being the pair
-        for trip_value in range(2, 15):
-            for pair_value in range(2, 15):
-
-                if trip_value == pair_value:
-                    # skip combinations where trip and pair are the same
-                    continue
-
-                trip_draws_required = max(3 - len(drawn_cards_by_value.get(trip_value, [])), 0)
-                pair_draws_required = max(2 - len(drawn_cards_by_value.get(pair_value, [])), 0)
-                if trip_draws_required + pair_draws_required > remaining_draws:
-                    # skip if cannot possibly draw enough cards
-                    continue
-
-                if trip_draws_required > len(drawable_cards_by_value.get(trip_value, [])) \
-                        or pair_draws_required > len(drawable_cards_by_value.get(pair_value, [])):
-                    # skip if deck is exhausted of the required value cards
-                    continue
-
-                possible_value_combinations.append((trip_value, pair_value))
-
-        # build outs for each combination
-        outs = []
-        for trip_value, pair_value in possible_value_combinations:
-            trip_draws_required = max(3 - len(drawn_cards_by_value.get(trip_value, [])), 0)
-            pair_draws_required = max(2 - len(drawn_cards_by_value.get(pair_value, [])), 0)
-
-            if not trip_draws_required and not pair_draws_required:
-                outs.append([AnyCard("")] * remaining_draws)
-                continue
-
-            trip_draw_combos = self.find_all_unique_card_combos(drawable_cards_by_value.get(trip_value, []), trip_draws_required)
-            pair_draw_combos = self.find_all_unique_card_combos(drawable_cards_by_value.get(pair_value, []), pair_draws_required)
-
-            for trip_draw_combo in trip_draw_combos:
-                for pair_draw_combo in pair_draw_combos:
-                    excess_cards = [AnyCard("")] * (remaining_draws - len(trip_draw_combo) - len(pair_draw_combo))
-                    outs.append(trip_draw_combo + pair_draw_combo + excess_cards)
-
-        return outs
-
-    def find_outs_flush(self, current_cards, possible_draws, remaining_draws):
-        """
-        Public "find outs" method for texas holdem engine
-        attempt to find all the logical out combinations using special cards for the player to build a flush hand.
-
-        This method should return you all logical draws to make all possible flushes, better or worse ones.
-        """
-
-        drawn_cards_by_suit = self.group_cards_by_suit(current_cards)
-        drawable_cards_by_suit = self.group_cards_by_suit(possible_draws)
-
-        eligible_suits = [
-            suit
-            for suit, cards
-            in drawn_cards_by_suit
-            if len(cards) + remaining_draws >= 5
-            and len(cards) + len(drawable_cards_by_suit.get(suit, [])) >= 5
-        ]
-
-        outs = []
-        for suit in eligible_suits:
-            required_suit_cards = 5 - len(drawn_cards_by_suit.get(suit, []))
-            required_any_cards = remaining_draws - required_suit_cards
-
-            suit_id = suit[0].upper()
-            out_set = [AnyValueCard(suit_id)] * required_suit_cards
-            out_set.extend([AnyCard("")] * required_any_cards)
-            outs.append(out_set)
-
-        return outs
+        return self.deduplicate_card_sets(outs)

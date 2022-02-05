@@ -1239,616 +1239,165 @@ def test_when_make_high_card_hands_and_only_single_card_combos_available_then_re
     assert result[2].cards == get_test_cards("H4")
 
 
-# Public "Find Outs" method tests
-# --------------------------------
-def test_when_find_outs_straight_flush_and_one_draw_and_no_suits_with_enough_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|S7|D8|H5|H6|C3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_no_eligible_suits_then_return_empty_list(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|ST|SJ|C6|C5")
+    available_cards = get_test_cards("D8|DT|SQ|SK|C2|C4")
     remaining_draws = 1
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 0
+    assert isinstance(result, list)
+    assert len(result) == 0
 
 
-def test_when_find_outs_straight_flush_and_one_draw_inside_straight_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|C7|C8|C5|H6|C3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_no_connecting_cards_then_return_empty_list(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|DT|D6|C6")
+    available_cards = get_test_cards("D5|D4|DJ|DQ|C2|C4")
+    remaining_draws = 2
+
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_straight_flush_and_one_draw_inside_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|DT|D6|C6")
+    available_cards = get_test_cards("D5|D4|DJ|D8|C2|C4")
     remaining_draws = 1
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-    assert get_test_cards("C6") in outs
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert get_test_cards("D8") in result
 
 
-def test_when_find_outs_straight_flush_and_one_draw_open_straight_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|C7|C8|C5|H6|SA")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_one_draw_open_ended_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|DT|D8|C6")
+    available_cards = get_test_cards("D6|D4|DJ|C2|C4")
     remaining_draws = 1
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 2
-    assert get_test_cards("C4") in outs
-    assert get_test_cards("C9") in outs
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert get_test_cards("D6") in result
+    assert get_test_cards("DJ") in result
 
 
-def test_when_find_outs_straight_flush_and_already_have_one_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|C7|C8|C5|C4|SA")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_one_draw_already_have_hand_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|DT|D8|C6|D6")
+    available_cards = get_test_cards("D5|C2|C4")
     remaining_draws = 1
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 3
-    assert get_test_cards("ANY_CARD") in outs
-    assert get_test_cards("C9") in outs
-    assert get_test_cards("C3") in outs
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert get_test_cards("ANY_CARD") in result
+    assert get_test_cards("D5") in result
 
 
-def test_when_find_outs_straight_flush_and_two_draws_and_no_suits_with_enough_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|S7|D8|H5|H6")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_two_draw_inside_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("D7|DT|D6|C6")
+    available_cards = get_test_cards("D5|D4|DJ|D8|C2|D9|C4")
     remaining_draws = 2
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 0
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert get_test_cards("D9|D8") in result
 
 
-def test_when_find_outs_straight_flush_and_two_draws_inside_straight_need_all_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|C8|C5|H6|S3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_two_draw_open_ended_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("CA|D9|DT|D8|C6")
+    available_cards = get_test_cards("D7|D4|DJ|C2|DQ|C4")
     remaining_draws = 2
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-    assert get_test_cards("C7|C6") in outs
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert get_test_cards("DJ|D7") in result
+    assert get_test_cards("DQ|DJ") in result
 
 
-def test_when_find_outs_straight_flush_and_two_draws_inside_straight_need_partial_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|C8|C5|C6|S3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_two_draw_inside_outside_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("CA|D9|DT|D7|C6")
+    available_cards = get_test_cards("D8|D4|DJ|C2|DQ|C4")
     remaining_draws = 2
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-    assert get_test_cards("C7|ANY_CARD") in outs
-    assert get_test_cards("C9|C7") in outs
-    assert get_test_cards("C7|C3") in outs
-    assert get_test_cards("C3|C2") in outs
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert get_test_cards("DJ|D8") in result
 
 
-def test_when_find_outs_straight_flush_and_two_draws_open_straight_need_all_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|C7|C8|H7|H6|SA")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_two_draw_already_have_hand_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|DT|D8|C6|D6")
+    available_cards = get_test_cards("D5|C2|C4|DJ|C7|DQ")
     remaining_draws = 2
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
 
-    assert isinstance(outs, list)
-    assert len(outs) == 3
-    assert get_test_cards("C9|C5") in outs
-    assert get_test_cards("C5|C4") in outs
-    assert get_test_cards("CT|C9") in outs
-
-
-def test_when_find_outs_straight_flush_and_two_draws_open_straight_need_partial_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|C7|C8|C5|SA")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-
-    assert get_test_cards("C4|ANY_CARD") in outs
-    assert get_test_cards("C9|ANY_CARD") in outs
-    assert get_test_cards("C4|C3") in outs
-    assert get_test_cards("CT|C9") in outs
+    assert isinstance(result, list)
+    assert len(result) == 4
+    assert get_test_cards("ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("D5|ANY_CARD") in result
+    assert get_test_cards("DJ|ANY_CARD") in result
+    assert get_test_cards("DQ|DJ") in result
 
 
-def test_when_find_outs_straight_flush_and_three_draws_and_no_suits_with_enough_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|S7|D8|H5")
-    possible_draws = [card for card in full_deck if card not in current_cards]
+def test_when_find_outs_straight_flush_and_three_draw_inside_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("CQ|DT|D6|C6")
+    available_cards = get_test_cards("D7|D4|DJ|D8|C2|D9|C4")
     remaining_draws = 3
 
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-def test_when_find_outs_straight_flush_and_three_draws_inside_straight_need_all_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|D8|H6|S3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 3
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-    assert get_test_cards("D7|D6|D5") in outs
-
-
-def test_when_find_outs_straight_flush_and_three_draws_inside_straight_need_partial_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("H8|H5|H9|C3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 3
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 5
-
-    assert get_test_cards("H7|H6|ANY_CARD") in outs
-    assert get_test_cards("H7|H6|H4") in outs
-    assert get_test_cards("HT|H7|H6") in outs
-    assert get_test_cards("HJ|HT|H7") in outs
-    assert get_test_cards("HQ|HJ|HT") in outs
-
-
-def test_when_find_outs_straight_flush_and_three_draws_open_straight_need_all_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|C7|H6|SA")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 3
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-
-    assert get_test_cards("C5|C4|C3") in outs
-    assert get_test_cards("C8|C5|C4") in outs
-    assert get_test_cards("C9|C8|C5") in outs
-    assert get_test_cards("CT|C9|C8") in outs
-
-
-def test_when_find_outs_straight_flush_and_three_draws_open_straight_need_partial_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|C7|C8|C5")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 3
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 6
-
-    assert get_test_cards("C4|ANY_CARD|ANY_CARD") in outs
-    assert get_test_cards("C9|ANY_CARD|ANY_CARD") in outs
-    assert get_test_cards("C4|C3|ANY_CARD") in outs
-    assert get_test_cards("CT|C9|ANY_CARD") in outs
-    assert get_test_cards("C4|C3|C2") in outs
-    assert get_test_cards("CJ|CT|C9") in outs
-
-
-def test_when_find_outs_straight_flush_and_three_draws_multiple_suits_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C6|S7|S8|C5")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 3
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 8
-
-    assert get_test_cards("C4|C3|C2") in outs
-    assert get_test_cards("C7|C4|C3") in outs
-    assert get_test_cards("C8|C7|C4") in outs
-    assert get_test_cards("C9|C8|C7") in outs
-
-    assert get_test_cards("S6|S5|S4") in outs
-    assert get_test_cards("S9|S6|S5") in outs
-    assert get_test_cards("ST|S9|S6") in outs
-    assert get_test_cards("SJ|ST|S9") in outs
-
-
-def test_when_find_outs_straight_flush_and_four_draws_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|D6")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 4
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 8
-
-    assert get_test_cards("DA|D5|D3|D2") in outs
-    assert get_test_cards("D5|D3|D2|ANY_CARD") in outs
-    assert get_test_cards("D7|D5|D3|ANY_CARD") in outs
-    assert get_test_cards("D8|D7|D5|ANY_CARD") in outs
-    assert get_test_cards("D9|D8|D7|D5") in outs
-    assert get_test_cards("DT|D9|D8|D7") in outs
-    assert get_test_cards("DA|DQ|DJ|DT") in outs
-    assert get_test_cards("DQ|DJ|DT|D9") in outs
-
-
-def test_when_find_outs_straight_flush_and_five_draws_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 5
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 40
-
-    assert get_test_cards("DA|D5|D3|D2|ANY_CARD") in outs
-    assert get_test_cards("D6|D5|D3|D2|ANY_CARD") in outs
-    assert get_test_cards("D7|D6|D5|D3|ANY_CARD") in outs
-    assert get_test_cards("D8|D7|D6|D5|ANY_CARD") in outs
-    assert get_test_cards("D9|D8|D7|D6|D5") in outs
-    assert get_test_cards("DT|D9|D8|D7|D6") in outs
-    assert get_test_cards("DJ|DT|D9|D8|D7") in outs
-    assert get_test_cards("DQ|DJ|DT|D9|D8") in outs
-    assert get_test_cards("DQ|DJ|DT|D9|ANY_CARD") in outs
-    assert get_test_cards("DA|DQ|DJ|DT|ANY_CARD") in outs
-
-    assert get_test_cards("CA|C5|C4|C3|C2") in outs
-    assert get_test_cards("C6|C5|C4|C3|C2") in outs
-    assert get_test_cards("C7|C6|C5|C4|C3") in outs
-    assert get_test_cards("C8|C7|C6|C5|C4") in outs
-    assert get_test_cards("C9|C8|C7|C6|C5") in outs
-    assert get_test_cards("CT|C9|C8|C7|C6") in outs
-    assert get_test_cards("CJ|CT|C9|C8|C7") in outs
-    assert get_test_cards("CQ|CJ|CT|C9|C8") in outs
-    assert get_test_cards("CK|CQ|CJ|CT|C9") in outs
-    assert get_test_cards("CA|CK|CQ|CJ|CT") in outs
-
-    assert get_test_cards("HA|H5|H4|H3|H2") in outs
-    assert get_test_cards("H6|H5|H4|H3|H2") in outs
-    assert get_test_cards("H7|H6|H5|H4|H3") in outs
-    assert get_test_cards("H8|H7|H6|H5|H4") in outs
-    assert get_test_cards("H9|H8|H7|H6|H5") in outs
-    assert get_test_cards("HT|H9|H8|H7|H6") in outs
-    assert get_test_cards("HJ|HT|H9|H8|H7") in outs
-    assert get_test_cards("HQ|HJ|HT|H9|H8") in outs
-    assert get_test_cards("HK|HQ|HJ|HT|H9") in outs
-    assert get_test_cards("HA|HK|HQ|HJ|HT") in outs
-
-    assert get_test_cards("SA|S5|S4|S3|S2") in outs
-    assert get_test_cards("S6|S5|S4|S3|S2") in outs
-    assert get_test_cards("S7|S6|S5|S4|S3") in outs
-    assert get_test_cards("S8|S7|S6|S5|S4") in outs
-    assert get_test_cards("S9|S8|S7|S6|S5") in outs
-    assert get_test_cards("ST|S9|S8|S7|S6") in outs
-    assert get_test_cards("SJ|ST|S9|S8|S7") in outs
-    assert get_test_cards("SQ|SJ|ST|S9|S8") in outs
-    assert get_test_cards("SK|SQ|SJ|ST|S9") in outs
-    assert get_test_cards("SA|SK|SQ|SJ|ST") in outs
-
-
-def test_when_find_outs_straight_flush_implicit_outs_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|C8|C5|C6|S3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.Implicit)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-    assert get_test_cards("C7|ANY_CARD") in outs
-    assert get_test_cards("C9|C7") in outs
-    assert get_test_cards("C7|C3") in outs
-    assert get_test_cards("C3|C2") in outs
-
-
-def test_when_find_outs_straight_flush_explict_partial_outs_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|C8|C5|C6|S3")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitPartial)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-    assert get_test_cards("C7|ANY_CARD") in outs
-    assert get_test_cards("C9|C7") in outs
-    assert get_test_cards("C7|C3") in outs
-    assert get_test_cards("C3|C2") in outs
-
-
-def test_when_find_outs_straight_flush_explicit_full_outs_then_return_outs(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("C4|C8|C5|C6|S3")
-    possible_draws = get_test_cards("C7|C9|C3|C2|S6|D9|HK|DA")
-    remaining_draws = 2
-
-    outs = engine.find_outs_straight_flush(current_cards, possible_draws, remaining_draws, OutsCalculationMethod.ExplicitFull)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 8
-
-    # C7 and any other card
-    assert get_test_cards("C9|C7") in outs
-    assert get_test_cards("C7|C3") in outs
-    assert get_test_cards("C7|C2") in outs
-    assert get_test_cards("C7|S6") in outs
-    assert get_test_cards("D9|C7") in outs
-    assert get_test_cards("HK|C7") in outs
-    assert get_test_cards("DA|C7") in outs
-
-    # Other Outs
-    assert get_test_cards("C3|C2") in outs
-
-
-def test_when_find_outs_quads_and_one_draw_no_quads_possible_then_empty_list_returned(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|S4|C9")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-def test_when_find_outs_quads_and_one_draw_one_quads_possible_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|S4|C4")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-
-    assert get_test_cards("H4") in outs
-
-
-def test_when_find_outs_quads_and_one_draw_multiple_quads_possible_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|S4|C4|HK|SK")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 2
-
-    assert get_test_cards("H4") in outs
-    assert get_test_cards("CK") in outs
-
-
-def test_when_find_outs_quads_and_one_draw_already_haev_quads_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CK|DK|S4|C4|HK|SK")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-
-    assert get_test_cards("ANY_CARD") in outs
-
-
-def test_when_find_outs_quads_and_and_missing_card_not_in_possible_draws_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CK|D7|S4|C4|HK|SK")
-    possible_draws = [card for card in full_deck if card not in current_cards and card not in get_test_cards("DK")]
-    remaining_draws = 1
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-
-
-
-
-
-
-def test_when_find_outs_quads_and_multiple_draws_no_quads_possible_then_empty_list_returned(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|SA|C9")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-def test_when_find_outs_quads_and_multiple_draw_one_quads_possible_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|S4|C3|D9")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-
-    assert get_test_cards("H4|C4") in outs
-
-
-def test_when_find_outs_quads_and_multiple_draw_multiple_quads_possible_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("D4|DK|S7|C9")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 3
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-
-    assert get_test_cards("H4|C4|S4") in outs
-    assert get_test_cards("HK|CK|SK") in outs
-    assert get_test_cards("H7|D7|C7") in outs
-    assert get_test_cards("H9|D9|S9") in outs
-
-
-def test_when_find_outs_quads_and_multiple_draw_already_have_quads_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CK|DK|S4|C7|HK|SK")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-
-    assert get_test_cards("ANY_CARD|ANY_CARD") in outs
-
-
-def test_when_find_outs_quads_and_multiple_draw_and_only_need_one_then_any_cards_fill_in_blanks(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CK|DK|S4|C7|HK")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_quads(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 1
-
-    assert get_test_cards("SK|ANY_CARD") in outs
-
-
-def test_when_find_outs_full_house_and_single_draw_and_no_full_house_possible_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CK|DK|S4|C7|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-def test_when_find_outs_full_house_and_single_draw_and_hand_possible_on_pair_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CK|DK|S4|HK|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 6
-
-    assert get_test_cards("H4") in outs
-    assert get_test_cards("C4") in outs
-    assert get_test_cards("D4") in outs
-
-    assert get_test_cards("S8") in outs
-    assert get_test_cards("C8") in outs
-    assert get_test_cards("D8") in outs
-
-
-def test_when_find_outs_full_house_and_single_draw_and_hand_possible_on_trips_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CA|D2|SA|H2|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 4
-
-    assert get_test_cards("DA") in outs
-    assert get_test_cards("HA") in outs
-
-    assert get_test_cards("C2") in outs
-    assert get_test_cards("S2") in outs
-
-
-def test_when_find_outs_full_house_and_single_draw_and_deck_exhausted_of_req_value_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CA|D2|SA|H2|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards and card not in get_test_cards("DA|HA|C2|S2")]
-    remaining_draws = 1
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-def test_when_find_outs_full_house_and_single_draw_and_already_have_full_house_then_return_correct_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CA|D2|SA|H2|HA")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 1
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 3
-
-    assert get_test_cards("ANY_CARD") in outs
-    assert get_test_cards("C2") in outs
-    assert get_test_cards("S2") in outs
-
-
-def test_when_find_outs_full_house_and_multiple_draw_and_no_full_house_possible_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CA|D2|SK|H7|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
-
-
-def test_when_find_outs_full_house_and_multiple_draw_and_full_house_possible_then_return_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CA|D2|S2|H7|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards]
-    remaining_draws = 2
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 27
-
-    assert get_test_cards("H2|DA") in outs
-    assert get_test_cards("H2|SA") in outs
-    assert get_test_cards("H2|HA") in outs
-    assert get_test_cards("H2|C7") in outs
-    assert get_test_cards("H2|D7") in outs
-    assert get_test_cards("H2|S7") in outs
-    assert get_test_cards("H2|C8") in outs
-    assert get_test_cards("H2|D8") in outs
-    assert get_test_cards("H2|S8") in outs
-
-    assert get_test_cards("C2|DA") in outs
-    assert get_test_cards("C2|SA") in outs
-    assert get_test_cards("C2|HA") in outs
-    assert get_test_cards("C2|C7") in outs
-    assert get_test_cards("C2|D7") in outs
-    assert get_test_cards("C2|S7") in outs
-    assert get_test_cards("C2|C8") in outs
-    assert get_test_cards("C2|D8") in outs
-    assert get_test_cards("C2|S8") in outs
-
-    assert get_test_cards("HA|DA") in outs
-    assert get_test_cards("DA|SA") in outs
-    assert get_test_cards("HA|SA") in outs
-
-    assert get_test_cards("D7|C7") in outs
-    assert get_test_cards("D7|S7") in outs
-    assert get_test_cards("C7|S7") in outs
-
-    assert get_test_cards("D8|C8") in outs
-    assert get_test_cards("D8|S8") in outs
-    assert get_test_cards("C8|S8") in outs
-
-
-def test_when_find_outs_full_house_and_deck_missing_required_outs_then_return_empty_list(engine, get_test_cards, full_deck):
-    current_cards = get_test_cards("CA|DA|S2|H2|H8")
-    possible_draws = [card for card in full_deck if card not in current_cards and card not in get_test_cards("SA|HA|C2|D2")]
-    remaining_draws = 1
-
-    outs = engine.find_outs_full_house(current_cards, possible_draws, remaining_draws)
-
-    assert isinstance(outs, list)
-    assert len(outs) == 0
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert get_test_cards("D9|D8|D7") in result
+
+
+# def test_when_find_outs_straight_flush_and_three_draw_open_ended_then_correct_values_returned(engine, get_test_cards):
+#     current_cards = get_test_cards("CA|D9|DT|C2|C6")
+#     available_cards = get_test_cards("D8|D4|DJ|DK|DQ|C4|D7")
+#     remaining_draws = 3
+#
+#     result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+#
+#     assert isinstance(result, list)
+#     assert len(result) == 3
+#     assert get_test_cards("DJ|D7") in result
+#     assert get_test_cards("DQ|DJ") in result
+#
+#
+# def test_when_find_outs_straight_flush_and_two_draw_inside_outside_then_correct_values_returned(engine, get_test_cards):
+#     current_cards = get_test_cards("CA|D9|DT|D7|C6")
+#     available_cards = get_test_cards("D8|D4|DJ|C2|DQ|C4")
+#     remaining_draws = 2
+#
+#     result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+#
+#     assert isinstance(result, list)
+#     assert len(result) == 1
+#     assert get_test_cards("DJ|D8") in result
+#
+#
+# def test_when_find_outs_straight_flush_and_two_draw_already_have_hand_then_correct_values_returned(engine, get_test_cards):
+#     current_cards = get_test_cards("D7|D9|DT|D8|C6|D6")
+#     available_cards = get_test_cards("D5|C2|C4|DJ|C7|DQ")
+#     remaining_draws = 2
+#
+#     result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+#
+#     assert isinstance(result, list)
+#     assert len(result) == 4
+#     assert get_test_cards("ANY_CARD|ANY_CARD") in result
+#     assert get_test_cards("D5|ANY_CARD") in result
+#     assert get_test_cards("DJ|ANY_CARD") in result
+#     assert get_test_cards("DQ|DJ") in result

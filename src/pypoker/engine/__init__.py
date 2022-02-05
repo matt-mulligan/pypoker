@@ -14,8 +14,8 @@ from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
 from typing import List, Dict
 
-from pypoker.constants import HandType, OutsCalculationMethod
-from pypoker.constructs import Card, Hand
+from pypoker.constants import HandType, OutsCalculationMethod, CardSuit
+from pypoker.constructs import Card, Hand, Deck
 from pypoker.player import BasePlayer
 
 
@@ -44,36 +44,18 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def find_player_outs(
-        self,
-        player: BasePlayer,
-        board: List[Card],
-        possible_draws: List[Card],
-        target_hand: HandType,
-        calc_method: OutsCalculationMethod = OutsCalculationMethod.ExplicitPartial
-    ) -> List[List[Card]]:
+    def find_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
         """
-        Abstract method to determine all possible outs a player has to get the the specified hand type with the
-        possible draws remaining.
-        If no way to get to the hand type then return empty list
-        This method provides an interface via the 'calc_method' argument to specify how explicitly outs should be
-        calculated
+        abstract method to find the possible draws a player has to make the specified hand type with the current
+        board cards and the possible draws remaining.
 
-        :param player: Pypoker player object, containign their card information
+        :param player: pypoker player object representing the player we are looking for outs for.
+        :param hand_type: hand type enum used for determining the type of hand to find outs for.
+        :param deck: Pypoker deck object containing the remaining cards that are drawable
 
-        :param board: List of card objects representing the communal cards.
-
-        :param possible_draws: List of cards representing all remaining cards that could be drawn by the player.
-
-        :param target_hand: enum of the hand type the player is looking to have outs calculated for
-
-        :param calc_method: enum indicating to what level of explicitness to have the player outs calculated.
-        Implict - Out combinations returned from this method will make full use of "special" card objects
-        (e.g. AnySpade, AnySeven, AnyCard)
-        ExplicitPartial - out combinations returned from this method will use the explicit cards that are drawable
-        for the "meaningfull" cards but will still use the "AnyCard" special card for any surplus draws not required
-        ExplictFull - out combinations returned from this method will use the full explict set of cards, including
-        for the surpluss draws. This will majorly increase out combinations if surplus draws are available
+        :return: list of each combination of cards that would give the player this type of hand. Cards in these combinations
+        are explict normal cards (7H, 9D, etc) for cards required to make the out and AnyCard special cards for
+        any surplus draw cards not required to make the hand.
         """
 
     # Shared utility methods for all engine classes
@@ -82,12 +64,13 @@ class BasePokerEngine(object, metaclass=ABCMeta):
     def group_cards_by_suit(cards: List[Card]) -> Dict[str, List[Card]]:
         """
         Shared utility method of BasePokerEngine class that will group the given cards by suit.
+        return dictionary will contain entries for each suit even if the cardset dosent have any of that suit
 
         :param cards: List of pypoker.deck.Card objects
         :return: Dictionary of lists of cards by suit "Clubs", "Diamonds", "Hearts", "Spades"
         """
 
-        return {
+        suit_group = {
             suit: list(group)
             for suit, group in groupby(
                 sorted(cards, key=lambda card: card.suit.name),
@@ -95,21 +78,35 @@ class BasePokerEngine(object, metaclass=ABCMeta):
             )
         }
 
+        # Add missing suits as empty lists
+        for suit in [CardSuit.Hearts, CardSuit.Diamonds, CardSuit.Clubs, CardSuit.Spades]:
+            if suit.name not in suit_group.keys():
+                suit_group[suit.name] = []
+
+        return suit_group
+
     @staticmethod
     def group_cards_by_value(cards: List[Card]) -> Dict[int, List[Card]]:
         """
         Shared utility method of BasePokerEngine class to group the given cards by value.
+        return dictionary will contain entries for each value even if the cardset dosen't have any of that value
 
         :param cards: List of pypoker.deck.Card objects
         :return: Dictionary of lists of cards by card value (2-14)
         """
 
-        return {
+        values_group = {
             value: list(group)
             for value, group in groupby(
                 sorted(cards, key=lambda card: card.value), key=lambda card: card.value
             )
         }
+
+        for value in range(2, 15):
+            if value not in values_group.keys():
+                values_group[value] = []
+
+        return values_group
 
     def find_consecutive_value_cards(
         self, cards: List[Card], treat_ace_low: bool = True, run_size: int = None
@@ -127,7 +124,7 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         # group cards into lists of values and get a list of unique card values
         cards_by_value = self.group_cards_by_value(cards)
-        card_values = list(cards_by_value)
+        card_values = [value for value, cards in cards_by_value.items() if len(cards) > 0]
         if treat_ace_low and 14 in card_values:
             card_values.append(1)
             cards_by_value[1] = cards_by_value[14]
@@ -253,10 +250,10 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         Public helper method
         """
 
-        # Order each card set
+        # Order cards in each card set
         card_sets = [self.order_cards(card_set) for card_set in card_sets]
 
-        # deduplicate card sets
+        # sort and deduplicate card sets
         card_sets.sort(key=lambda cards: ([card.value for card in cards], [card.suit.value for card in cards]), reverse=True)
         return list(k for k, _ in itertools.groupby(card_sets))
 
