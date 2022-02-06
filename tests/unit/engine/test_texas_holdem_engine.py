@@ -1363,41 +1363,78 @@ def test_when_find_outs_straight_flush_and_three_draw_inside_then_correct_values
     assert get_test_cards("D9|D8|D7") in result
 
 
-# def test_when_find_outs_straight_flush_and_three_draw_open_ended_then_correct_values_returned(engine, get_test_cards):
-#     current_cards = get_test_cards("CA|D9|DT|C2|C6")
-#     available_cards = get_test_cards("D8|D4|DJ|DK|DQ|C4|D7")
-#     remaining_draws = 3
-#
-#     result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
-#
-#     assert isinstance(result, list)
-#     assert len(result) == 3
-#     assert get_test_cards("DJ|D7") in result
-#     assert get_test_cards("DQ|DJ") in result
-#
-#
-# def test_when_find_outs_straight_flush_and_two_draw_inside_outside_then_correct_values_returned(engine, get_test_cards):
-#     current_cards = get_test_cards("CA|D9|DT|D7|C6")
-#     available_cards = get_test_cards("D8|D4|DJ|C2|DQ|C4")
-#     remaining_draws = 2
-#
-#     result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
-#
-#     assert isinstance(result, list)
-#     assert len(result) == 1
-#     assert get_test_cards("DJ|D8") in result
-#
-#
-# def test_when_find_outs_straight_flush_and_two_draw_already_have_hand_then_correct_values_returned(engine, get_test_cards):
-#     current_cards = get_test_cards("D7|D9|DT|D8|C6|D6")
-#     available_cards = get_test_cards("D5|C2|C4|DJ|C7|DQ")
-#     remaining_draws = 2
-#
-#     result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
-#
-#     assert isinstance(result, list)
-#     assert len(result) == 4
-#     assert get_test_cards("ANY_CARD|ANY_CARD") in result
-#     assert get_test_cards("D5|ANY_CARD") in result
-#     assert get_test_cards("DJ|ANY_CARD") in result
-#     assert get_test_cards("DQ|DJ") in result
+def test_when_find_outs_straight_flush_and_three_draw_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("CA|D9|DT|C2")
+    available_cards = get_test_cards("D8|D4|DJ|DK|DQ|C4|D7|D6|DJ|DQ|DK|C3|C5|C4|C7")
+    remaining_draws = 3
+
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 5
+    assert get_test_cards("D8|D7|D6") in result
+    assert get_test_cards("DJ|D8|D7") in result
+    assert get_test_cards("DQ|DJ|D8") in result
+    assert get_test_cards("DK|DQ|DJ") in result
+    assert get_test_cards("C5|C4|C3") in result
+
+
+def test_when_find_outs_straight_flush_and_three_draw_already_have_hand_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("D7|D9|DT|D8|C6|D6")
+    available_cards = get_test_cards("D5|C2|C4|DJ|C7|DQ|D4")
+    remaining_draws = 3
+
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 5
+
+    assert get_test_cards("ANY_CARD|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("D5|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("DJ|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("DQ|DJ|ANY_CARD") in result
+    assert get_test_cards("D5|D4|ANY_CARD") in result
+
+
+def test_when_find_outs_straight_flush_and_five_draw_then_correct_values_returned(engine, get_test_cards):
+    current_cards = get_test_cards("CA|D9")
+    available_cards = get_test_cards("CK|CQ|CJ|CT|C9|C8|C7|C6|C5|C4|C3|C2|DA|DK|DQ|DJ|DT|D8|D7|D6|D5|D4|D3|D2|HA|HK|HQ|HJ|HT|H9|H8|H7|H6|H5|H4|H3|H2")
+    remaining_draws = 5
+
+    result = engine.find_outs_straight_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 30
+
+    assert get_test_cards("CK|CQ|CJ|CT|ANY_CARD") in result
+    assert get_test_cards("CK|CQ|CJ|CT|C9") in result
+    assert get_test_cards("CQ|CJ|CT|C9|C8") in result
+    assert get_test_cards("CJ|CT|C9|C8|C7") in result
+    assert get_test_cards("CT|C9|C8|C7|C6") in result
+    assert get_test_cards("C9|C8|C7|C6|C5") in result
+    assert get_test_cards("C8|C7|C6|C5|C4") in result
+    assert get_test_cards("C7|C6|C5|C4|C3") in result
+    assert get_test_cards("C6|C5|C4|C3|C2") in result
+    assert get_test_cards("C5|C4|C3|C2|ANY_CARD") in result
+
+    assert get_test_cards("DA|DK|DQ|DJ|DT") in result
+    assert get_test_cards("DK|DQ|DJ|DT|ANY_CARD") in result
+    assert get_test_cards("DQ|DJ|DT|D8|ANY_CARD") in result
+    assert get_test_cards("DJ|DT|D8|D7|ANY_CARD") in result
+    assert get_test_cards("DT|D8|D7|D6|ANY_CARD") in result
+    assert get_test_cards("D8|D7|D6|D5|ANY_CARD") in result
+    assert get_test_cards("D8|D7|D6|D5|D4") in result
+    assert get_test_cards("D7|D6|D5|D4|D3") in result
+    assert get_test_cards("D6|D5|D4|D3|D2") in result
+    assert get_test_cards("DA|D5|D4|D3|D2") in result
+
+    assert get_test_cards("HA|HK|HQ|HJ|HT") in result
+    assert get_test_cards("HK|HQ|HJ|HT|H9") in result
+    assert get_test_cards("HQ|HJ|HT|H9|H8") in result
+    assert get_test_cards("HJ|HT|H9|H8|H7") in result
+    assert get_test_cards("HT|H9|H8|H7|H6") in result
+    assert get_test_cards("H9|H8|H7|H6|H5") in result
+    assert get_test_cards("H8|H7|H6|H5|H4") in result
+    assert get_test_cards("H7|H6|H5|H4|H3") in result
+    assert get_test_cards("H6|H5|H4|H3|H2") in result
+    assert get_test_cards("HA|H5|H4|H3|H2") in result
