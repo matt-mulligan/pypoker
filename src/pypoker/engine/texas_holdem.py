@@ -802,3 +802,36 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     outs.append(out_cards)
 
         return self.deduplicate_card_sets(outs)
+
+    def find_outs_quads(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> \
+    List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a quad hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of drawd remaining.
+
+        :return List of draw combinations that would give a quad hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        possible_values = [
+            value for value in range(2, 15)
+            if len(current_cards_by_value[value]) + remaining_draws >= 4
+            and len(current_cards_by_value[value]) + len(available_cards_by_value[value]) >= 4
+        ]
+
+        outs = []
+        for quad_value in possible_values:
+            required_quad_draws = 4 - len(current_cards_by_value[quad_value])
+            surplus_draws = [AnyCard("")] * (remaining_draws - required_quad_draws)
+
+            for draw_combo in self.find_all_unique_card_combos(available_cards_by_value[quad_value], required_quad_draws):
+                outs.append(self.order_cards(draw_combo + surplus_draws))
+
+        return outs

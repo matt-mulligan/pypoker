@@ -1,8 +1,10 @@
 import sys
 from pathlib import Path
+from typing import List
+
 from pytest import fixture
 
-from pypoker.constructs import Card, AnyCard, AnyValueCard, AnySuitCard
+from pypoker.constructs import Card, AnyCard, AnyValueCard, AnySuitCard, Deck
 
 here = Path(__file__).absolute()
 tests_path = here.parent.parent
@@ -10,6 +12,19 @@ src_path = here.parent.parent.parent / "src"
 fixtures_path = tests_path / "fixtures"
 
 sys.path.insert(0, str(src_path))
+
+
+@fixture
+def get_deck_minus_set():
+    """
+    test helper to return a full deck of cards minus the cards provided
+    """
+
+    def _get_deck_minus_set(exclude_cards: List[Card]):
+        deck_cards = Deck().cards_all
+        return [card for card in deck_cards if card not in exclude_cards]
+
+    return _get_deck_minus_set
 
 
 @fixture

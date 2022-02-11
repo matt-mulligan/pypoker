@@ -1438,3 +1438,91 @@ def test_when_find_outs_straight_flush_and_five_draw_then_correct_values_returne
     assert get_test_cards("H7|H6|H5|H4|H3") in result
     assert get_test_cards("H6|H5|H4|H3|H2") in result
     assert get_test_cards("HA|H5|H4|H3|H2") in result
+
+
+def test_when_find_outs_quads_and_none_possible_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("D5|S9|SK|ST|C5|H9")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_quads(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_quads_and_none_possible_via_deck_exhaustion_then_return_empty_list(engine, get_test_cards):
+    current_cards = get_test_cards("D5|S9|C9|ST|C5|H9")
+    available_cards = get_test_cards("D8|SA|CJ|S5")
+    remaining_draws = 2
+
+    result = engine.find_outs_quads(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_quads_and_already_have_then_return_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("D5|S9|H5|S5|C5|HJ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_quads(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+    assert get_test_cards("ANY_CARD|ANY_CARD") in result
+
+
+def test_when_find_outs_quads_and_one_draw_and_outs_then_return_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("D5|S9|H5|C9|C5|H9")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_quads(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert get_test_cards("S5") in result
+    assert get_test_cards("D9") in result
+
+
+def test_when_find_outs_quads_and_two_draw_and_outs_then_return_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("D5|S9|H5|C5|H9")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_quads(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+
+    assert get_test_cards("S5|ANY_CARD") in result
+    assert get_test_cards("D9|C9") in result
+
+
+def test_when_find_outs_quads_and_five_draw_and_outs_then_return_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|SK")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 5
+
+    result = engine.find_outs_quads(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 13
+
+    assert get_test_cards("S2|H2|D2|C2|ANY_CARD") in result
+    assert get_test_cards("S3|H3|D3|C3|ANY_CARD") in result
+    assert get_test_cards("S4|H4|D4|C4|ANY_CARD") in result
+    assert get_test_cards("S5|H5|D5|C5|ANY_CARD") in result
+    assert get_test_cards("S6|H6|D6|C6|ANY_CARD") in result
+    assert get_test_cards("S7|H7|D7|C7|ANY_CARD") in result
+    assert get_test_cards("S8|H8|D8|C8|ANY_CARD") in result
+    assert get_test_cards("S9|H9|D9|C9|ANY_CARD") in result
+    assert get_test_cards("ST|HT|DT|CT|ANY_CARD") in result
+    assert get_test_cards("SJ|HJ|DJ|CJ|ANY_CARD") in result
+    assert get_test_cards("SQ|HQ|DQ|CQ|ANY_CARD") in result
+    assert get_test_cards("HK|DK|CK|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|HA|CA|ANY_CARD|ANY_CARD") in result
