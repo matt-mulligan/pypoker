@@ -835,3 +835,78 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 outs.append(self.order_cards(draw_combo + surplus_draws))
 
         return outs
+
+    def find_outs_full_house(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> \
+    List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a full house hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a full house hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        # find all values that could make a triple with the remaining number of draws
+        trip_possible_values = [
+            value for value in range(2, 15)
+            if len(current_cards_by_value[value]) + remaining_draws >= 3
+            and len(current_cards_by_value[value]) + len(available_cards_by_value[value]) >= 3
+        ]
+
+        # find all values that could make a pair with the remaining number of draws
+        pair_possible_values = [
+            value for value in range(2, 15)
+            if len(current_cards_by_value[value]) + remaining_draws >= 2
+               and len(current_cards_by_value[value]) + len(available_cards_by_value[value]) >= 2
+        ]
+
+        full_house_values = [
+            (trip_value, pair_value)
+            for trip_value in trip_possible_values
+            for pair_value in pair_possible_values
+            if trip_value != pair_value
+            and max(3-len(current_cards_by_value[trip_value]), 0) + max(2-len(current_cards_by_value[pair_value]), 0) <= remaining_draws
+        ]
+
+        outs = []
+        for trip_value, pair_value in full_house_values:
+            trip_req_draws = max(3 - len(current_cards_by_value[trip_value]), 0)
+            pair_req_draws = max(2 - len(current_cards_by_value[pair_value]), 0)
+
+            trip_draw_combos = self.find_all_unique_card_combos(available_cards_by_value[trip_value], trip_req_draws) \
+                if trip_req_draws \
+                else []
+
+            pair_draw_combos = self.find_all_unique_card_combos(available_cards_by_value[pair_value], pair_req_draws) \
+                if pair_req_draws \
+                else []
+
+            if not trip_draw_combos and not pair_draw_combos:
+                outs.append([AnyCard("")] * remaining_draws)
+
+            elif not trip_draw_combos:
+                outs.extend([
+                    pair_draw + [AnyCard("")] * (remaining_draws - len(pair_draw))
+                    for pair_draw in pair_draw_combos
+                ])
+
+            elif not pair_draw_combos:
+                outs.extend([
+                    trip_draw + [AnyCard("")] * (remaining_draws - len(trip_draw))
+                    for trip_draw in trip_draw_combos
+                ])
+
+            else:
+                outs.extend([
+                    trip_draw + pair_draw + [AnyCard("")] * (remaining_draws - len(trip_draw) - len(pair_draw))
+                    for trip_draw in trip_draw_combos for pair_draw in pair_draw_combos
+                ])
+
+        return self.deduplicate_card_sets(outs)

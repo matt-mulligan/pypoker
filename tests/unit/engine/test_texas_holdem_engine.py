@@ -1526,3 +1526,117 @@ def test_when_find_outs_quads_and_five_draw_and_outs_then_return_list(engine, ge
     assert get_test_cards("SQ|HQ|DQ|CQ|ANY_CARD") in result
     assert get_test_cards("HK|DK|CK|ANY_CARD|ANY_CARD") in result
     assert get_test_cards("SA|HA|CA|ANY_CARD|ANY_CARD") in result
+
+
+def test_when_find_outs_full_house_and_no_possible_trips_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|HK|C2|D9|S6|H4")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_full_house(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_full_house_and_not_enough_draws_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|HA|C2|D9|S6|H4")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_full_house(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_full_house_one_draw_and_outs_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|HA|C2|CA|S2|H4")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_full_house(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 6
+
+    assert get_test_cards("ANY_CARD") in result
+    assert get_test_cards("S4") in result
+    assert get_test_cards("C4") in result
+    assert get_test_cards("D4") in result
+    assert get_test_cards("D2") in result
+    assert get_test_cards("H2") in result
+
+
+def test_when_find_outs_full_house_two_draws_and_outs_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|HA|C2|S2|H4")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_full_house(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 19
+
+    assert get_test_cards("SA|ANY_CARD") in result
+    assert get_test_cards("CA|ANY_CARD") in result
+
+    assert get_test_cards("H2|ANY_CARD") in result
+    assert get_test_cards("D2|ANY_CARD") in result
+
+    assert get_test_cards("S4|D4") in result
+    assert get_test_cards("D4|C4") in result
+    assert get_test_cards("S4|C4") in result
+
+    assert get_test_cards("SA|S4") in result
+    assert get_test_cards("SA|D4") in result
+    assert get_test_cards("SA|C4") in result
+
+    assert get_test_cards("CA|S4") in result
+    assert get_test_cards("CA|D4") in result
+    assert get_test_cards("CA|C4") in result
+
+    assert get_test_cards("S4|H2") in result
+    assert get_test_cards("D4|H2") in result
+    assert get_test_cards("C4|H2") in result
+
+    assert get_test_cards("S4|D2") in result
+    assert get_test_cards("D4|D2") in result
+    assert get_test_cards("C4|D2") in result
+
+
+def test_when_find_outs_full_house_and_five_draws_and_outs_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|HA")
+    available_cards = get_test_cards("SA|CA|S7|H7|D7|C7|S2|H2")
+    remaining_draws = 5
+
+    result = engine.find_outs_full_house(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 22
+
+    assert get_test_cards("SA|S7|H7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|S7|D7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|S7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|H7|D7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|H7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|D7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|S2|H2|ANY_CARD|ANY_CARD") in result
+
+    assert get_test_cards("CA|S7|H7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("CA|S7|D7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("CA|S7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("CA|H7|D7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("CA|H7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("CA|D7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("CA|S2|H2|ANY_CARD|ANY_CARD") in result
+
+    assert get_test_cards("S7|H7|D7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("S7|H7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("S7|D7|C7|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("H7|D7|C7|ANY_CARD|ANY_CARD") in result
+
+    assert get_test_cards("S7|H7|D7|S2|H2") in result
+    assert get_test_cards("S7|H7|C7|S2|H2") in result
+    assert get_test_cards("S7|D7|C7|S2|H2") in result
+    assert get_test_cards("H7|D7|C7|S2|H2") in result
