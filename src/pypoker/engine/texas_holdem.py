@@ -8,7 +8,7 @@ inherits from the BasePokerEngine class.
 from itertools import combinations
 from typing import List, Dict
 
-from pypoker.constants import GameTypes, TexasHoldemHandType
+from pypoker.constants import GameTypes, TexasHoldemHandType, CardSuit
 from pypoker.constructs import Card, Hand, Deck, AnyCard
 from pypoker.engine import BasePokerEngine
 from pypoker.exceptions import RankingError
@@ -910,3 +910,41 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 ])
 
         return self.deduplicate_card_sets(outs)
+
+    def find_outs_flush(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> \
+    List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a flush hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a flush hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_suit = self.group_cards_by_suit(current_cards)
+        available_cards_by_suit = self.group_cards_by_suit(available_cards)
+
+        flush_suits = [
+            suit.name for suit in CardSuit
+            if suit != suit.Any
+            and len(current_cards_by_suit[suit.name]) + len(available_cards_by_suit[suit.name]) >= 5
+            and len(current_cards_by_suit[suit.name]) + remaining_draws >= 5
+        ]
+
+        outs = []
+        for suit in flush_suits:
+            required_draws = 5 - len(current_cards_by_suit[suit])
+            surplus_draws = [AnyCard] * (remaining_draws - required_draws)
+
+            if not required_draws:
+                outs.append(surplus_draws)
+                continue
+
+            draw_combos = self.find_all_unique_card_combos(available_cards_by_suit[suit], required_draws)
+
+
+
