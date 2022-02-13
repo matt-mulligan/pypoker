@@ -44,7 +44,7 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def find_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
+    def find_player_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
         """
         abstract method to find the possible draws a player has to make the specified hand type with the current
         board cards and the possible draws remaining.

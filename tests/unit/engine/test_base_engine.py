@@ -19,7 +19,7 @@ def base_engine():
         def rank_player_hands(self, players: List[BasePlayer]):
             pass
 
-        def find_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
+        def find_player_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
             pass
 
     return FakePokerEngine()

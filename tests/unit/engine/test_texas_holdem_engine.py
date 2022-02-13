@@ -1,11 +1,12 @@
 import re
 
 from pytest import fixture, mark, raises
+from mock import patch
 
 from pypoker.constants import GameTypes, TexasHoldemHandType, OutsCalculationMethod
 from pypoker.constructs import Hand, Deck, Card
 from pypoker.engine.texas_holdem import TexasHoldemPokerEngine
-from pypoker.exceptions import RankingError
+from pypoker.exceptions import RankingError, OutsError
 from pypoker.player.human import HumanPlayer
 
 
@@ -191,6 +192,120 @@ def test_when_rank_player_hands_and_incomplete_hands_then_return_correct_dict(en
     assert ranked == {
         1: [player_d], 2: [player_c], 3: [player_a], 4: [player_b]
     }
+
+
+def test_when_find_player_outs_and_bad_hand_type_then_raise_error(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|SQ"))
+    hand_type = TexasHoldemHandType.HighCard
+    board = get_test_cards("S7|DT|C2")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with raises(OutsError, match="Cannot find outs for hand type HighCard, you always have this hand type made"):
+        engine.find_player_outs(player, hand_type, board, possible_cards)
+
+
+def test_when_find_player_outs_and_straight_flush_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|SQ"))
+    hand_type = TexasHoldemHandType.StraightFlush
+    board = get_test_cards("S7|ST|C2")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_straight_flush") as find_outs_straight_flush:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_straight_flush.assert_called_once_with(get_test_cards("SK|SQ|S7|ST|C2"), possible_cards, 2)
+    assert result == find_outs_straight_flush()
+
+
+def test_when_find_player_outs_and_quads_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.Quads
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_quads") as find_outs_quads:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_quads.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_quads()
+
+
+def test_when_find_player_outs_and_full_house_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.FullHouse
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_full_house") as find_outs_full_house:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_full_house.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_full_house()
+
+
+def test_when_find_player_outs_and_flush_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.Flush
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_flush") as find_outs_flush:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_flush.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_flush()
+
+
+def test_when_find_player_outs_and_straight_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.Straight
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_straight") as find_outs_straight:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_straight.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_straight()
+
+
+def test_when_find_player_outs_and_trips_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.Trips
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_trips") as find_outs_trips:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_trips.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_trips()
+
+
+def test_when_find_player_outs_and_two_pair_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.TwoPair
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_two_pair") as find_outs_two_pair:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_two_pair.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_two_pair()
+    
+    
+def test_when_find_player_outs_and_pair_then_correct_calls_made(engine, get_test_cards, get_deck_minus_set):
+    player = HumanPlayer("Matt", hole_cards=get_test_cards("SK|CK"))
+    hand_type = TexasHoldemHandType.Pair
+    board = get_test_cards("S7|ST|DK")
+    possible_cards = get_deck_minus_set(player.hole_cards + board)
+
+    with patch.object(engine, "find_outs_pair") as find_outs_pair:
+        result = engine.find_player_outs(player, hand_type, board, possible_cards)
+
+    find_outs_pair.assert_called_once_with(get_test_cards("SK|CK|S7|ST|DK"), possible_cards, 2)
+    assert result == find_outs_pair()
 
 
 # Public "Hand Maker" method tests

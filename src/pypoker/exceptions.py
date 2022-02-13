@@ -36,3 +36,9 @@ class RankingError(PyPokerError):
     """
     Error thrown when trying to rank player hands but an error occurs, usually a player dosent have their hand attr set
     """
+
+
+class OutsError(PyPokerError):
+    """
+    Error thrown when trying to find outs for a player
+    """

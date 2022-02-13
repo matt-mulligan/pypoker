@@ -11,7 +11,7 @@ from typing import List, Dict
 from pypoker.constants import GameTypes, TexasHoldemHandType, CardSuit
 from pypoker.constructs import Card, Hand, Deck, AnyCard
 from pypoker.engine import BasePokerEngine
-from pypoker.exceptions import RankingError
+from pypoker.exceptions import RankingError, OutsError
 from pypoker.player import BasePlayer
 
 
@@ -108,22 +108,25 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return ranked_players
 
-    def find_outs(self, player: BasePlayer, hand_type: TexasHoldemHandType, board: List[Card], deck: Deck) -> List[List[Card]]:
+    def find_player_outs(self, player: BasePlayer, hand_type: TexasHoldemHandType, board: List[Card], possible_cards: List[Card]) -> List[List[Card]]:
         """
         abstract method to find the possible draws a player has to make the specified hand type with the current
         board cards and the possible draws remaining.
 
         :param player: pypoker player object representing the player we are looking for outs for.
         :param hand_type: hand type enum used for determining the type of hand to find outs for.
-        :param deck: Pypoker deck object containing the remaining cards that are drawable
+        :param possible_cards: List of card objects that could be drawn
+        (Note this could be the available cards from the deck or the "implied" available cards)
 
         :return: list of each combination of cards that would give the player this type of hand. Cards in these combinations
         are explict normal cards (7H, 9D, etc) for cards required to make the out and AnyCard special cards for
         any surplus draw cards not required to make the hand.
         """
 
+        if hand_type == TexasHoldemHandType.HighCard:
+            raise OutsError("Cannot find outs for hand type HighCard, you always have this hand type made.")
+
         current_cards = player.hole_cards + board
-        drawable_cards = deck.cards_available
         draws_remaining = 5 - len(board)
 
         return {
@@ -135,8 +138,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             TexasHoldemHandType.Trips: self.find_outs_trips,
             TexasHoldemHandType.TwoPair: self.find_outs_two_pair,
             TexasHoldemHandType.Pair: self.find_outs_pair,
-            TexasHoldemHandType.HighCard: self.find_outs_high_card,
-        }[hand_type](current_cards, drawable_cards, draws_remaining)
+        }[hand_type](current_cards, possible_cards, draws_remaining)
 
     # Public "Hand Maker" methods
     # ---------------------------
