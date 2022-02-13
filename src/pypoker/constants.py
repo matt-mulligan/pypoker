@@ -10,6 +10,7 @@ class OutsCalculationMethod(Enum):
     ExplicitPartial = "explicit_partial"
     ExplicitFull = "explicit_full"
 
+
 """
 Card Construct Constants
 """

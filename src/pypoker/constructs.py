@@ -21,7 +21,8 @@ from pypoker.constants import (
     GameHandTypes,
     GameHandStrengths,
     GameHandNumCards,
-    GameHandTiebreakerArgs, OutsCalculationMethod,
+    GameHandTiebreakerArgs,
+    OutsCalculationMethod,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
 

@@ -44,7 +44,9 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def find_player_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
+    def find_player_outs(
+        self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck
+    ) -> List[List[Card]]:
         """
         abstract method to find the possible draws a player has to make the specified hand type with the current
         board cards and the possible draws remaining.
@@ -79,7 +81,12 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         }
 
         # Add missing suits as empty lists
-        for suit in [CardSuit.Hearts, CardSuit.Diamonds, CardSuit.Clubs, CardSuit.Spades]:
+        for suit in [
+            CardSuit.Hearts,
+            CardSuit.Diamonds,
+            CardSuit.Clubs,
+            CardSuit.Spades,
+        ]:
             if suit.name not in suit_group.keys():
                 suit_group[suit.name] = []
 
@@ -124,7 +131,9 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         # group cards into lists of values and get a list of unique card values
         cards_by_value = self.group_cards_by_value(cards)
-        card_values = [value for value, cards in cards_by_value.items() if len(cards) > 0]
+        card_values = [
+            value for value, cards in cards_by_value.items() if len(cards) > 0
+        ]
         if treat_ace_low and 14 in card_values:
             card_values.append(1)
             cards_by_value[1] = cards_by_value[14]
@@ -154,7 +163,11 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         :return: List of lists of card objects for each combination found.
         """
 
-        return [] if combo_size == 0 else [list(value) for value in combinations(cards, combo_size)]
+        return (
+            []
+            if combo_size == 0
+            else [list(value) for value in combinations(cards, combo_size)]
+        )
 
     @staticmethod
     def check_all_card_values_unique(cards: List[Card]) -> bool:
@@ -242,7 +255,9 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         :param cards: List of card objects to sort
         """
 
-        ordered = sorted(cards, key=lambda card: (card.value, card.suit.value), reverse=True)
+        ordered = sorted(
+            cards, key=lambda card: (card.value, card.suit.value), reverse=True
+        )
         return ordered
 
     def deduplicate_card_sets(self, card_sets: List[List[Card]]):
@@ -254,7 +269,13 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         card_sets = [self.order_cards(card_set) for card_set in card_sets]
 
         # sort and deduplicate card sets
-        card_sets.sort(key=lambda cards: ([card.value for card in cards], [card.suit.value for card in cards]), reverse=True)
+        card_sets.sort(
+            key=lambda cards: (
+                [card.value for card in cards],
+                [card.suit.value for card in cards],
+            ),
+            reverse=True,
+        )
         return list(k for k, _ in itertools.groupby(card_sets))
 
     # Private Method Implementations
