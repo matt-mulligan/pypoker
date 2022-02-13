@@ -1,6 +1,6 @@
 from typing import List
 
-from pypoker.constructs import Card
+from pypoker.constructs import Card, Hand
 from pypoker.player import BasePlayer
 
 
@@ -13,5 +13,8 @@ class HumanPlayer(BasePlayer):
         chips: int = None,
         hole_cards: List[Card] = None,
         table_pos: int = None,
+        hand: Hand = None,
     ):
-        super().__init__(name, chips=chips, hole_cards=hole_cards, table_pos=table_pos)
+        super().__init__(
+            name, chips=chips, hole_cards=hole_cards, table_pos=table_pos, hand=hand
+        )

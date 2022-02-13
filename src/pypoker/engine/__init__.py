@@ -9,11 +9,13 @@ the following tasks will be handled by the pypoker.engine classes:
     find odds of a player making X hand type from current position
     find odds of each player winning from current position
 """
+import itertools
 from abc import ABCMeta, abstractmethod
 from itertools import groupby, product, combinations
 from typing import List, Dict
 
-from pypoker.constructs import Card
+from pypoker.constants import HandType, OutsCalculationMethod, CardSuit
+from pypoker.constructs import Card, Hand, Deck
 from pypoker.player import BasePlayer
 
 
@@ -23,9 +25,39 @@ class BasePokerEngine(object, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def find_player_best_hand(self, player: BasePlayer, board: List[Card], **kwargs):
+    def find_player_best_hand(
+        self, player: BasePlayer, board: List[Card]
+    ) -> List[Hand]:
         """
         Abstract method to determine the given players best possible hand with the cards currently available
+        """
+
+    @abstractmethod
+    def rank_player_hands(
+        self, players: List[BasePlayer]
+    ) -> Dict[int, List[BasePlayer]]:
+        """
+        Abstract method to rank players based on their hand attributes.
+        If player.hand is None this method should raise an exception.
+        Method to return a dictionary where key is the rank (1 is highest) and the value is a list of player objects
+        sharing that rank
+        """
+
+    @abstractmethod
+    def find_player_outs(
+        self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck
+    ) -> List[List[Card]]:
+        """
+        abstract method to find the possible draws a player has to make the specified hand type with the current
+        board cards and the possible draws remaining.
+
+        :param player: pypoker player object representing the player we are looking for outs for.
+        :param hand_type: hand type enum used for determining the type of hand to find outs for.
+        :param deck: Pypoker deck object containing the remaining cards that are drawable
+
+        :return: list of each combination of cards that would give the player this type of hand. Cards in these combinations
+        are explict normal cards (7H, 9D, etc) for cards required to make the out and AnyCard special cards for
+        any surplus draw cards not required to make the hand.
         """
 
     # Shared utility methods for all engine classes
@@ -34,33 +66,54 @@ class BasePokerEngine(object, metaclass=ABCMeta):
     def group_cards_by_suit(cards: List[Card]) -> Dict[str, List[Card]]:
         """
         Shared utility method of BasePokerEngine class that will group the given cards by suit.
+        return dictionary will contain entries for each suit even if the cardset dosent have any of that suit
 
         :param cards: List of pypoker.deck.Card objects
         :return: Dictionary of lists of cards by suit "Clubs", "Diamonds", "Hearts", "Spades"
         """
 
-        return {
+        suit_group = {
             suit: list(group)
             for suit, group in groupby(
-                sorted(cards, key=lambda card: card.suit), key=lambda card: card.suit
+                sorted(cards, key=lambda card: card.suit.name),
+                key=lambda card: card.suit.name,
             )
         }
+
+        # Add missing suits as empty lists
+        for suit in [
+            CardSuit.Hearts,
+            CardSuit.Diamonds,
+            CardSuit.Clubs,
+            CardSuit.Spades,
+        ]:
+            if suit.name not in suit_group.keys():
+                suit_group[suit.name] = []
+
+        return suit_group
 
     @staticmethod
     def group_cards_by_value(cards: List[Card]) -> Dict[int, List[Card]]:
         """
         Shared utility method of BasePokerEngine class to group the given cards by value.
+        return dictionary will contain entries for each value even if the cardset dosen't have any of that value
 
         :param cards: List of pypoker.deck.Card objects
         :return: Dictionary of lists of cards by card value (2-14)
         """
 
-        return {
+        values_group = {
             value: list(group)
             for value, group in groupby(
                 sorted(cards, key=lambda card: card.value), key=lambda card: card.value
             )
         }
+
+        for value in range(2, 15):
+            if value not in values_group.keys():
+                values_group[value] = []
+
+        return values_group
 
     def find_consecutive_value_cards(
         self, cards: List[Card], treat_ace_low: bool = True, run_size: int = None
@@ -78,7 +131,9 @@ class BasePokerEngine(object, metaclass=ABCMeta):
 
         # group cards into lists of values and get a list of unique card values
         cards_by_value = self.group_cards_by_value(cards)
-        card_values = list(cards_by_value)
+        card_values = [
+            value for value, cards in cards_by_value.items() if len(cards) > 0
+        ]
         if treat_ace_low and 14 in card_values:
             card_values.append(1)
             cards_by_value[1] = cards_by_value[14]
@@ -108,7 +163,11 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         :return: List of lists of card objects for each combination found.
         """
 
-        return [list(value) for value in combinations(cards, combo_size)]
+        return (
+            []
+            if combo_size == 0
+            else [list(value) for value in combinations(cards, combo_size)]
+        )
 
     @staticmethod
     def check_all_card_values_unique(cards: List[Card]) -> bool:
@@ -185,6 +244,39 @@ class BasePokerEngine(object, metaclass=ABCMeta):
             )
 
         return consecutive or consecutive_ace_low
+
+    @staticmethod
+    def order_cards(cards: List[Card]):
+        """
+        Helper function provided to order cards as one would in a hand.
+        Cards provided are sorted by value (High to Low) then by suit (Reverse Alphabetical Order)
+        This is mostly done to make analysis of hand outs easy as hand card order will always be the same.
+
+        :param cards: List of card objects to sort
+        """
+
+        ordered = sorted(
+            cards, key=lambda card: (card.value, card.suit.value), reverse=True
+        )
+        return ordered
+
+    def deduplicate_card_sets(self, card_sets: List[List[Card]]):
+        """
+        Public helper method
+        """
+
+        # Order cards in each card set
+        card_sets = [self.order_cards(card_set) for card_set in card_sets]
+
+        # sort and deduplicate card sets
+        card_sets.sort(
+            key=lambda cards: (
+                [card.value for card in cards],
+                [card.suit.value for card in cards],
+            ),
+            reverse=True,
+        )
+        return list(k for k, _ in itertools.groupby(card_sets))
 
     # Private Method Implementations
     # ------------------------------

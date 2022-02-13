@@ -5,24 +5,13 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-from itertools import combinations
-from typing import List
+from itertools import combinations, product, groupby
+from typing import List, Dict
 
-from pypoker.constants import (
-    TH_HANDS_ORDERED,
-    TH_HAND_STRAIGHT_FLUSH,
-    TH_HAND_QUADS,
-    TH_HAND_FULL_HOUSE,
-    TH_HAND_FLUSH,
-    TH_HAND_STRAIGHT,
-    TH_HAND_TRIPS,
-    TH_HAND_TWO_PAIR,
-    TH_HAND_PAIR,
-    TH_HAND_HIGH_CARD,
-    GAME_TEXAS_HOLDEM,
-)
-from pypoker.constructs import Card, Hand
+from pypoker.constants import GameTypes, TexasHoldemHandType, CardSuit
+from pypoker.constructs import Card, Hand, Deck, AnyCard
 from pypoker.engine import BasePokerEngine
+from pypoker.exceptions import RankingError, OutsError
 from pypoker.player import BasePlayer
 
 
@@ -34,7 +23,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
     # Concrete Implementation of public methods
     # -----------------------------------------
     def find_player_best_hand(
-        self, player: BasePlayer, board: List[Card], **kwargs
+        self, player: BasePlayer, board: List[Card]
     ) -> List[Hand]:
         """
         Find a given players best possible hand with the current cards available.
@@ -45,17 +34,17 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         available_cards = player.hole_cards + board
 
-        for hand_type in TH_HANDS_ORDERED:
+        for hand_type in TexasHoldemHandType:
             made_hands = {
-                TH_HAND_STRAIGHT_FLUSH: self.make_straight_flush_hands,
-                TH_HAND_QUADS: self.make_quads_hands,
-                TH_HAND_FULL_HOUSE: self.make_full_house_hands,
-                TH_HAND_FLUSH: self.make_flush_hands,
-                TH_HAND_STRAIGHT: self.make_straight_hands,
-                TH_HAND_TRIPS: self.make_trips_hands,
-                TH_HAND_TWO_PAIR: self.make_two_pair_hands,
-                TH_HAND_PAIR: self.make_pair_hands,
-                TH_HAND_HIGH_CARD: self.make_high_card_hands,
+                TexasHoldemHandType.StraightFlush: self.make_straight_flush_hands,
+                TexasHoldemHandType.Quads: self.make_quads_hands,
+                TexasHoldemHandType.FullHouse: self.make_full_house_hands,
+                TexasHoldemHandType.Flush: self.make_flush_hands,
+                TexasHoldemHandType.Straight: self.make_straight_hands,
+                TexasHoldemHandType.Trips: self.make_trips_hands,
+                TexasHoldemHandType.TwoPair: self.make_two_pair_hands,
+                TexasHoldemHandType.Pair: self.make_pair_hands,
+                TexasHoldemHandType.HighCard: self.make_high_card_hands,
             }[hand_type](available_cards)
 
             if made_hands:
@@ -65,6 +54,99 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     for hand in made_hands
                     if hand.tiebreakers == best_hand_tiebreaker
                 ]
+
+    def rank_player_hands(
+        self, players: List[BasePlayer]
+    ) -> Dict[int, List[BasePlayer]]:
+        """
+        For the given list of players, rank them based on the player.hand attributes.
+
+        If any player in the list does not have a hand attribute set, raise exception.
+
+        :param players: List of players to rank
+
+        :returns: Dictionary where key is the rank (1 being highest) and value is a list of player objects sharing
+        that rank.
+        """
+
+        if not all(isinstance(player, BasePlayer) for player in players):
+            raise RankingError("All values of players list must be of BasePlayer Type")
+
+        if any(player.hand is None for player in players):
+            raise RankingError(
+                "All players must have their player.hand attribute set to rank them."
+            )
+
+        players = sorted(
+            players,
+            key=lambda player: (player.hand.strength, player.hand.tiebreakers),
+            reverse=True,
+        )
+
+        ranked_players = dict()
+        rank = 1
+        current_strength = None
+        current_tb = None
+
+        for player in players:
+            if not current_strength:
+                current_strength = player.hand.strength
+                current_tb = player.hand.tiebreakers
+                ranked_players[rank] = [player]
+
+            elif (
+                player.hand.strength == current_strength
+                and player.hand.tiebreakers == current_tb
+            ):
+                ranked_players[rank].append(player)
+
+            else:
+                rank += 1
+                current_strength = player.hand.strength
+                current_tb = player.hand.tiebreakers
+                ranked_players[rank] = [player]
+
+        return ranked_players
+
+    def find_player_outs(
+        self,
+        player: BasePlayer,
+        hand_type: TexasHoldemHandType,
+        board: List[Card],
+        possible_cards: List[Card],
+    ) -> List[List[Card]]:
+        """
+        abstract method to find the possible draws a player has to make the specified hand type with the current
+        board cards and the possible draws remaining.
+
+        :param player: pypoker player object representing the player we are looking for outs for.
+        :param hand_type: hand type enum used for determining the type of hand to find outs for.
+        :param possible_cards: List of card objects that could be drawn
+        (Note this could be the available cards from the deck or the "implied" available cards)
+
+        :return: list of each combination of cards that would give the player this type of hand. Cards in these combinations
+        are explict normal cards (7H, 9D, etc) for cards required to make the out and AnyCard special cards for
+        any surplus draw cards not required to make the hand.
+        """
+
+        if hand_type == TexasHoldemHandType.HighCard:
+            raise OutsError(
+                "Cannot find outs for hand type HighCard, you always have this hand type made."
+            )
+
+        current_cards = player.hole_cards + board
+        draws_remaining = 5 - len(board)
+
+        return {
+            TexasHoldemHandType.StraightFlush: self.find_outs_straight_flush,
+            TexasHoldemHandType.Quads: self.find_outs_quads,
+            TexasHoldemHandType.FullHouse: self.find_outs_full_house,
+            TexasHoldemHandType.Flush: self.find_outs_flush,
+            TexasHoldemHandType.Straight: self.find_outs_straight,
+            TexasHoldemHandType.Trips: self.find_outs_trips,
+            TexasHoldemHandType.TwoPair: self.find_outs_two_pair,
+            TexasHoldemHandType.Pair: self.find_outs_pair,
+        }[hand_type](current_cards, possible_cards, draws_remaining)
 
     # Public "Hand Maker" methods
     # ---------------------------
@@ -97,7 +179,12 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             if tiebreaker == [14] and any(card.value == 5 for card in cards):
                 tiebreaker = [5]
             hands.append(
-                Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT_FLUSH, cards, tiebreaker)
+                Hand(
+                    GameTypes.TexasHoldem,
+                    TexasHoldemHandType.StraightFlush,
+                    cards,
+                    tiebreaker,
+                )
             )
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
@@ -132,15 +219,18 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             ):  # manages for the usecase of only getting 4 cards of the same value and no kickers
                 quad_hands.append(
                     Hand(
-                        GAME_TEXAS_HOLDEM, TH_HAND_QUADS, quad_cards, [quad_value, None]
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.Quads,
+                        quad_cards,
+                        [quad_value, None],
                     )
                 )
             else:
                 quad_hands.extend(
                     [
                         Hand(
-                            GAME_TEXAS_HOLDEM,
-                            TH_HAND_QUADS,
+                            GameTypes.TexasHoldem,
+                            TexasHoldemHandType.Quads,
                             quad_cards + [card],
                             [quad_value, card.value],
                         )
@@ -183,8 +273,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
             hands = [
                 Hand(
-                    GAME_TEXAS_HOLDEM,
-                    TH_HAND_FULL_HOUSE,
+                    GameTypes.TexasHoldem,
+                    TexasHoldemHandType.FullHouse,
                     trip_combo + pair_combo,
                     [trip_value, pair_combo[0].value],
                 )
@@ -220,8 +310,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         flushes = [val for sublist in flushes for val in sublist]
         flushes = [
             Hand(
-                GAME_TEXAS_HOLDEM,
-                TH_HAND_FLUSH,
+                GameTypes.TexasHoldem,
+                TexasHoldemHandType.Flush,
                 cards,
                 sorted([card.value for card in cards], reverse=True),
             )
@@ -251,7 +341,14 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             tiebreaker = [max([card.value for card in cards])]
             if tiebreaker == [14] and any(card.value == 5 for card in cards):
                 tiebreaker = [5]
-            hands.append(Hand(GAME_TEXAS_HOLDEM, TH_HAND_STRAIGHT, cards, tiebreaker))
+            hands.append(
+                Hand(
+                    GameTypes.TexasHoldem,
+                    TexasHoldemHandType.Straight,
+                    cards,
+                    tiebreaker,
+                )
+            )
 
         return sorted(hands, key=lambda hand: hand.tiebreakers, reverse=True)
 
@@ -296,8 +393,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 trip_hands.extend(
                     [
                         Hand(
-                            GAME_TEXAS_HOLDEM,
-                            TH_HAND_TRIPS,
+                            GameTypes.TexasHoldem,
+                            TexasHoldemHandType.Trips,
                             trip_combo,
                             [trip_combo[0].value, None, None],
                         )
@@ -317,8 +414,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     trip_hands.extend(
                         [
                             Hand(
-                                GAME_TEXAS_HOLDEM,
-                                TH_HAND_TRIPS,
+                                GameTypes.TexasHoldem,
+                                TexasHoldemHandType.Trips,
                                 trip_combo + [kicker_card],
                                 [trip_value, kicker_card.value, None],
                             )
@@ -331,8 +428,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     trip_hands.extend(
                         [
                             Hand(
-                                GAME_TEXAS_HOLDEM,
-                                TH_HAND_TRIPS,
+                                GameTypes.TexasHoldem,
+                                TexasHoldemHandType.Trips,
                                 trip_combo + kicker_combo,
                                 [
                                     trip_value,
@@ -405,8 +502,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 two_pair_hands.extend(
                     [
                         Hand(
-                            GAME_TEXAS_HOLDEM,
-                            TH_HAND_TWO_PAIR,
+                            GameTypes.TexasHoldem,
+                            TexasHoldemHandType.TwoPair,
                             two_pair,
                             [max(two_pair_value_list), min(two_pair_value_list), None],
                         )
@@ -418,8 +515,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             two_pair_hands.extend(
                 [
                     Hand(
-                        GAME_TEXAS_HOLDEM,
-                        TH_HAND_TWO_PAIR,
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.TwoPair,
                         two_pair + [kicker],
                         [
                             max(two_pair_value_list),
@@ -474,8 +571,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 pair_hands.extend(
                     [
                         Hand(
-                            GAME_TEXAS_HOLDEM,
-                            TH_HAND_PAIR,
+                            GameTypes.TexasHoldem,
+                            TexasHoldemHandType.Pair,
                             pair,
                             [pair_value, None, None, None],
                         )
@@ -495,8 +592,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 pair_hands.extend(
                     [
                         Hand(
-                            GAME_TEXAS_HOLDEM,
-                            TH_HAND_PAIR,
+                            GameTypes.TexasHoldem,
+                            TexasHoldemHandType.Pair,
                             pair + kicker_set,
                             [
                                 pair_value,
@@ -522,8 +619,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                 pair_hands.extend(
                     [
                         Hand(
-                            GAME_TEXAS_HOLDEM,
-                            TH_HAND_PAIR,
+                            GameTypes.TexasHoldem,
+                            TexasHoldemHandType.Pair,
                             pair + kicker_set,
                             [
                                 pair_value,
@@ -541,8 +638,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             pair_hands.extend(
                 [
                     Hand(
-                        GAME_TEXAS_HOLDEM,
-                        TH_HAND_PAIR,
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.Pair,
                         pair + [card],
                         [pair_value, card.value, None, None],
                     )
@@ -577,8 +674,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return sorted(
                 [
                     Hand(
-                        GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True),
                     )
@@ -599,8 +696,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return sorted(
                 [
                     Hand(
-                        GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True) + [None],
                     )
@@ -621,8 +718,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return sorted(
                 [
                     Hand(
-                        GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True)
                         + [None, None],
@@ -644,8 +741,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             return sorted(
                 [
                     Hand(
-                        GAME_TEXAS_HOLDEM,
-                        TH_HAND_HIGH_CARD,
+                        GameTypes.TexasHoldem,
+                        TexasHoldemHandType.HighCard,
                         cards,
                         sorted([card.value for card in cards], reverse=True)
                         + [None, None, None],
@@ -659,8 +756,8 @@ class TexasHoldemPokerEngine(BasePokerEngine):
         return sorted(
             [
                 Hand(
-                    GAME_TEXAS_HOLDEM,
-                    TH_HAND_HIGH_CARD,
+                    GameTypes.TexasHoldem,
+                    TexasHoldemHandType.HighCard,
                     [card],
                     [card.value, None, None, None, None],
                 )
@@ -669,3 +766,497 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             key=lambda hand: hand.tiebreakers,
             reverse=True,
         )
+
+    # Public "Find Outs" methods
+    # ---------------------------
+
+    def find_outs_straight_flush(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for the a straight flush hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of drawd remaining.
+
+        :return List of draw combinations that would give a straight flush. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_suits_grouped = self.group_cards_by_suit(current_cards)
+        drawable_suits_grouped = self.group_cards_by_suit(available_cards)
+
+        eligible_suits = {
+            suit: (curr_cards, drawable_suits_grouped[suit])
+            for suit, curr_cards in current_suits_grouped.items()
+            if len(curr_cards) + len(drawable_suits_grouped[suit]) >= 5
+        }
+
+        if not eligible_suits:
+            return []
+
+        outs = []
+        for curr_suit_cards, drawable_suit_cards in eligible_suits.values():
+            for draw_size in range(1, remaining_draws + 1):
+                straight_flushes = []
+                draw_combos = self.find_all_unique_card_combos(
+                    drawable_suit_cards, draw_size
+                )
+
+                for draw_combo in draw_combos:
+                    straight_flushes.extend(
+                        self.find_consecutive_value_cards(
+                            curr_suit_cards + draw_combo, run_size=5
+                        )
+                    )
+
+                straight_flushes = self.deduplicate_card_sets(straight_flushes)
+
+                for cards in straight_flushes:
+                    out_cards = [card for card in cards if card in drawable_suit_cards]
+                    out_cards = out_cards + [AnyCard("")] * (
+                        remaining_draws - len(out_cards)
+                    )
+                    outs.append(out_cards)
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_quads(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a quad hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of drawd remaining.
+
+        :return List of draw combinations that would give a quad hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        possible_values = [
+            value
+            for value in range(2, 15)
+            if len(current_cards_by_value[value]) + remaining_draws >= 4
+            and len(current_cards_by_value[value])
+            + len(available_cards_by_value[value])
+            >= 4
+        ]
+
+        outs = []
+        for quad_value in possible_values:
+            required_quad_draws = 4 - len(current_cards_by_value[quad_value])
+            surplus_draws = [AnyCard("")] * (remaining_draws - required_quad_draws)
+
+            if not required_quad_draws:
+                outs.append(surplus_draws)
+                continue
+
+            for draw_combo in self.find_all_unique_card_combos(
+                available_cards_by_value[quad_value], required_quad_draws
+            ):
+                outs.append(self.order_cards(draw_combo + surplus_draws))
+
+        return outs
+
+    def find_outs_full_house(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a full house hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a full house hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        # find all values that could make a triple with the remaining number of draws
+        trip_possible_values = [
+            value
+            for value in range(2, 15)
+            if len(current_cards_by_value[value]) + remaining_draws >= 3
+            and len(current_cards_by_value[value])
+            + len(available_cards_by_value[value])
+            >= 3
+        ]
+
+        # find all values that could make a pair with the remaining number of draws
+        pair_possible_values = [
+            value
+            for value in range(2, 15)
+            if len(current_cards_by_value[value]) + remaining_draws >= 2
+            and len(current_cards_by_value[value])
+            + len(available_cards_by_value[value])
+            >= 2
+        ]
+
+        full_house_values = [
+            (trip_value, pair_value)
+            for trip_value in trip_possible_values
+            for pair_value in pair_possible_values
+            if trip_value != pair_value
+            and max(3 - len(current_cards_by_value[trip_value]), 0)
+            + max(2 - len(current_cards_by_value[pair_value]), 0)
+            <= remaining_draws
+        ]
+
+        outs = []
+        for trip_value, pair_value in full_house_values:
+            trip_req_draws = max(3 - len(current_cards_by_value[trip_value]), 0)
+            pair_req_draws = max(2 - len(current_cards_by_value[pair_value]), 0)
+
+            trip_draw_combos = (
+                self.find_all_unique_card_combos(
+                    available_cards_by_value[trip_value], trip_req_draws
+                )
+                if trip_req_draws
+                else []
+            )
+
+            pair_draw_combos = (
+                self.find_all_unique_card_combos(
+                    available_cards_by_value[pair_value], pair_req_draws
+                )
+                if pair_req_draws
+                else []
+            )
+
+            if not trip_draw_combos and not pair_draw_combos:
+                outs.append([AnyCard("")] * remaining_draws)
+
+            elif not trip_draw_combos:
+                outs.extend(
+                    [
+                        pair_draw + [AnyCard("")] * (remaining_draws - len(pair_draw))
+                        for pair_draw in pair_draw_combos
+                    ]
+                )
+
+            elif not pair_draw_combos:
+                outs.extend(
+                    [
+                        trip_draw + [AnyCard("")] * (remaining_draws - len(trip_draw))
+                        for trip_draw in trip_draw_combos
+                    ]
+                )
+
+            else:
+                outs.extend(
+                    [
+                        trip_draw
+                        + pair_draw
+                        + [AnyCard("")]
+                        * (remaining_draws - len(trip_draw) - len(pair_draw))
+                        for trip_draw in trip_draw_combos
+                        for pair_draw in pair_draw_combos
+                    ]
+                )
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_flush(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a flush hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a flush hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_suit = self.group_cards_by_suit(current_cards)
+        available_cards_by_suit = self.group_cards_by_suit(available_cards)
+
+        flush_suits = [
+            suit.name
+            for suit in CardSuit
+            if suit != suit.Any
+            and len(current_cards_by_suit[suit.name])
+            + len(available_cards_by_suit[suit.name])
+            >= 5
+            and len(current_cards_by_suit[suit.name]) + remaining_draws >= 5
+        ]
+
+        outs = []
+        for suit in flush_suits:
+            required_draws = max(5 - len(current_cards_by_suit[suit]), 0)
+            surplus_draws = [AnyCard("")] * (remaining_draws - required_draws)
+
+            if not required_draws:
+                outs.append(surplus_draws)
+                continue
+
+            draw_combos = self.find_all_unique_card_combos(
+                available_cards_by_suit[suit], required_draws
+            )
+            for draw_combo in draw_combos:
+                outs.append(draw_combo + surplus_draws)
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_straight(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a straight hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a straight hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        current_values = [
+            key for key, value in current_cards_by_value.items() if len(value) > 0
+        ]
+        available_values = [
+            key for key, value in available_cards_by_value.items() if len(value) > 0
+        ]
+
+        # loop through drawing 1 to remaining draws number of cards, test straights, create outs
+        outs = []
+        for draw_amount in range(1, remaining_draws + 1):
+            draw_value_combos = [
+                list(value) for value in combinations(available_values, draw_amount)
+            ]
+
+            for draw_value_combo in draw_value_combos:
+                test_draw_cards = [
+                    available_cards_by_value[value][0] for value in draw_value_combo
+                ]
+                straights = self.find_consecutive_value_cards(
+                    current_cards + test_draw_cards, run_size=5
+                )
+
+                for straight in straights:
+                    straight_draw_values = [
+                        card.value
+                        for card in straight
+                        if card.value in draw_value_combo
+                        and card.value not in current_values
+                    ]
+
+                    possible_draw_cards = [
+                        available_cards_by_value[value]
+                        for value in straight_draw_values
+                    ]
+                    draw_card_combos = list(product(*possible_draw_cards))
+                    surplus_draws = [AnyCard("")] * (
+                        remaining_draws - len(straight_draw_values)
+                    )
+
+                    outs.extend(
+                        [
+                            list(draw_card_combo) + surplus_draws
+                            for draw_card_combo in draw_card_combos
+                        ]
+                    )
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_trips(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a trips hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a trips hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        trip_values = [
+            value
+            for value, cards in current_cards_by_value.items()
+            if len(cards) + remaining_draws >= 3
+            and len(cards) + len(available_cards_by_value[value]) >= 3
+        ]
+
+        outs = []
+        for trip_value in trip_values:
+            draws_required = max(3 - len(current_cards_by_value[trip_value]), 0)
+            surplus_draws = [AnyCard("")] * (remaining_draws - draws_required)
+
+            if not draws_required:
+                outs.append(surplus_draws)
+                continue
+
+            draw_combos = self.find_all_unique_card_combos(
+                available_cards_by_value[trip_value], draws_required
+            )
+            outs.extend([draw_combo + surplus_draws for draw_combo in draw_combos])
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_two_pair(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a two pair hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a two pair hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        pair_values = [
+            value
+            for value, cards in current_cards_by_value.items()
+            if len(cards) + remaining_draws >= 2
+            and len(cards) + len(available_cards_by_value[value]) >= 2
+        ]
+
+        pair_combos = [
+            sorted([pair_a, pair_b])
+            for pair_a in pair_values
+            for pair_b in pair_values
+            if pair_a != pair_b
+            and max(2 - len(current_cards_by_value[pair_a]), 0)
+            + max(2 - len(current_cards_by_value[pair_b]), 0)
+            <= remaining_draws
+        ]
+
+        # de-duplicates any pair combos that are repeated
+        pair_combos.sort(key=lambda pairs: (pairs[0], pairs[1]))
+        pair_combos = list(k for k, _ in groupby(pair_combos))
+
+        outs = []
+        for pair_a, pair_b in pair_combos:
+            pair_a_draws_required = max(2 - len(current_cards_by_value[pair_a]), 0)
+            pair_b_draws_required = max(2 - len(current_cards_by_value[pair_b]), 0)
+            surplus_cards = [AnyCard("")] * (
+                remaining_draws - pair_a_draws_required - pair_b_draws_required
+            )
+
+            if not pair_a_draws_required and not pair_b_draws_required:
+                outs.append(surplus_cards)
+                continue
+
+            pair_a_combos = self.find_all_unique_card_combos(
+                available_cards_by_value[pair_a], pair_a_draws_required
+            )
+            pair_b_combos = self.find_all_unique_card_combos(
+                available_cards_by_value[pair_b], pair_b_draws_required
+            )
+
+            if not pair_a_combos:
+                outs.extend(
+                    [pair_b_combo + surplus_cards for pair_b_combo in pair_b_combos]
+                )
+                continue
+
+            if not pair_b_combos:
+                outs.extend(
+                    [pair_a_combo + surplus_cards for pair_a_combo in pair_a_combos]
+                )
+                continue
+
+            draw_sets = product(pair_a_combos, pair_b_combos)
+            draw_sets = [set_a + set_b for set_a, set_b in draw_sets]
+            outs.extend([draw_set + surplus_cards for draw_set in draw_sets])
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_pair(
+        self,
+        current_cards: List[Card],
+        available_cards: List[Card],
+        remaining_draws: int,
+    ) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a pair hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a pair hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        pair_values = [
+            value
+            for value, cards in current_cards_by_value.items()
+            if len(cards) + remaining_draws >= 2
+            and len(cards) + len(available_cards_by_value[value]) >= 2
+        ]
+
+        outs = []
+        for pair_value in pair_values:
+            draws_required = max(2 - len(current_cards_by_value[pair_value]), 0)
+            surplus_draws = [AnyCard("")] * (remaining_draws - draws_required)
+
+            if not draws_required:
+                outs.append(surplus_draws)
+                continue
+
+            draw_combos = self.find_all_unique_card_combos(
+                available_cards_by_value[pair_value], draws_required
+            )
+            outs.extend([draw_combo + surplus_draws for draw_combo in draw_combos])
+
+        return self.deduplicate_card_sets(outs)

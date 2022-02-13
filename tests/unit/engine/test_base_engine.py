@@ -2,7 +2,8 @@ from typing import List
 
 from pytest import fixture, mark
 
-from pypoker.constructs import Card
+from pypoker.constants import HandType
+from pypoker.constructs import Card, Deck
 from pypoker.engine import BasePokerEngine
 from pypoker.player import BasePlayer
 
@@ -13,6 +14,12 @@ def base_engine():
         def find_player_best_hand(
             self, player: BasePlayer, board: List[Card], **kwargs
         ):
+            pass
+
+        def rank_player_hands(self, players: List[BasePlayer]):
+            pass
+
+        def find_player_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
             pass
 
     return FakePokerEngine()
@@ -31,7 +38,7 @@ def test_when_group_cards_by_suit_then_correct_dict_returned(
     assert result["Clubs"] == [cards[6], cards[7]]
 
 
-def test_when_group_cards_by_suit_and_suit_missing_then_not_in_return_list(
+def test_when_group_cards_by_suit_and_suit_missing_then_empty_lists_in_return_list(
     base_engine, get_test_cards
 ):
     cards = get_test_cards("D5|H8|D6")
@@ -40,12 +47,11 @@ def test_when_group_cards_by_suit_and_suit_missing_then_not_in_return_list(
     assert isinstance(result, dict)
     assert result["Diamonds"] == [cards[0], cards[2]]
     assert result["Hearts"] == [cards[1]]
+    assert result["Clubs"] == []
+    assert result["Spades"] == []
 
-    assert "Clubs" not in list(result)
-    assert "Spades" not in list(result)
 
-
-def test_when_group_cards_by_value_then_correct_dict_returned(
+def test_when_group_cards_by_value_then_empty_list_in_returned_dict(
     base_engine, get_test_cards
 ):
     cards = get_test_cards("D5|H8|D6|D9|S5|SK|C5|C8|DA|S9")
@@ -53,17 +59,17 @@ def test_when_group_cards_by_value_then_correct_dict_returned(
     result = base_engine.group_cards_by_value(cards)
     assert isinstance(result, dict)
 
-    assert 2 not in list(result)
-    assert 3 not in list(result)
-    assert 4 not in list(result)
+    assert result[2] == []
+    assert result[3] == []
+    assert result[4] == []
     assert result[5] == [cards[0], cards[4], cards[6]]
     assert result[6] == [cards[2]]
-    assert 7 not in list(result)
+    assert result[7] == []
     assert result[8] == [cards[1], cards[7]]
     assert result[9] == [cards[3], cards[9]]
-    assert 10 not in list(result)
-    assert 11 not in list(result)
-    assert 12 not in list(result)
+    assert result[10] == []
+    assert result[11] == []
+    assert result[12] == []
     assert result[13] == [cards[5]]
     assert result[14] == [cards[8]]
 
@@ -245,3 +251,33 @@ def test_when_check_cards_consecutive_then_correct_values_returned(base_engine, 
     actual = base_engine.check_cards_consecutive(cards, treat_ace_low)
 
     assert actual == expected
+
+
+@mark.parametrize("raw_cards, expected_cards", [
+    ("D4", "D4"),
+    ("D9|H6|S2", "D9|H6|S2"),
+    ("D4|H9|C7|SK", "SK|H9|C7|D4"),
+    ("S9|D4|C9|CK|CA|H9", "CA|CK|S9|H9|C9|D4"),
+    ("D4|H9|ANY_DIAMOND|C7|ANY_HEART|SK", "SK|H9|C7|D4|ANY_HEART|ANY_DIAMOND"),
+    ("D4|H9|ANY_SEVEN|C7|ANY_CARD|SK", "SK|H9|C7|ANY_SEVEN|D4|ANY_CARD"),
+])
+def test_when_order_cards_then_correct_cards_returned(base_engine, get_test_cards, raw_cards, expected_cards):
+    raw_cards = get_test_cards(raw_cards)
+    expected_cards = get_test_cards(expected_cards)
+
+    actual = base_engine.order_cards(raw_cards)
+
+    assert actual == expected_cards
+
+
+@mark.parametrize("raw_sets, expected_sets", [
+    (["SK|S7", "C4|D9", "H2|CA"], ["CA|H2", "SK|S7", "D9|C4"]),
+    (["S7|DK", "S7|SK", "SK|S7", "C2|H3", "S7|SK"], ["SK|S7", "DK|S7", "H3|C2"]),
+])
+def test_when_deduplicate_card_sets_then_correct_sets_returned(base_engine, get_test_cards, raw_sets, expected_sets):
+    raw_sets = [get_test_cards(card_set) for card_set in raw_sets]
+    expected_sets = [get_test_cards(card_set) for card_set in expected_sets]
+
+    actual = base_engine.deduplicate_card_sets(raw_sets)
+
+    assert actual == expected_sets
