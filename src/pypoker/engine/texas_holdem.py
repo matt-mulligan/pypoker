@@ -5,7 +5,7 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
-from itertools import combinations
+from itertools import combinations, product
 from typing import List, Dict
 
 from pypoker.constants import GameTypes, TexasHoldemHandType, CardSuit
@@ -946,5 +946,48 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             draw_combos = self.find_all_unique_card_combos(available_cards_by_suit[suit], required_draws)
             for draw_combo in draw_combos:
                 outs.append(draw_combo + surplus_draws)
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_straight(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a flush hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a flush hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        current_values = [key for key, value in current_cards_by_value.items() if len(value) > 0]
+        available_values = [key for key, value in available_cards_by_value.items() if len(value) > 0]
+
+        # loop through drawing 1 to remaining draws number of cards, test straights, create outs
+        outs = []
+        for draw_amount in range(1, remaining_draws+1):
+            draw_value_combos = [list(value) for value in combinations(available_values, draw_amount)]
+
+            for draw_value_combo in draw_value_combos:
+                test_draw_cards = [available_cards_by_value[value][0] for value in draw_value_combo]
+                straights = self.find_consecutive_value_cards(current_cards + test_draw_cards, run_size=5)
+
+                for straight in straights:
+                    straight_draw_values = [
+                        card.value for card in straight
+                        if card.value in draw_value_combo
+                        and card.value not in current_values
+                    ]
+
+                    possible_draw_cards = [available_cards_by_value[value] for value in straight_draw_values]
+                    draw_card_combos = list(product(*possible_draw_cards))
+                    surplus_draws = [AnyCard("")] * (remaining_draws - len(straight_draw_values))
+
+                    outs.extend([list(draw_card_combo) + surplus_draws for draw_card_combo in draw_card_combos])
 
         return self.deduplicate_card_sets(outs)

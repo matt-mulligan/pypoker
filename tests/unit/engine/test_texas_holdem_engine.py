@@ -1737,3 +1737,148 @@ def test_when_find_outs_flush_and_five_draws_then_return_outs(engine, get_test_c
     assert get_test_cards("HT|H9|H5|H4|H2") in result
     assert get_test_cards("DQ|D9|D6|D4|D3") in result
     # not asserting all 4026 outs
+
+
+def test_when_find_outs_straight_and_no_possible_values_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK|D5|C8|H8|S8")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_straight(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_straight_and_single_inner_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK|D5|C8|HJ|ST")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_straight(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert get_test_cards("SQ") in result
+    assert get_test_cards("HQ") in result
+    assert get_test_cards("CQ") in result
+    assert get_test_cards("DQ") in result
+
+
+def test_when_find_outs_straight_and_single_open_ender_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("C3|CK|D4|C8|H2|S5")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_straight(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 8
+
+    assert get_test_cards("SA") in result
+    assert get_test_cards("HA") in result
+    assert get_test_cards("CA") in result
+    assert get_test_cards("DA") in result
+    assert get_test_cards("S6") in result
+    assert get_test_cards("H6") in result
+    assert get_test_cards("C6") in result
+    assert get_test_cards("D6") in result
+
+
+def test_when_find_outs_straight_and_multiple_straights_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|D5|C8|HJ|ST")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_straight(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 48
+
+    # not asserting all 48 outs
+    assert get_test_cards("SK|SQ") in result
+    assert get_test_cards("SK|DQ") in result
+    assert get_test_cards("CK|SQ") in result
+    assert get_test_cards("HK|CQ") in result
+
+    assert get_test_cards("SQ|S9") in result
+    assert get_test_cards("SQ|D9") in result
+    assert get_test_cards("CQ|S9") in result
+    assert get_test_cards("HQ|C9") in result
+
+    assert get_test_cards("S9|S7") in result
+    assert get_test_cards("S9|D7") in result
+    assert get_test_cards("C9|S7") in result
+    assert get_test_cards("H9|C7") in result
+
+
+def test_when_find_outs_straight_and_surplus_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|D5|CK|HJ|ST")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_straight(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 20
+
+    assert get_test_cards("SQ|ANY_CARD") in result
+    assert get_test_cards("DQ|ANY_CARD") in result
+    assert get_test_cards("HQ|ANY_CARD") in result
+    assert get_test_cards("CQ|ANY_CARD") in result
+
+    assert get_test_cards("SQ|S9") in result
+    assert get_test_cards("SQ|H9") in result
+    assert get_test_cards("SQ|C9") in result
+    assert get_test_cards("SQ|D9") in result
+
+    assert get_test_cards("DQ|S9") in result
+    assert get_test_cards("DQ|H9") in result
+    assert get_test_cards("DQ|C9") in result
+    assert get_test_cards("DQ|D9") in result
+
+    assert get_test_cards("HQ|S9") in result
+    assert get_test_cards("HQ|H9") in result
+    assert get_test_cards("HQ|C9") in result
+    assert get_test_cards("HQ|D9") in result
+
+    assert get_test_cards("CQ|S9") in result
+    assert get_test_cards("CQ|H9") in result
+    assert get_test_cards("CQ|C9") in result
+    assert get_test_cards("CQ|D9") in result
+
+
+def test_when_find_outs_straight_and_already_have_one_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|CK|HJ|ST")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_straight(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 21
+
+    assert get_test_cards("ANY_CARD|ANY_CARD") in result
+
+    assert get_test_cards("S9|ANY_CARD") in result
+    assert get_test_cards("D9|ANY_CARD") in result
+    assert get_test_cards("H9|ANY_CARD") in result
+    assert get_test_cards("C9|ANY_CARD") in result
+
+    assert get_test_cards("S9|S8") in result
+    assert get_test_cards("S9|H8") in result
+    assert get_test_cards("S9|C8") in result
+    assert get_test_cards("S9|D8") in result
+    assert get_test_cards("D9|S8") in result
+    assert get_test_cards("D9|H8") in result
+    assert get_test_cards("D9|C8") in result
+    assert get_test_cards("D9|D8") in result
+    assert get_test_cards("H9|S8") in result
+    assert get_test_cards("H9|H8") in result
+    assert get_test_cards("H9|C8") in result
+    assert get_test_cards("H9|D8") in result
+    assert get_test_cards("C9|S8") in result
+    assert get_test_cards("C9|H8") in result
+    assert get_test_cards("C9|C8") in result
+    assert get_test_cards("C9|D8") in result
