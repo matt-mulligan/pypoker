@@ -2,7 +2,7 @@ import re
 
 from pytest import mark, raises
 
-from pypoker.constants import GAME_TEXAS_HOLDEM, TH_HAND_PAIR
+from pypoker.constants import GameTypes, TexasHoldemHandType
 from pypoker.constructs import Card, Hand
 from pypoker.player import BasePlayer
 
@@ -21,13 +21,13 @@ def test_when_base_player_created_and_no_optionals_then_player_attr_correct():
 def test_when_base_player_created_and_all_optionals_then_attr_correct(get_test_cards):
     player = BasePlayer(
         "Matt", chips=12345, hole_cards=get_test_cards("H2|D4"), table_pos=1,
-        hand=Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
+        hand=Hand(GameTypes.TexasHoldem, TexasHoldemHandType.Pair, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
     )
     assert player.name == "Matt"
     assert player.chips == 12345
     assert player.hole_cards == [Card("H2"), Card("D4")]
     assert player.table_pos == 1
-    assert player.hand == Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
+    assert player.hand == Hand(GameTypes.TexasHoldem, TexasHoldemHandType.Pair, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
     assert player.current_bet is None
 
 
@@ -37,14 +37,14 @@ def test_when_base_player_and_properties_set_then_attr_correct(get_test_cards):
     player.hole_cards = [Card("DK"), Card("DA")]
     player.table_pos = 9
     player.current_bet = 1000
-    player.hand = Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
+    player.hand = Hand(GameTypes.TexasHoldem, TexasHoldemHandType.Pair, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
 
     assert player.name == "Matt"
     assert player.chips == 9001
     assert player.hole_cards == [Card("DK"), Card("DA")]
     assert player.table_pos == 9
     assert player.current_bet == 1000
-    assert player.hand == Hand(GAME_TEXAS_HOLDEM, TH_HAND_PAIR, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
+    assert player.hand == Hand(GameTypes.TexasHoldem, TexasHoldemHandType.Pair, get_test_cards("D7|H7|S9|C8|CK"), [7, 13, 9, 8])
 
 
 @mark.parametrize("chips", ["123", -45])

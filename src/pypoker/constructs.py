@@ -10,47 +10,21 @@ from dataclasses import dataclass, InitVar, field
 from typing import List
 
 from pypoker.constants import (
-    GAME_TYPES,
-    GAME_HAND_TYPES,
-    GAME_HAND_STRENGTHS,
-    GAME_HAND_TIEBREAKERS_ARGS,
-    GAME_HAND_NUM_CARDS,
+    CARD_ANY_VALUE,
+    CARD_ANY_SUIT,
+    CardRank,
+    CardSuit,
+    CARD_SUIT_VALUES,
+    CARD_RANK_VALUES,
+    HandType,
+    GameTypes,
+    GameHandTypes,
+    GameHandStrengths,
+    GameHandNumCards,
+    GameHandTiebreakerArgs,
+    OutsCalculationMethod,
 )
 from pypoker.exceptions import InvalidGameError, InvalidHandTypeError, GameMismatchError
-
-CARD_SUITS = ["Clubs", "Diamonds", "Hearts", "Spades"]
-CARD_RANKS = [
-    "Two",
-    "Three",
-    "Four",
-    "Five",
-    "Six",
-    "Seven",
-    "Eight",
-    "Nine",
-    "Ten",
-    "Jack",
-    "Queen",
-    "King",
-    "Ace",
-]
-
-CARD_ID_SUITS = {"C": "Clubs", "D": "Diamonds", "H": "Hearts", "S": "Spades"}
-CARD_ID_RANKS = {
-    "2": "Two",
-    "3": "Three",
-    "4": "Four",
-    "5": "Five",
-    "6": "Six",
-    "7": "Seven",
-    "8": "Eight",
-    "9": "Nine",
-    "T": "Ten",
-    "J": "Jack",
-    "Q": "Queen",
-    "K": "King",
-    "A": "Ace",
-}
 
 
 @dataclass()
@@ -60,23 +34,32 @@ class Card(object):
     """
 
     card_id: InitVar[str]
-    rank: str = field(init=False, compare=False, repr=False)
-    suit: str = field(init=False, compare=False, repr=False)
+    rank: CardRank = field(init=False, compare=False, repr=False)
+    suit: CardSuit = field(init=False, compare=False, repr=False)
     value: int = field(init=False, compare=False, repr=False)
     name: str = field(init=False)
 
     def __post_init__(self, card_id):
         self.identity = self._check_card_id(card_id)
-        self.rank = self._determine_rank(self.identity)
-        self.suit = self._determine_suit(self.identity)
+        self.rank = CardRank(card_id[1])
+        self.suit = CardSuit(card_id[0])
         self.value = self._determine_value(self.rank)
-        self.name = self._determine_name(self.rank, self.suit)
+        self.name = f"{self.rank.name} of {self.suit.name}"
 
     def __gt__(self, other):
+        if any(isinstance(obj, SpecialCard) for obj in [self, other]):
+            raise ValueError("Cannot compare any cards of type SpecialCard")
+
         return self.value > other.value
 
     def __lt__(self, other):
+        if any(isinstance(obj, SpecialCard) for obj in [self, other]):
+            raise ValueError("Cannot compare any cards of type SpecialCard")
+
         return self.value < other.value
+
+    def __hash__(self):
+        return hash(self.name)
 
     @staticmethod
     def _check_card_id(card_id: str) -> str:
@@ -87,50 +70,26 @@ class Card(object):
         if len(card_id) != 2:
             raise ValueError("Card ID provided must be exactly 2 characters long.")
 
-        if card_id[0] not in CARD_ID_SUITS.keys():
+        if card_id[0] not in CARD_SUIT_VALUES:
             raise ValueError(
                 f"Card ID first character '{card_id[0]}' is not within valid list of "
-                f"suit identifiers '{CARD_ID_SUITS.keys()}'"
+                f"suit identifiers '{CARD_SUIT_VALUES}'"
             )
 
-        if card_id[1] not in CARD_ID_RANKS.keys():
+        if card_id[1] not in CARD_RANK_VALUES:
             raise ValueError(
                 f"Card ID second character '{card_id[1]}' is not within valid list of "
-                f"rank identifiers '{CARD_ID_RANKS.keys()}'"
+                f"rank identifiers '{CARD_RANK_VALUES}'"
             )
 
         return card_id
 
     @staticmethod
-    def _determine_suit(card_id: str) -> str:
-        """
-        determines the suite of the card based on the card id value
-
-        :param card_id: 2 character string representation of the card. First character representing Suit,
-        Second character representing the rank
-        :return: Suit value of the card
-        """
-
-        return CARD_ID_SUITS[card_id[0]]
-
-    @staticmethod
-    def _determine_rank(card_id: str) -> str:
-        """
-        returns the english rank of the card based on the card id value
-
-        :param card_id: 2 character string representation of the card. First character representing Suit,
-        Second character representing the rank
-        :return: English rank of the card
-        """
-
-        return CARD_ID_RANKS[card_id[1]]
-
-    @staticmethod
-    def _determine_value(rank: str) -> int:
+    def _determine_value(rank: CardRank) -> int:
         """
         returns the numeric value of a rank, used for greater_than and less_than comparisons
 
-        :param rank: str representing the rank of a card between "Two" and "Ace"
+        :param rank: Enum of CardRank representing the rank of a card between "Two" and "Ace"
         :return: comparison value of a card
         """
 
@@ -148,19 +107,140 @@ class Card(object):
             "Queen": 12,
             "King": 13,
             "Ace": 14,
-        }[rank]
+            "Any": 0,
+        }[rank.name]
+
+
+@dataclass()
+class SpecialCard(Card):
+    """
+    data class to identify "special" cards
+    special cards are ones that are not used within games but represent abstract card sets
+    e.g. any 7 card, any heart card, any card at all
+    """
+
+
+@dataclass()
+class AnyValueCard(SpecialCard):
+
+    rank: CardRank = field(init=False, compare=False, repr=False)
+    suit: CardSuit = field(init=False, compare=False, repr=False)
+    value: int = field(init=False, compare=False, repr=False)
+    name: str = field(init=False)
+
+    def __post_init__(self, card_id):
+        self.identity = self._check_card_any_value_id(card_id)
+        self.rank = CardRank(CARD_ANY_VALUE)
+        self.suit = CardSuit(card_id)
+        self.value = self._determine_value(self.rank)
+        self.name = f"{self.rank.name} of {self.suit.name}"
+
+    def __hash__(self):
+        return hash(self.name)
 
     @staticmethod
-    def _determine_name(rank: str, suit: str) -> str:
+    def _check_card_any_value_id(card_id):
         """
-        Simple method to return the full english name of a card
-
-        :param rank: the english rank of the card.
-        :param suit: the english suit of the card.
-        :return: Full english name of the card
+        checks the ID value passed to AnyValueCard class.
+        Value should be just the suit component
         """
 
-        return f"{rank} of {suit}"
+        if len(card_id) != 1:
+            raise ValueError(
+                "Card ID provided for AnyValueCard must be exactly 1 character."
+            )
+
+        if card_id not in CARD_SUIT_VALUES:
+            raise ValueError(
+                f"Card ID '{card_id}' is not within valid list of suit identifiers '{CARD_SUIT_VALUES}'"
+            )
+
+        return f"{card_id}{CARD_ANY_VALUE}"
+
+    def to_explicit(self, cards: List[Card]):
+        """
+        Helper method on special card classes to convert them from their special card state to a list of explicit cards.
+
+        :param cards: list of possible card objects to create explict cards from.
+        """
+
+        return [card for card in cards if card.suit == self.suit]
+
+
+@dataclass()
+class AnySuitCard(SpecialCard):
+
+    rank: CardRank = field(init=False, compare=False, repr=False)
+    suit: CardSuit = field(init=False, compare=False, repr=False)
+    value: int = field(init=False, compare=False, repr=False)
+    name: str = field(init=False)
+
+    def __post_init__(self, card_id):
+        self.identity = self._check_card_any_suit_id(card_id)
+        self.rank = CardRank(card_id)
+        self.suit = CardSuit(CARD_ANY_SUIT)
+        self.value = self._determine_value(self.rank)
+        self.name = f"{self.rank.name} of {self.suit.name}"
+
+    def __hash__(self):
+        return hash(self.name)
+
+    @staticmethod
+    def _check_card_any_suit_id(card_id):
+        """
+        checks the ID value passed to AnySuitCard class.
+        Value should be just the suit component
+        """
+
+        if len(card_id) != 1:
+            raise ValueError(
+                "Card ID provided for AnySuitCard must be exactly 1 character."
+            )
+
+        if card_id not in CARD_RANK_VALUES:
+            raise ValueError(
+                f"Card ID '{card_id}' is not within valid list of rank identifiers '{CARD_RANK_VALUES}'"
+            )
+
+        return f"{CARD_ANY_SUIT}{card_id}"
+
+    def to_explicit(self, cards: List[Card]):
+        """
+        Helper method on special card classes to convert them from their special card state to a list of explicit cards.
+
+        :param cards: list of possible card objects to create explict cards from.
+        """
+
+        return [card for card in cards if card.value == self.value]
+
+
+@dataclass()
+class AnyCard(SpecialCard):
+
+    rank: CardRank = field(init=False, compare=False, repr=False)
+    suit: CardSuit = field(init=False, compare=False, repr=False)
+    value: int = field(init=False, compare=False, repr=False)
+    name: str = field(init=False)
+
+    def __post_init__(self, card_id):
+        self.identity = f"{CARD_ANY_SUIT}{CARD_ANY_VALUE}"
+        self.rank = CardRank(CARD_ANY_VALUE)
+        self.suit = CardSuit(CARD_ANY_SUIT)
+        self.value = self._determine_value(self.rank)
+        self.name = f"{self.rank.name} of {self.suit.name}"
+
+    def __hash__(self):
+        return hash(self.name)
+
+    @staticmethod
+    def to_explicit(cards: List[Card]):
+        """
+        Helper method on special card classes to convert them from their special card state to a list of explicit cards.
+
+        :param cards: list of possible card objects to create explict cards from.
+        """
+
+        return cards
 
 
 class Deck(object):
@@ -261,7 +341,7 @@ class Deck(object):
             )
 
         ordered_cards = []
-        suits = ["Spades", "Hearts", "Clubs", "Diamonds"]
+        suits = [CardSuit("S"), CardSuit("H"), CardSuit("C"), CardSuit("D")]
 
         for suit in suits:
             suited_cards = [card for card in cards if card.suit == suit]
@@ -277,7 +357,11 @@ class Hand(object):
     """
 
     def __init__(
-        self, game: str, hand_type: str, cards: List[Card], tiebreakers: List[int]
+        self,
+        game: GameTypes,
+        hand_type: HandType,
+        cards: List[Card],
+        tiebreakers: List[int],
     ):
         self.game = self._validate_game(game)
         self.type = self._validate_type(game, hand_type)
@@ -376,7 +460,7 @@ class Hand(object):
         return False
 
     @staticmethod
-    def _validate_game(game: str) -> str:
+    def _validate_game(game: GameTypes) -> GameTypes:
         """
         private method to validate the game value.
 
@@ -385,15 +469,15 @@ class Hand(object):
         :return: validated game type
         """
 
-        if game not in GAME_TYPES:
-            raise InvalidGameError(f"Game type '{game}' is invalid")
+        if not isinstance(game, GameTypes):
+            raise InvalidGameError("game object must be Enum of type GameTypes")
 
         return game
 
     @staticmethod
-    def _validate_type(game: str, hand_type: str) -> str:
+    def _validate_type(game: GameTypes, hand_type: HandType) -> HandType:
         """
-        private method to validate the hand type giv
+        private method to validate the hand type give
 
         :param game: type of game the hand is from
         :param hand_type: the hand type to validate
@@ -401,19 +485,27 @@ class Hand(object):
         :return: validated hand type
         """
 
-        hand_types = GAME_HAND_TYPES[game]
+        if not isinstance(hand_type, HandType):
+            raise InvalidHandTypeError(
+                "hand_type passed to Hand is not of type HandType"
+            )
+
+        hand_types = GameHandTypes[game.name].value
         if hand_type not in hand_types:
-            raise InvalidHandTypeError(f"Hand type '{hand_type}' is invalid")
+            raise InvalidHandTypeError(
+                f"Hand type '{hand_type}' is not part of {game} hand types"
+            )
 
         return hand_type
 
     @staticmethod
-    def _validate_cards(game: str, hand_type: str, cards: List[Card]) -> List[Card]:
+    def _validate_cards(
+        game: GameTypes, hand_type: HandType, cards: List[Card]
+    ) -> List[Card]:
         """
         private method to validate card objects.
 
         :param cards: value to validate
-
         :return: validated cards object
         """
 
@@ -422,7 +514,7 @@ class Hand(object):
                 "Cards object passed to hand must be a list of Card objects"
             )
 
-        min_cards, max_cards = GAME_HAND_NUM_CARDS[game][hand_type]
+        min_cards, max_cards = GameHandNumCards[game.name].value[hand_type.name].value
         if not min_cards <= len(cards) <= max_cards:
             raise ValueError(
                 f"{game} {hand_type} hand required between {min_cards} and {max_cards} cards"
@@ -431,7 +523,7 @@ class Hand(object):
         return cards
 
     @staticmethod
-    def _get_hand_strength(game: str, hand_type: str) -> int:
+    def _get_hand_strength(game: GameTypes, hand_type: HandType) -> int:
         """
         private method to get the strength of the hand type for a specific game
 
@@ -441,12 +533,11 @@ class Hand(object):
         :return: strength of the hand type for the specific game type
         """
 
-        hand_strengths = GAME_HAND_STRENGTHS[game]
-        return hand_strengths[hand_type]
+        return GameHandStrengths[game.name].value[hand_type.name].value
 
     @staticmethod
     def _validate_tiebreakers(
-        game: str, hand_type: str, tiebreakers: List[int]
+        game: GameTypes, hand_type: HandType, tiebreakers: List[int]
     ) -> List[int]:
         """
         private method to check that the tiebreaker lists has the correct datatypes and number of args
@@ -464,7 +555,7 @@ class Hand(object):
                 "all arguments in tiebreakers must be integers or Nonetype"
             )
 
-        arg_num = GAME_HAND_TIEBREAKERS_ARGS[game][hand_type]
+        arg_num = GameHandTiebreakerArgs[game.name].value[hand_type.name].value
         if not len(tiebreakers) == arg_num:
             raise ValueError(f"{game} {hand_type} hand requires {arg_num} tiebreakers")
 
