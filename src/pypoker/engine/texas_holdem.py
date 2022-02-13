@@ -952,13 +952,13 @@ class TexasHoldemPokerEngine(BasePokerEngine):
     def find_outs_straight(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> List[List[Card]]:
         """
         Texas Holdem Poker Engine Find Outs Method
-        Method to find all possible outs for a flush hand with the given current_cards and available_cards
+        Method to find all possible outs for a straight hand with the given current_cards and available_cards
 
         :param current_cards: List of the players hole cards and the current board cards.
         :param available_cards: List of cards remaining in the deck that could be drawn
         :param remaining_draws: the number of draws remaining.
 
-        :return List of draw combinations that would give a flush hand. with required draws being explict cards
+        :return List of draw combinations that would give a straight hand. with required draws being explict cards
         (D7, SK, etc) and surplus draws represented by AnyCard special cards
         """
 
@@ -989,5 +989,41 @@ class TexasHoldemPokerEngine(BasePokerEngine):
                     surplus_draws = [AnyCard("")] * (remaining_draws - len(straight_draw_values))
 
                     outs.extend([list(draw_card_combo) + surplus_draws for draw_card_combo in draw_card_combos])
+
+        return self.deduplicate_card_sets(outs)
+
+    def find_outs_trips(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> List[List[Card]]:
+        """
+        Texas Holdem Poker Engine Find Outs Method
+        Method to find all possible outs for a straight hand with the given current_cards and available_cards
+
+        :param current_cards: List of the players hole cards and the current board cards.
+        :param available_cards: List of cards remaining in the deck that could be drawn
+        :param remaining_draws: the number of draws remaining.
+
+        :return List of draw combinations that would give a straight hand. with required draws being explict cards
+        (D7, SK, etc) and surplus draws represented by AnyCard special cards
+        """
+
+        current_cards_by_value = self.group_cards_by_value(current_cards)
+        available_cards_by_value = self.group_cards_by_value(available_cards)
+
+        trip_values = [
+            value for value, cards in current_cards_by_value.items()
+            if len(cards) + remaining_draws >= 3
+            and len(cards) + len(available_cards_by_value[value]) >= 3
+        ]
+
+        outs = []
+        for trip_value in trip_values:
+            draws_required = max(3 - len(current_cards_by_value[trip_value]), 0)
+            surplus_draws = [AnyCard("")] * (remaining_draws - draws_required)
+
+            if not draws_required:
+                outs.append(surplus_draws)
+                continue
+
+            draw_combos = self.find_all_unique_card_combos(available_cards_by_value[trip_value], draws_required)
+            outs.extend([draw_combo + surplus_draws for draw_combo in draw_combos])
 
         return self.deduplicate_card_sets(outs)

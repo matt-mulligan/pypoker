@@ -1882,3 +1882,96 @@ def test_when_find_outs_straight_and_already_have_one_then_return_outs(engine, g
     assert get_test_cards("C9|H8") in result
     assert get_test_cards("C9|C8") in result
     assert get_test_cards("C9|D8") in result
+
+
+def test_when_find_outs_trips_and_no_possible_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|CK|HJ|ST")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_trips(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_trips_and_already_have_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|DA|HJ|HA")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_trips(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+    assert get_test_cards("ANY_CARD") in result
+
+
+def test_when_find_outs_trips_and_one_draw_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|DA|HJ|CJ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_trips(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert get_test_cards("HA") in result
+    assert get_test_cards("SA") in result
+    assert get_test_cards("SJ") in result
+    assert get_test_cards("DJ") in result
+
+
+def test_when_find_outs_trips_and_two_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|DA|H7|CJ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_trips(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 11
+
+    assert get_test_cards("HA|ANY_CARD") in result
+    assert get_test_cards("SA|ANY_CARD") in result
+
+    assert get_test_cards("SQ|HQ") in result
+    assert get_test_cards("SQ|CQ") in result
+    assert get_test_cards("HQ|CQ") in result
+
+    assert get_test_cards("S7|D7") in result
+    assert get_test_cards("S7|C7") in result
+    assert get_test_cards("D7|C7") in result
+
+    assert get_test_cards("SJ|HJ") in result
+    assert get_test_cards("SJ|DJ") in result
+    assert get_test_cards("HJ|DJ") in result
+
+
+def test_when_find_outs_trips_and_five_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CQ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 5
+
+    result = engine.find_outs_trips(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 50
+
+    # not asserting all 50
+    assert get_test_cards("SA|HA|ANY_CARD|ANY_CARD|ANY_CARD")
+    assert get_test_cards("SA|DA|ANY_CARD|ANY_CARD|ANY_CARD")
+    assert get_test_cards("HA|DA|ANY_CARD|ANY_CARD|ANY_CARD")
+
+    assert get_test_cards("SQ|HQ|ANY_CARD|ANY_CARD|ANY_CARD")
+    assert get_test_cards("SQ|DQ|ANY_CARD|ANY_CARD|ANY_CARD")
+    assert get_test_cards("HQ|DQ|ANY_CARD|ANY_CARD|ANY_CARD")
+
+    assert get_test_cards("SK|HK|DK|ANY_CARD|ANY_CARD")
+    assert get_test_cards("SK|HK|CK|ANY_CARD|ANY_CARD")
+    assert get_test_cards("SK|DK|CK|ANY_CARD|ANY_CARD")
+    assert get_test_cards("HK|DK|CK|ANY_CARD|ANY_CARD")
+
+
