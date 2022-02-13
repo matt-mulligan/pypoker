@@ -154,7 +154,7 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         :return: List of lists of card objects for each combination found.
         """
 
-        return [list(value) for value in combinations(cards, combo_size)]
+        return [] if combo_size == 0 else [list(value) for value in combinations(cards, combo_size)]
 
     @staticmethod
     def check_all_card_values_unique(cards: List[Card]) -> bool:

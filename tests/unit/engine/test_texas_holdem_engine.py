@@ -1975,3 +1975,155 @@ def test_when_find_outs_trips_and_five_draws_then_return_outs(engine, get_test_c
     assert get_test_cards("HK|DK|CK|ANY_CARD|ANY_CARD")
 
 
+def test_when_find_outs_two_pair_and_not_possible_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|D2|H7|CJ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_two_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_two_pair_and_already_have_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DJ|DA|H7|C7")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_two_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 4
+
+    assert get_test_cards("ANY_CARD") in result
+    assert get_test_cards("SJ") in result
+    assert get_test_cards("HJ") in result
+    assert get_test_cards("CJ") in result
+
+
+def test_when_find_outs_two_pair_and_one_draw_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DJ|D2|H7|C7")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_two_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 9
+
+    assert get_test_cards("SA") in result
+    assert get_test_cards("HA") in result
+    assert get_test_cards("DA") in result
+    assert get_test_cards("SJ") in result
+    assert get_test_cards("HJ") in result
+    assert get_test_cards("CJ") in result
+    assert get_test_cards("S2") in result
+    assert get_test_cards("H2") in result
+    assert get_test_cards("C2") in result
+
+
+def test_when_find_outs_two_pair_and_two_draw_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DJ|D2|H7|C7")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_two_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 90
+
+    # not asserting all 90
+    assert get_test_cards("SA|ANY_CARD") in result
+    assert get_test_cards("HA|ANY_CARD") in result
+    assert get_test_cards("DA|ANY_CARD") in result
+    assert get_test_cards("SJ|ANY_CARD") in result
+    assert get_test_cards("HJ|ANY_CARD") in result
+    assert get_test_cards("CJ|ANY_CARD") in result
+    assert get_test_cards("S2|ANY_CARD") in result
+    assert get_test_cards("H2|ANY_CARD") in result
+    assert get_test_cards("C2|ANY_CARD") in result
+
+    assert get_test_cards("SA|SJ") in result
+    assert get_test_cards("SA|HJ") in result
+    assert get_test_cards("SA|CJ") in result
+    assert get_test_cards("HA|SJ") in result
+    assert get_test_cards("HA|HJ") in result
+    assert get_test_cards("HA|CJ") in result
+    assert get_test_cards("DA|SJ") in result
+    assert get_test_cards("DA|HJ") in result
+    assert get_test_cards("DA|CJ") in result
+
+    assert get_test_cards("SQ|HQ") in result
+    assert get_test_cards("SQ|DQ") in result
+    assert get_test_cards("SQ|CQ") in result
+    assert get_test_cards("HQ|DQ") in result
+    assert get_test_cards("HQ|CQ") in result
+    assert get_test_cards("DQ|CQ") in result
+
+
+def test_when_find_outs_pair_and_already_have_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|DA|HJ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 7
+
+    assert get_test_cards("ANY_CARD") in result
+    assert get_test_cards("SQ") in result
+    assert get_test_cards("HQ") in result
+    assert get_test_cards("CQ") in result
+    assert get_test_cards("SJ") in result
+    assert get_test_cards("DJ") in result
+    assert get_test_cards("CJ") in result
+
+
+def test_when_find_outs_pair_and_two_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|DQ|DA|H7|CJ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 64
+
+    # not asserting all 64
+    assert get_test_cards("ANY_CARD|ANY_CARD") in result
+
+    assert get_test_cards("SQ|ANY_CARD") in result
+    assert get_test_cards("HQ|ANY_CARD") in result
+    assert get_test_cards("CQ|ANY_CARD") in result
+
+    assert get_test_cards("S8|H8") in result
+    assert get_test_cards("S8|D8") in result
+    assert get_test_cards("S8|C8") in result
+    assert get_test_cards("H8|D8") in result
+    assert get_test_cards("H8|C8") in result
+    assert get_test_cards("D8|C8") in result
+
+
+def test_when_find_outs_pair_and_five_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CQ")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 5
+
+    result = engine.find_outs_pair(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 72
+
+    # not asserting all 50
+    assert get_test_cards("SA|ANY_CARD|ANY_CARD|ANY_CARD|ANY_CARD")
+    assert get_test_cards("HA|ANY_CARD|ANY_CARD|ANY_CARD|ANY_CARD")
+    assert get_test_cards("DA|ANY_CARD|ANY_CARD|ANY_CARD|ANY_CARD")
+
+    assert get_test_cards("S8|H8|ANY_CARD|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("S8|D8|ANY_CARD|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("S8|C8|ANY_CARD|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("H8|D8|ANY_CARD|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("H8|C8|ANY_CARD|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("D8|C8|ANY_CARD|ANY_CARD|ANY_CARD") in result
