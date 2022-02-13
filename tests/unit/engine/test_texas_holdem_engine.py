@@ -1640,3 +1640,100 @@ def test_when_find_outs_full_house_and_five_draws_and_outs_then_return_outs(engi
     assert get_test_cards("S7|H7|C7|S2|H2") in result
     assert get_test_cards("S7|D7|C7|S2|H2") in result
     assert get_test_cards("H7|D7|C7|S2|H2") in result
+
+
+def test_when_find_outs_flush_and_no_suits_possible_because_draw_numbers_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("DA|HA|S7|C2|S2|H2")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_flush_and_no_suits_possible_becuase_deck_depleted_then_return_empty_list(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK|C7|C2|S2|H2")
+    available_cards = get_test_cards("DA|SK|H7|D2|S2|H2")
+    remaining_draws = 2
+
+    result = engine.find_outs_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_when_find_outs_flush_and_already_have_one_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK|C7|C2|S2|H2|C4")
+    available_cards = get_test_cards("DA|SK|H7|D2|S2|H2")
+    remaining_draws = 2
+
+    result = engine.find_outs_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+
+    assert get_test_cards("ANY_CARD|ANY_CARD") in result
+
+
+def test_when_find_outs_flush_and_one_draw_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK|C7|C2|S2|S9")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 1
+
+    result = engine.find_outs_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 9
+
+    assert get_test_cards("CQ") in result
+    assert get_test_cards("CJ") in result
+    assert get_test_cards("CT") in result
+    assert get_test_cards("C9") in result
+    assert get_test_cards("C8") in result
+    assert get_test_cards("C6") in result
+    assert get_test_cards("C5") in result
+    assert get_test_cards("C4") in result
+    assert get_test_cards("C3") in result
+
+
+def test_when_find_outs_flush_and_two_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK|C7|C2|S2|S9|SK")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 2
+
+    result = engine.find_outs_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 54
+
+    assert get_test_cards("CQ|ANY_CARD") in result
+    assert get_test_cards("CJ|ANY_CARD") in result
+    assert get_test_cards("CT|ANY_CARD") in result
+    assert get_test_cards("C9|ANY_CARD") in result
+    assert get_test_cards("C8|ANY_CARD") in result
+    assert get_test_cards("C6|ANY_CARD") in result
+    assert get_test_cards("C5|ANY_CARD") in result
+    assert get_test_cards("C4|ANY_CARD") in result
+    assert get_test_cards("C3|ANY_CARD") in result
+
+    assert get_test_cards("SA|SQ") in result
+    # not asserting all 54 outs
+
+
+def test_when_find_outs_flush_and_five_draws_then_return_outs(engine, get_test_cards, get_deck_minus_set):
+    current_cards = get_test_cards("CA|CK")
+    available_cards = get_deck_minus_set(current_cards)
+    remaining_draws = 5
+
+    result = engine.find_outs_flush(current_cards, available_cards, remaining_draws)
+
+    assert isinstance(result, list)
+    assert len(result) == 4026
+
+    assert get_test_cards("CQ|CJ|CT|ANY_CARD|ANY_CARD") in result
+    assert get_test_cards("SA|S7|S6|S3|S2") in result
+    assert get_test_cards("HT|H9|H5|H4|H2") in result
+    assert get_test_cards("DQ|D9|D6|D4|D3") in result
+    # not asserting all 4026 outs

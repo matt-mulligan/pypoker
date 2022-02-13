@@ -911,8 +911,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         return self.deduplicate_card_sets(outs)
 
-    def find_outs_flush(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> \
-    List[List[Card]]:
+    def find_outs_flush(self, current_cards: List[Card], available_cards: List[Card], remaining_draws: int) -> List[List[Card]]:
         """
         Texas Holdem Poker Engine Find Outs Method
         Method to find all possible outs for a flush hand with the given current_cards and available_cards
@@ -937,14 +936,15 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         outs = []
         for suit in flush_suits:
-            required_draws = 5 - len(current_cards_by_suit[suit])
-            surplus_draws = [AnyCard] * (remaining_draws - required_draws)
+            required_draws = max(5 - len(current_cards_by_suit[suit]), 0)
+            surplus_draws = [AnyCard("")] * (remaining_draws - required_draws)
 
             if not required_draws:
                 outs.append(surplus_draws)
                 continue
 
             draw_combos = self.find_all_unique_card_combos(available_cards_by_suit[suit], required_draws)
+            for draw_combo in draw_combos:
+                outs.append(draw_combo + surplus_draws)
 
-
-
+        return self.deduplicate_card_sets(outs)
