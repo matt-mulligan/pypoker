@@ -1,4 +1,5 @@
 import re
+from decimal import Decimal
 
 from pytest import fixture, mark, raises
 from mock import patch
@@ -2242,3 +2243,32 @@ def test_when_find_outs_pair_and_five_draws_then_return_outs(engine, get_test_ca
     assert get_test_cards("H8|D8|ANY_CARD|ANY_CARD|ANY_CARD") in result
     assert get_test_cards("H8|C8|ANY_CARD|ANY_CARD|ANY_CARD") in result
     assert get_test_cards("D8|C8|ANY_CARD|ANY_CARD|ANY_CARD") in result
+
+
+# TEST FIND PLAYER OUTS INTERFACE
+@mark.parametrize("a_cards,b_cards,board_cards,a_odds,b_odds,tie_odds", [
+    ("S6|S7", "DA|C9", "S8|S9|HA", Decimal("48.79"), Decimal("51.21"), 0),  # Open-ended straight flush draw vs Over Pair
+    ("HA|CQ", "D7|C7", "S2|S9|S4", Decimal("23.94"), Decimal("71.52"), Decimal("4.55")),  # Two over cards vs lower pair, chance of board flushing for tie
+    ("HA|C7", "DA|C9", "S2|S8|D4", Decimal("13.74"), Decimal("81.92"), Decimal("4.34")),  # Dominated Ace
+    ("H9|C7", "D6|C6", "S9|SK|D2", Decimal("91.21"), Decimal("8.79"), Decimal("0")),  # pair vs pair
+    ("H9|C7", "D6|CA", "S6|ST|D2", Decimal("36.87"), Decimal("63.13"), Decimal("0")),  # inside straight draw vs pair
+])
+def test_when_find_player_odds_and_two_player_and_two_draws_then_correct_values_returned(
+        engine, get_test_cards, get_deck_minus_set,
+        a_cards, b_cards, board_cards, a_odds, b_odds, tie_odds
+):
+    players = [
+        HumanPlayer(name="player_a", hole_cards=get_test_cards(a_cards)),
+        HumanPlayer(name="player_b", hole_cards=get_test_cards(b_cards))
+    ]
+    board = get_test_cards(board_cards)
+    drawable_cards = get_deck_minus_set(players[0].hole_cards + players[1].hole_cards + board)
+
+    result = engine.find_player_odds(players, board, drawable_cards)
+
+    assert result["player_a"] == a_odds
+    assert result["player_b"] == b_odds
+    if tie_odds:
+        assert result["TIE(player_a,player_b)"] == tie_odds
+    else:
+        assert "TIE(player_a,player_b)" not in result.keys()

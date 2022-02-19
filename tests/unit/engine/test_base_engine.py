@@ -1,4 +1,5 @@
-from typing import List
+from decimal import Decimal
+from typing import List, Dict
 
 from pytest import fixture, mark
 
@@ -20,6 +21,9 @@ def base_engine():
             pass
 
         def find_player_outs(self, player: BasePlayer, hand_type: HandType, board: List[Card], deck: Deck) -> List[List[Card]]:
+            pass
+
+        def find_player_odds(self, players: List[BasePlayer], board: List[Card], drawable_cards: Deck) -> Dict[str, Decimal]:
             pass
 
     return FakePokerEngine()

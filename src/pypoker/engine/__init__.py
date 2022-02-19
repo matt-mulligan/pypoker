@@ -11,6 +11,7 @@ the following tasks will be handled by the pypoker.engine classes:
 """
 import itertools
 from abc import ABCMeta, abstractmethod
+from decimal import Decimal
 from itertools import groupby, product, combinations
 from typing import List, Dict
 
@@ -58,6 +59,19 @@ class BasePokerEngine(object, metaclass=ABCMeta):
         :return: list of each combination of cards that would give the player this type of hand. Cards in these combinations
         are explict normal cards (7H, 9D, etc) for cards required to make the out and AnyCard special cards for
         any surplus draw cards not required to make the hand.
+        """
+
+    @abstractmethod
+    def find_player_odds(self, players: List[BasePlayer], board: List[Card], drawable_cards: Deck) -> Dict[str, Decimal]:
+        """
+        abstract method to find the win probability of each player.
+
+        :param players: List of pypoker player object representing the player we are looking for odds fos.
+        :param board: List of card objects representign the cards that have already been dealt on the board.
+        :param drawable_cards: List of card objects representing the remaining possible cards to draw.
+
+        :return: dict of player win probabilities from 0.0 to 100.0. This dictionary should also contain entries for
+        ties in the format of 'TIE(player_a,player_b,player_c)'
         """
 
     # Shared utility methods for all engine classes

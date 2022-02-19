@@ -5,6 +5,7 @@ pypoker.engine.texas_holdem module
 module containing the poker engine for the texas holdem game type.
 inherits from the BasePokerEngine class.
 """
+from decimal import Decimal
 from itertools import combinations, product, groupby
 from typing import List, Dict
 
@@ -147,6 +148,42 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             TexasHoldemHandType.TwoPair: self.find_outs_two_pair,
             TexasHoldemHandType.Pair: self.find_outs_pair,
         }[hand_type](current_cards, possible_cards, draws_remaining)
+
+    def find_player_odds(self, players: List[BasePlayer], board: List[Card], drawable_cards: Deck) -> Dict[
+        str, Decimal]:
+        """
+        Texas Holdem Engine concrete implementation of abstract method to find the win probability of each player.
+
+        :param players: List of pypoker player object representing the player we are looking for odds fos.
+        :param board: List of card objects representing the cards that have already been dealt on the board.
+        :param drawable_cards: List of card objects representing the remaining possible cards to draw.
+
+        :return: dict of player win probabilities from 0.0 to 100.0 rounded to two decimal places. This dictionary should also contain entries for
+        ties in the format of 'TIE(player_a,player_b,player_c)'
+        """
+
+        draws_remaining = 5 - len(board)
+
+        if draws_remaining == 5:
+            # Estimate odds, way too many possibilities to calculate this
+            # return self.find_player_odds_open_board(players, drawable_cards)
+            return {}
+
+        # dumb method - run out all the combos and check for winners/losers and tally results
+        draw_combos = self.find_all_unique_card_combos(drawable_cards, draws_remaining)
+
+        wins = {}
+        for draw_combo in draw_combos:
+            drawn_out_board = board + draw_combo
+
+            for player in players:
+                player.hand = self.find_player_best_hand(player, drawn_out_board)[0]
+
+            draw_winners = self.rank_player_hands(players)[1]
+            wins = _add_winners_to_win_counter(wins, draw_winners)
+
+        odds = {key: win_count / len(draw_combos) * 100 for key, win_count in wins.items()}
+        return {key: Decimal(f"{odd_pct:.2f}") for key, odd_pct in odds.items()}
 
     # Public "Hand Maker" methods
     # ---------------------------
@@ -1260,3 +1297,23 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             outs.extend([draw_combo + surplus_draws for draw_combo in draw_combos])
 
         return self.deduplicate_card_sets(outs)
+
+
+####################################
+#  Private Implementation Methods  #
+####################################
+def _add_winners_to_win_counter(wins, draw_winners):
+    """
+    helper method to update the wins dictionary used as part of the calculation of odds.
+    """
+
+    winner_id = draw_winners[0].name \
+        if len(draw_winners) == 1 \
+        else f"TIE({','.join([player.name for player in sorted(draw_winners, key=lambda player: player.name)])})"
+
+    if winner_id in wins.keys():
+        wins[winner_id] += 1
+    else:
+        wins[winner_id] = 1
+
+    return wins
