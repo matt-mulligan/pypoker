@@ -5,6 +5,7 @@ from typing import List
 from pytest import fixture
 
 from pypoker.constructs import Card, AnyCard, AnyValueCard, AnySuitCard, Deck
+from pypoker.engine.texas_holdem import TexasHoldemPokerEngine
 
 here = Path(__file__).absolute()
 tests_path = here.parent.parent
@@ -39,6 +40,11 @@ def get_test_cards():
         return [Card(card_id) if len(card_id) == 2 else _get_special_card(card_id) for card_id in card_ids]
 
     return _get_test_cards
+
+
+@fixture
+def th_engine():
+    return TexasHoldemPokerEngine()
 
 
 def _get_special_card(card_id):

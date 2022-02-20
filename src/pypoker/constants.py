@@ -5,10 +5,9 @@ General Enums
 """
 
 
-class OutsCalculationMethod(Enum):
-    Implicit = "implicit"
-    ExplicitPartial = "explicit_partial"
-    ExplicitFull = "explicit_full"
+class FindOddsMethod(Enum):
+    Enumerate = "enumerate"
+    Simulate100 = "simulate_100"
 
 
 """
