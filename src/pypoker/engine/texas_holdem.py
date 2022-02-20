@@ -149,7 +149,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             TexasHoldemHandType.Pair: self.find_outs_pair,
         }[hand_type](current_cards, possible_cards, draws_remaining)
 
-    def find_player_odds(self, players: List[BasePlayer], board: List[Card], drawable_cards: Deck) -> Dict[
+    def find_player_odds(self, players: List[BasePlayer], board: List[Card], drawable_cards: List[Card]) -> Dict[
         str, Decimal]:
         """
         Texas Holdem Engine concrete implementation of abstract method to find the win probability of each player.
@@ -183,6 +183,12 @@ class TexasHoldemPokerEngine(BasePokerEngine):
             wins = _add_winners_to_win_counter(wins, draw_winners)
 
         odds = {key: win_count / len(draw_combos) * 100 for key, win_count in wins.items()}
+
+        # add any missing players to odds dict
+        for player in players:
+            if player.name not in odds.keys():
+                odds[player.name] = 0
+
         return {key: Decimal(f"{odd_pct:.2f}") for key, odd_pct in odds.items()}
 
     # Public "Hand Maker" methods
