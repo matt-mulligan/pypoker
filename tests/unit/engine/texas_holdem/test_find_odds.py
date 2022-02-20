@@ -6,6 +6,8 @@ import pypoker.engine.texas_holdem.find_odds as odds
 from pypoker.player.human import HumanPlayer
 
 
+# find_player_odds_enumerate tests
+# --------------------------------
 @mark.parametrize("a_cards,b_cards,board_cards,a_odds,b_odds,tie_odds", [
     ("S6|S7", "DA|C9", "S8|S9|HA|H3", Decimal("31.82"), Decimal("68.18"), Decimal("0")),  # Open-ended straight flush draw vs Over Pair
     ("HA|CQ", "D7|C7", "S2|S9|S4|SK", Decimal("9.09"), Decimal("70.45"), Decimal("20.45")),  # Two over cards vs lower pair, chance of board flushing for tie
@@ -70,25 +72,37 @@ def test_when_find_player_odds_enumerate_and_two_player_and_two_draws_then_corre
         assert "TIE(player_a,player_b)" not in result.keys()
 
 
-# @mark.parametrize("a_cards,b_cards,a_odds,b_odds,tie_odds", [
-#     ("S6|D6", "DA|HJ", Decimal("53.99"), Decimal("45.62"), Decimal("0.39")),  # pair vs two over cards
-# ])
-# def test_when_find_player_odds_enumerate_and_two_player_and_five_draws_then_correct_values_returned(
-#         engine, get_test_cards, get_deck_minus_set,
-#         a_cards, b_cards, a_odds, b_odds, tie_odds
-# ):
-#     players = [
-#         HumanPlayer(name="player_a", hole_cards=get_test_cards(a_cards)),
-#         HumanPlayer(name="player_b", hole_cards=get_test_cards(b_cards))
-#     ]
-#     board = []
-#     drawable_cards = get_deck_minus_set(players[0].hole_cards + players[1].hole_cards)
-#
-#     result = engine.find_player_odds(players, board, drawable_cards)
-#
-#     assert result["player_a"] == a_odds
-#     assert result["player_b"] == b_odds
-#     if tie_odds:
-#         assert result["TIE(player_a,player_b)"] == tie_odds
-#     else:
-#         assert "TIE(player_a,player_b)" not in result.keys()
+@mark.parametrize("a_cards,b_cards,a_odds,b_odds,tie_odds", [
+    ("S6|D6", "DA|HJ", Decimal("53.99"), Decimal("45.62"), Decimal("0.39")),  # pair vs two over cards
+])
+def test_when_find_player_odds_simulate_and_two_players_and_five_draws_and_10000_sample_then_correct_values_returned(
+        th_engine, get_test_cards, get_deck_minus_set,
+        a_cards, b_cards, a_odds, b_odds, tie_odds
+):
+    players = [
+        HumanPlayer(name="player_a", hole_cards=get_test_cards(a_cards)),
+        HumanPlayer(name="player_b", hole_cards=get_test_cards(b_cards))
+    ]
+    board = []
+    drawable_cards = get_deck_minus_set(players[0].hole_cards + players[1].hole_cards)
+
+    results = {
+        "player_a": [],
+        "player_b": [],
+        "TIE(player_a,player_b)": [],
+    }
+    for val in range(1, 2):
+        result = odds.find_player_odds_simulate(th_engine, players, board, drawable_cards, 10000)
+        results["player_a"].append(result["player_a"])
+        results["player_b"].append(result["player_b"])
+        results["TIE(player_a,player_b)"].append(result["TIE(player_a,player_b)"])
+
+    print(f"PLAYER_A: \texpected: {Decimal('53.99')} \t actual_avg: {sum(results['player_a']) / 100} \t min: {min(results['player_a'])} \t max: {max(results['player_a'])}")
+    print(
+        f"PLAYER_B: \texpected: {Decimal('45.62')} \t actual_avg: {sum(results['player_b']) / 100} \t min: {min(results['player_b'])} \t max: {max(results['player_b'])}")
+    print(
+        f"TIE: \texpected: {Decimal('0.39')} \t actual_avg: {sum(results['TIE(player_a,player_b)']) / 100} \t min: {min(results['TIE(player_a,player_b)'])} \t max: {max(results['TIE(player_a,player_b)'])}")
+
+
+
+

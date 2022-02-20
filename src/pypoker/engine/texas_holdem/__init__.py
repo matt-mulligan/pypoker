@@ -173,7 +173,7 @@ class TexasHoldemPokerEngine(BasePokerEngine):
 
         func, args = {
             FindOddsMethod.Enumerate: (odds.find_player_odds_enumerate, [self, players, board, drawable_cards]),
-            FindOddsMethod.Simulate100: (odds.find_player_odds_simulate, [players, board, drawable_cards, 100000]),
+            FindOddsMethod.Simulate100: (odds.find_player_odds_simulate, [self, players, board, drawable_cards, 100000]),
         }[method]
 
         return func(*args)
